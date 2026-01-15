@@ -1,0 +1,93 @@
+<section class="form-wrapper">
+  <div class="form-container">
+    <h2>Cadastro do Produtor</h2>
+    <p class="subtitle">
+      Preencha os dados abaixo para participar do programa.
+    </p>
+
+    <form #formAgricultor="ngForm">
+
+      <div class="grid">
+        <div class="form-group">
+          <label>Nome completo</label>
+          <input type="text" formControlName="nome" placeholder="Digite seu nome completo">
+        </div>
+
+        <div class="form-group">
+          <label>Telefone</label>
+          <input type="tel" formControlName="telefone" placeholder="(DDD) 9XXXX-XXXX">
+        </div>
+
+        <div class="form-group">
+          <label>CPF / CNPJ</label>
+          <input type="text" formControlName="cpf_cnpj" placeholder="Digite o CPF ou CNPJ">
+        </div>
+
+        <div class="form-group">
+          <label>RG</label>
+          <input type="text" formControlName="rg" placeholder="Digite o RG">
+        </div>
+
+        <div class="form-group full">
+          <label>Endereço</label>
+          <input type="text" formControlName="endereco" placeholder="Endereço completo">
+        </div>
+
+        <div class="form-group full">
+          <label>Ponto de Referência</label>
+          <input type="text" formControlName="ponto_referencia" placeholder="Insira o ponto de referência">
+        </div>
+
+        <div class="form-group">
+          <label>Cidade</label>
+          <input type="text" formControlName="cidade" placeholder="Cidade">
+        </div>
+
+        <div class="form-group">
+          <label>Nome da Propriedade</label>
+          <input type="text" formControlName="nome_propriedade" placeholder="Nome da propriedade">
+        </div>
+
+        <div class="form-group">
+          <label>Área Total (ha)</label>
+          <input type="number" formControlName="area_total">
+        </div>
+
+        <div class="form-group">
+          <label>Área de Algodão (ha)</label>
+          <input type="number" formControlName="area_algodao">
+        </div>
+
+        <div class="form-group">
+          <label>Regime de Cultivo</label>
+          <select formControlName="regime_cultivo">
+            <option value="">Selecione</option>
+            <option value="sequeiro">Sequeiro</option>
+            <option value="irrigado">Irrigado</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Cadastro ADAGRI</label>
+          <select formControlName="cadastro_adagri">
+            <option value="">Selecione</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" formControlName="confirma_informacao" id="confirma">
+        <label for="confirma">
+          Confirmo que as informações prestadas são verdadeiras
+        </label>
+      </div>
+
+      <button type="submit" [disabled]="formAgricultor.invalid" (click)="cadastrarAgricultor()">
+        Enviar Cadastro
+      </button>
+
+    </form>
+  </div>
+</section>
