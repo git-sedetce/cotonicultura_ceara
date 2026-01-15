@@ -5,8 +5,7 @@ const nodemailer = require("nodemailer")
 
 class UserController {
   static async cadastraUser(req, res) {
-    var enviarEmail = [
-      
+    var enviarEmail = [      
       "daniel.araujo@sde.ce.gov.br",
     ];
     const novoUser = req.body;
@@ -15,7 +14,7 @@ class UserController {
     novoUser.user_password = hashedPassword;
 
     try {
-      const criarUser = await database.User.create(novoUser);
+      const criarUser = await database.user.create(novoUser);
 
       var transporter = nodemailer.createTransport({
         host: "172.26.2.26", //relay.etice.ce.gov.br
@@ -29,7 +28,7 @@ class UserController {
       var mailOptions = {
         from: "gestao.pessoas@sde.ce.gov.br",
         to: enviarEmail,
-        subject: "Cadastro de usuário do Sistema Eventos da SDE",
+        subject: "Cadastro de usuário do Sistema de Cotonicultura da SDE",
         html: `<h3>Cadastro Realizado com sucesso!!</h3><p>${novoUser.nome_completo} fez o cadastrado. Verifique o perfil dele e ative para o uso do sistema.`,
       };
       //   console.log("mailOptions", mailOptions);
@@ -83,43 +82,14 @@ class UserController {
         },
         process.env.ACCESS_TOKEN,
         {
-          expiresIn: 24 * 60 * 60 * 1000,
+          expiresIn: '8h'
         }
       );
-      return res.json({ token: token });
+      return res.json({ auth: true, token: token, message: "Usuário logado com sucesso!" });
     } catch (error) {
       res.send({ message: "Problemas ao realizar login!" });
     }
-  }
-
-  static async authenticatedUser(req, res) {
-    try {
-      const cookie = req.cookies["jwt"];
-
-      const claims = jwt.verify(cookie, process.env.ACCESS_TOKEN);
-
-      if (!claims) {
-        return res.status(401).send({ message: "Usuário não autenticado!" });
-      }
-
-      const user = await database.User.findOne({
-        where: { id: claims._id },
-        attributes: [
-          "id",
-          "nome_completo",
-          "user_name",
-          "user_email",
-          "profile_id",
-          "sexec_id",
-        ],
-      });
-
-      const { password, ...data } = await user.toJSON();
-      res.send(data);
-    } catch (error) {
-      return res.status(401).send({ message: "Usuário não autenticado!" });
-    }
-  }
+  }  
 
   static async pegaUsers(req, res) {
     try {

@@ -1,18 +1,16 @@
 const { Router } = require('express')
 const UserController = require('../controllers/UserControllers')
+var auth = require('../service/AutenticaService')
+var checkRole = require('../service/checkRole')
 
 
 const router = Router()
 router.post('/register', UserController.cadastraUser)
 router.post('/login', UserController.login)
-router.get('/user', UserController.authenticatedUser)
-router.get('/allUser', UserController.pegaUsers)
-// router.get('/userByProfile/: id', UserController.usersProfile)
-router.put('/atualizaUser/:id', UserController.atualizaUser)
+router.get('/allUser', auth.authenticatedUser, checkRole.checkRole([1]), UserController.pegaUsers)
+router.put('/atualizaUser/:id', auth.authenticatedUser, checkRole.checkRole([1]), UserController.atualizaUser)
 router.post('/logout', UserController.logout)
 router.post('/reset', UserController.resetPassword)
-router.get('/getUser/:id', UserController.pegarUser)
-router.get('/getUserSexec/:id', UserController.pegarUserSexec)
-router.delete('/user/:id', UserController.deletaUsers)
+router.delete('/user/:id', auth.authenticatedUser, checkRole.checkRole([1]), UserController.deletaUsers)
 
 module.exports = router
