@@ -13,6 +13,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      telefone: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       cpf_cnpj: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -23,7 +27,7 @@ module.exports = {
       endereco: {
         type: Sequelize.STRING,
         allowNull: false,
-      },
+      },      
       cidade: {
         allowNull: false,
         type: Sequelize.INTEGER,
@@ -31,6 +35,10 @@ module.exports = {
       },
       nome_propriedade: {
         type: Sequelize.STRING
+      },
+      ponto_referencia: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       area_total: {
         type: Sequelize.DOUBLE,
@@ -45,7 +53,8 @@ module.exports = {
         allowNull: false,
       },
       cadastro_adagri: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       confirma_informacao: {
         type: Sequelize.BOOLEAN,
