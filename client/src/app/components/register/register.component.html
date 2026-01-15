@@ -1,0 +1,60 @@
+<div class="container-fluid">
+  <div class="row main-content bg-success text-center">
+    <div class="col-md-4 text-center company__info">
+      <!--<span class="company__logo">
+        <h2><span class="fa fa-android"></span></h2>
+      </span>-->
+      <h4 class="company_title"><img src="assets/imgs/logos/Logo-SDE---Vertical---Branco.png" alt=""></h4>
+    </div>
+    <div class="col-md-8 col-xs-12 col-sm-12 login_form">
+      <div class="container-fluid">
+        <div class="row">
+          <h2>Cadastro de Login</h2>
+        </div>
+        <div class="row">
+          <form class="form-group" #formCadastroUser="ngForm">
+            <div class="row">
+              <input type="text" name="nome" id="nome" class="form__input form-control" #nome="ngModel" [(ngModel)]="user.nome" placeholder="Nome completo do usuário" required>
+              <div *ngIf="!nome.valid && nome.touched" class="alert alert-danger" role="alert">
+                Nome é obrigatório
+              </div>
+            </div>
+            <div class="row">
+              <input type="email" name="user_email" id="user_email" class="form__input form-control" #user_email="ngModel" [(ngModel)]="user.user_email" placeholder="Email do usuário" (blur)="verificaEmail(user_email)" required>
+              <div *ngIf="!user_email.valid && user_email.touched" class="alert alert-danger" role="alert">
+                Email inválido
+              </div>
+            </div>
+
+            <div class="row">
+              <select class="form__input form-control" id="sexec_id" name="sexec_id" #sexec_id="ngModel" [(ngModel)]="user.sexec_id" required>
+                <option value="" disabled selected>Insira a Secretaria Executiva</option>
+                <option *ngFor="let sexec of lista_sexec" [value]="sexec.id">{{ sexec.secretaria }}</option>
+              </select>
+              <div *ngIf="!sexec_id.valid && sexec_id.touched" class="alert alert-danger" role="alert">
+                Secretaria Executiva é obrigatório
+              </div>
+            </div>
+
+
+            <div class="row">
+              <!-- <span class="fa fa-lock"></span> -->
+              <input type="password" name="user_password" id="user_password" class="form__input form-control" #user_password="ngModel" [(ngModel)]="user.user_password" placeholder="Password" [pattern]="passwordPtn" minlength="8" required>
+              <div *ngIf="!user_password.valid && user_password.touched" class="alert alert-danger" role="alert">Digite a sua senha</div>
+              <div *ngIf="(user_password.touched || user_password.valid) && user_password.errors" class="alert alert-danger" role="alert">A senha deve ter no mínimo de 8 caracteres e deve conter letras, numeros,  caracteres especais e letras maiúscula.</div>
+            </div>
+            <div class="row">
+              <!-- <span class="fa fa-lock"></span> -->
+              <input type="password" name="user_confirm_password" id="user_confirm_password" class="form__input form-control" #user_confirm_password="ngModel" [(ngModel)]="user.confirm_password" placeholder="Confirmação de senha" [pattern]="passwordPtn" minlength="8" required>
+              <div *ngIf="!user_confirm_password.valid && user_confirm_password.touched" class="alert alert-danger" role="alert">Confirmação de senha é obrigatório</div>
+              <div *ngIf="(user_confirm_password.touched) && user.user_password !== user.confirm_password" class="alert alert-danger" role="alert">A senha não confere com a confirmação.</div>
+            </div>
+            <div class="row">
+              <input type="submit" value="Submit" [disabled]="!formCadastroUser.valid" (click)="saveUser()" class="btn">
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
