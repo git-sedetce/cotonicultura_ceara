@@ -1,0 +1,43 @@
+<div class="container-fluid">
+  <div class="row main-content bg-success text-center">
+    <div class="col-md-4 text-center company__info">
+      <!--<span class="company__logo">
+        <h2><span class="fa fa-android"></span></h2>
+      </span>-->
+      <h4 class="company_title"><img src="assets/imgs/logos/Logo-SDE---Vertical---Branco.png" alt=""></h4>
+    </div>
+    <div class="col-md-8 col-xs-12 col-sm-12 login_form">
+      <div class="container-fluid">
+        <div class="row">
+          <h2>Faça o seu Login</h2>
+        </div>
+        <div class="row">
+          <form control="" class="form-group" #formLogin="ngForm">
+            <div class="row">
+              <input type="email" name="user_email" id="user_email" class="form__input form-control" (blur)="verificaEmail(user_email)" #user_email="ngModel" [(ngModel)]="loginUsers.user_email" placeholder="Email do usuário" required>
+              <div *ngIf="!user_email.valid && user_email.touched" class="alert alert-danger" role="alert">Informe o email do usuário</div>
+            </div>
+            <div class="row">
+              <!-- <span class="fa fa-lock"></span> -->
+              <input type="password" name="user_password" id="user_password" class="form__input form-control" #user_password="ngModel" [(ngModel)]="loginUsers.user_password" placeholder="Password" required>
+              <div *ngIf="!user_password.valid && user_password.touched" class="alert alert-danger" role="alert">Digite a sua senha</div>
+            </div>
+            <!--<div class="row remember">
+              <input type="checkbox" name="remember_me" id="remember_me" class="col-sm-3 col-12">
+              <label class="col-sm-9 col-12" for="remember_me">Remember Me!</label>
+            </div>-->
+            <div class="row">
+              <input type="submit" value="Submit" [disabled]="!formLogin.valid" (click)="login()" class="btn">
+            </div>
+          </form>
+        </div>
+        <div class="row">
+          <p>Não possui conta? <a routerLink="/cadastro">Registre-se aqui</a></p>
+        </div>
+        <div class="row">
+          <p>Esqueceu sua senha? <a routerLink="/resetsenha">Clique aqui</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
