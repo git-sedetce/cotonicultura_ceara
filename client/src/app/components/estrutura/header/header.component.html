@@ -1,0 +1,57 @@
+<header>
+  <div class="px-3 py-2 text-bg-success border-bottom">
+    <div class="container">
+      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start cabecalho">
+        <a routerLink="/home" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
+          <img src="assets/imgs/logos/Brasao-100x121.png" alt="Brasão do Governo do Estado do Ceará">
+        </a>
+
+        <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
+          <li>
+            <a routerLink="/home" class="nav-link text-white">
+              <i class="ms-2 bi bi-house-door"></i> Home
+            </a>
+          </li>
+          <li>
+            <a routerLink="/projeto/projetos-page" class="nav-link text-white">
+              <i class="ms-2 bi bi-people"></i> Quem somos
+            </a>
+          </li>
+
+          <!-- <li>
+            <a routerLink="/commitment/home" class="nav-link text-white">
+              <i class="ms-2 bi bi-calendar3"></i> Compromissos
+            </a>
+          </li> -->
+
+          <li *ngIf="profile === 1 || profile === 2 || sexec_id === 2">
+            <a routerLink="/industria/home" class="nav-link text-white">
+              <i class="ms-2 bi bi-buildings-fill"></i> Indústria
+            </a>
+          </li>
+
+          <li *ngIf="profile === 1">
+            <a routerLink="/listUsers" class="nav-link text-white">
+              <i class="ms-2 me-2 bi bi-people-fill"></i> Usuários
+            </a>
+          </li>
+
+          <li *ngIf="!authenticated">
+            <button type="button" routerLink="/login" class="btn btn-light text-dark ms-2 me-2">Login</button>
+          </li>
+          <li *ngIf="!authenticated">
+            <button type="button" routerLink="/cadastro" class="btn btn-primary">Cadastre-se</button>
+          </li>
+          <li *ngIf="authenticated">
+            <div class="p-2 mb-1 bg-success fw-bold text-white">Olá {{ user_name }}</div>
+          </li>
+          <li *ngIf="authenticated">
+            <button type="button" routerLink="/login" class="btn btn-danger text-dark fw-bold text-white ms-3 me-2"
+              (click)="logout()">Sair</button>
+            <!--<a routerLink="/login" class="nav-link" (click)="logout()">Logout</a>-->
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>

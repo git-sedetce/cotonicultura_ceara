@@ -1,0 +1,11 @@
+header {
+  margin: -1px;
+}
+.cabecalho img {
+  width: 50%;
+}
+
+.cabecalho ul li a:hover {
+  /*padding: 5px 0;*/
+  background-color:#ffc107;
+}
