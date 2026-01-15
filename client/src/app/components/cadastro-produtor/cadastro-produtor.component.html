@@ -10,57 +10,90 @@
       <div class="grid">
         <div class="form-group">
           <label>Nome completo</label>
-          <input type="text" formControlName="nome" placeholder="Digite seu nome completo">
+          <input type="text" id="nome" name="nome"
+            [(ngModel)]="agricultor.nome" #nome="ngModel" required placeholder="Digite seu nome completo">
+            <div *ngIf="!nome.valid && nome.touched" class="alert alert-danger" role="alert">
+            Cadastro da ADAGRI é obrigatório
+          </div>
         </div>
 
         <div class="form-group">
           <label>Telefone</label>
-          <input type="tel" formControlName="telefone" placeholder="(DDD) 9XXXX-XXXX">
+          <input type="tel" id="telefone" name="telefone"
+            [(ngModel)]="agricultor.telefone" #telefone="ngModel" required placeholder="(DDD) 9XXXX-XXXX">
+            <div *ngIf="!telefone.valid && telefone.touched" class="alert alert-danger" role="alert">
+            Cadastro da ADAGRI é obrigatório
+          </div>
         </div>
 
         <div class="form-group">
           <label>CPF / CNPJ</label>
-          <input type="text" formControlName="cpf_cnpj" placeholder="Digite o CPF ou CNPJ">
+          <input type="text" id="cpf_cnpj" name="cpf_cnpj"
+            [(ngModel)]="agricultor.cpf_cnpj" #cpf_cnpj="ngModel" required  placeholder="Digite o CPF ou CNPJ">
+            <div *ngIf="!cpf_cnpj.valid && cpf_cnpj.touched" class="alert alert-danger" role="alert">
+            Cadastro da ADAGRI é obrigatório
+          </div>
         </div>
 
         <div class="form-group">
           <label>RG</label>
-          <input type="text" formControlName="rg" placeholder="Digite o RG">
+          <input type="text" id="rg" name="rg" [(ngModel)]="agricultor.rg" #rg="ngModel" placeholder="Digite o RG">
         </div>
 
         <div class="form-group full">
           <label>Endereço</label>
-          <input type="text" formControlName="endereco" placeholder="Endereço completo">
+          <input type="text"  id="endereco" name="endereco"
+            [(ngModel)]="agricultor.endereco" #endereco="ngModel" required placeholder="Endereço completo">
+            <div *ngIf="!endereco.valid && endereco.touched" class="alert alert-danger" role="alert">
+            Cadastro da ADAGRI é obrigatório
+          </div>
         </div>
 
         <div class="form-group full">
           <label>Ponto de Referência</label>
-          <input type="text" formControlName="ponto_referencia" placeholder="Insira o ponto de referência">
+          <input type="text" id="ponto_referencia" name="ponto_referencia"
+            [(ngModel)]="agricultor.ponto_referencia" #ponto_referencia="ngModel" required  placeholder="Insira o ponto de referência">
+            <div *ngIf="!ponto_referencia.valid && ponto_referencia.touched" class="alert alert-danger" role="alert">
+            Cadastro da ADAGRI é obrigatório
+          </div>
         </div>
 
         <div class="form-group">
-          <label>Cidade</label>
-          <input type="text" formControlName="cidade" placeholder="Cidade">
+          <label for="city_id">Cidade</label>
+          <select name="city_id" id="city_id" [(ngModel)]="agricultor.cidade" #cidade="ngModel" required>
+            <option value="">Selecione</option>
+            <option *ngFor="let city of city_list" [value]=city.id>{{city.nome_municipio}}</option>
+          </select>
         </div>
 
         <div class="form-group">
           <label>Nome da Propriedade</label>
-          <input type="text" formControlName="nome_propriedade" placeholder="Nome da propriedade">
+          <input type="text" id="nome_propriedade" name="nome_propriedade"
+            [(ngModel)]="agricultor.nome_propriedade" #nome_propriedade="ngModel" placeholder="Nome da propriedade">
         </div>
 
         <div class="form-group">
           <label>Área Total (ha)</label>
-          <input type="number" formControlName="area_total">
+          <input type="number" id="area_total" name="area_total"
+            [(ngModel)]="agricultor.area_total" #area_total="ngModel" required>
+            <div *ngIf="!area_total.valid && area_total.touched" class="alert alert-danger" role="alert">
+            Cadastro da ADAGRI é obrigatório
+          </div>
         </div>
 
         <div class="form-group">
           <label>Área de Algodão (ha)</label>
-          <input type="number" formControlName="area_algodao">
+          <input type="number" id="area_algodao" name="area_algodao"
+            [(ngModel)]="agricultor.area_algodao" #area_algodao="ngModel" required>
+            <div *ngIf="!area_algodao.valid && area_algodao.touched" class="alert alert-danger" role="alert">
+            Cadastro da ADAGRI é obrigatório
+          </div>
         </div>
 
         <div class="form-group">
           <label>Regime de Cultivo</label>
-          <select formControlName="regime_cultivo">
+          <select id="regime_cultivo" placeholder="Regime de Cultivo" name="regime_cultivo"
+            [(ngModel)]="agricultor.regime_cultivo" #regime_cultivo="ngModel" required>
             <option value="">Selecione</option>
             <option value="sequeiro">Sequeiro</option>
             <option value="irrigado">Irrigado</option>
@@ -69,16 +102,17 @@
 
         <div class="form-group">
           <label>Cadastro ADAGRI</label>
-          <select formControlName="cadastro_adagri">
-            <option value="">Selecione</option>
-            <option value="sim">Sim</option>
-            <option value="nao">Não</option>
-          </select>
+          <input type="text" id="cadastro_adagri" placeholder="Cadastro ADAGRI" name="cadastro_adagri"
+            [(ngModel)]="agricultor.cadastro_adagri" #cadastro_adagri="ngModel" required>
+          <div *ngIf="!cadastro_adagri.valid && cadastro_adagri.touched" class="alert alert-danger" role="alert">
+            Cadastro da ADAGRI é obrigatório
+          </div>
         </div>
       </div>
 
       <div class="checkbox-group">
-        <input type="checkbox" formControlName="confirma_informacao" id="confirma">
+        <input type="checkbox" id="confirma_informacao" placeholder="Cadastro ADAGRI" name="confirma_informacao"
+            [(ngModel)]="agricultor.confirma_informacao" #confirma_informacao="ngModel" required id="confirma">
         <label for="confirma">
           Confirmo que as informações prestadas são verdadeiras
         </label>
