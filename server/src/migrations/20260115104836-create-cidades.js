@@ -2,27 +2,23 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('audits', {
+    await queryInterface.createTable('cidades', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      user_id: {
+      nome_municipio: {
+        type: Sequelize.STRING
+      },
+      regiao_id: {
         allowNull: false,
         type: Sequelize.INTEGER,
-        references: { model: 'users', key: 'id' },
-        onDelete: "Cascade",
-        onUpdate: "Cascade"
+        references: { model: 'regiaos', key: 'id' }
       },
-      tipo_acao: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      acao: {
-        type: Sequelize.STRING,
-        allowNull: false,
+      cod_ibge: {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
@@ -35,6 +31,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('audits');
+    await queryInterface.dropTable('cidades');
   }
 };

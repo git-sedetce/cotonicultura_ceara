@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('users', {
+    await queryInterface.createTable('produtor_rurals', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -13,30 +13,43 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      user_name: {
+      cpf_cnpj: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      user_email: {
+      rg: {
+        type: Sequelize.STRING
+      },
+      endereco: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      user_active: {
-        type: Sequelize.BOOLEAN
-      },
-      user_password: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      profile_id: {
+      cidade: {
         allowNull: false,
         type: Sequelize.INTEGER,
-        references: { model: 'profiles', key: 'id' }
+        references: { model: 'cidades', key: 'id' }
       },
-      sexec_id: {
+      nome_propriedade: {
+        type: Sequelize.STRING
+      },
+      area_total: {
+        type: Sequelize.DOUBLE,
         allowNull: false,
-        type: Sequelize.INTEGER,
-        references: { model: 'secretaria_executivas', key: 'id' }
+      },
+      area_algodao: {
+        type: Sequelize.DOUBLE,
+        allowNull: false,
+      },
+      regime_cultivo: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      cadastro_adagri: {
+        type: Sequelize.STRING
+      },
+      confirma_informacao: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
@@ -49,6 +62,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('users');
+    await queryInterface.dropTable('produtor_rurals');
   }
 };

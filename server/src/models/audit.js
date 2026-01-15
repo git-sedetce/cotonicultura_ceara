@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      audit.belongsTo(models.user, { foreignKey: 'user_id', as: 'ass_audit_users' });
     }
   }
   audit.init({
