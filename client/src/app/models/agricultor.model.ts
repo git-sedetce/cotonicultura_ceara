@@ -6,6 +6,7 @@ export class Agricultor {
     public cpf_cnpj?: string,
     public rg?: string,
     public endereco?: string,
+    public ponto_referencia?: string,
     public cidade?: number,
     public nome_propriedade?: string,
     public area_total?: number,
