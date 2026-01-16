@@ -24,9 +24,9 @@
             </a>
           </li> -->
 
-          <li *ngIf="profile === 1 || profile === 2 || sexec_id === 2">
+          <li *ngIf="authenticated">
             <a routerLink="/industria/home" class="nav-link text-white">
-              <i class="ms-2 bi bi-buildings-fill"></i> Indústria
+              <i class="ms-2 bi bi-buildings-fill"></i> Agricultores Cadastrados
             </a>
           </li>
 

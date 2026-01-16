@@ -1,6 +1,5 @@
-import { ToastrConfig } from './../../node_modules/ngx-toastr/toastr/toastr-config.d';
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -15,8 +14,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HomeComponent } from './components/home/home.component';
 import { CadastroProdutorComponent } from './components/cadastro-produtor/cadastro-produtor.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { NgxMaskModule } from 'ngx-mask';
+import { DatePipe } from '@angular/common';
+import { AuthInterceptor } from './services/interceptor/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,15 @@ import { NgxMaskModule } from 'ngx-mask';
     ReactiveFormsModule,
     HttpClientModule
   ],
-  providers: [],
+  providers: [
+    provideClientHydration(),
+    DatePipe,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true,
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
