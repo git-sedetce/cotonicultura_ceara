@@ -20,7 +20,7 @@
               </div>
             </div>
             <div class="row">
-              <input type="email" name="user_email" id="user_email" class="form__input form-control" #user_email="ngModel" [(ngModel)]="user.user_email" placeholder="Email do usuário" (blur)="verificaEmail(user_email)" required>
+              <input type="email" name="user_email" id="user_email" class="form__input form-control" #user_email="ngModel" [(ngModel)]="user.user_email" placeholder="Email do usuário" (blur)="verificaEmail(user_email)" (blur)="consultaEmail(user.user_email, formCadastroUser)" required>
               <div *ngIf="!user_email.valid && user_email.touched" class="alert alert-danger" role="alert">
                 Email inválido
               </div>
@@ -29,7 +29,7 @@
             <div class="row">
               <select class="form__input form-control" id="sexec_id" name="sexec_id" #sexec_id="ngModel" [(ngModel)]="user.sexec_id" required>
                 <option value="" disabled selected>Insira a Secretaria Executiva</option>
-                <option *ngFor="let sexec of lista_sexec" [value]="sexec.id">{{ sexec.secretaria }}</option>
+                <option *ngFor="let sexec of lista_sexec" [value]="sexec.id">{{ sexec.secretaria }} - {{ sexec.sigla }}</option>
               </select>
               <div *ngIf="!sexec_id.valid && sexec_id.touched" class="alert alert-danger" role="alert">
                 Secretaria Executiva é obrigatório
