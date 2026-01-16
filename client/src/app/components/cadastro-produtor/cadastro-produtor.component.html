@@ -13,7 +13,7 @@
           <input type="text" id="nome" name="nome"
             [(ngModel)]="agricultor.nome" #nome="ngModel" required placeholder="Digite seu nome completo">
             <div *ngIf="!nome.valid && nome.touched" class="alert alert-danger" role="alert">
-            Cadastro da ADAGRI é obrigatório
+            Nome completo é obrigatório
           </div>
         </div>
 
@@ -22,16 +22,16 @@
           <input type="tel" id="telefone" name="telefone"
             [(ngModel)]="agricultor.telefone" #telefone="ngModel" required placeholder="(DDD) 9XXXX-XXXX" prefix="+55 " mask="(00) 0 0000-0000||(00) 0000-0000">
             <div *ngIf="!telefone.valid && telefone.touched" class="alert alert-danger" role="alert">
-            Cadastro da ADAGRI é obrigatório
+            Telefone é obrigatório
           </div>
         </div>
 
         <div class="form-group">
           <label>CPF / CNPJ</label>
           <input type="text" id="cpf_cnpj" name="cpf_cnpj"
-            [(ngModel)]="agricultor.cpf_cnpj" #cpf_cnpj="ngModel" required  placeholder="Digite o CPF ou CNPJ" mask="00.000.000/0000-00||000.000.000-00">
+            [(ngModel)]="agricultor.cpf_cnpj" #cpf_cnpj="ngModel" required  placeholder="Digite o CPF ou CNPJ" mask="00.000.000/0000-00||000.000.000-00" (blur)="consultaCPF(agricultor.cpf_cnpj, formAgricultor)">
             <div *ngIf="!cpf_cnpj.valid && cpf_cnpj.touched" class="alert alert-danger" role="alert">
-            Cadastro da ADAGRI é obrigatório
+            CPF / CNPJ é obrigatório
           </div>
         </div>
 
@@ -45,7 +45,7 @@
           <input type="text"  id="endereco" name="endereco"
             [(ngModel)]="agricultor.endereco" #endereco="ngModel" required placeholder="Endereço completo">
             <div *ngIf="!endereco.valid && endereco.touched" class="alert alert-danger" role="alert">
-            Cadastro da ADAGRI é obrigatório
+            Endereço é obrigatório
           </div>
         </div>
 
@@ -54,7 +54,7 @@
           <input type="text" id="ponto_referencia" name="ponto_referencia"
             [(ngModel)]="agricultor.ponto_referencia" #ponto_referencia="ngModel" required  placeholder="Insira o ponto de referência">
             <div *ngIf="!ponto_referencia.valid && ponto_referencia.touched" class="alert alert-danger" role="alert">
-            Cadastro da ADAGRI é obrigatório
+            Ponto de referência é obrigatório
           </div>
         </div>
 
@@ -77,7 +77,7 @@
           <input type="number" id="area_total" name="area_total"
             [(ngModel)]="agricultor.area_total" #area_total="ngModel" required>
             <div *ngIf="!area_total.valid && area_total.touched" class="alert alert-danger" role="alert">
-            Cadastro da ADAGRI é obrigatório
+            Informar a área total é obrigatório
           </div>
         </div>
 
@@ -86,7 +86,7 @@
           <input type="number" id="area_algodao" name="area_algodao"
             [(ngModel)]="agricultor.area_algodao" #area_algodao="ngModel" required>
             <div *ngIf="!area_algodao.valid && area_algodao.touched" class="alert alert-danger" role="alert">
-            Cadastro da ADAGRI é obrigatório
+            Informar a área de plantio é obrigatório
           </div>
         </div>
 
@@ -103,7 +103,7 @@
         <div class="form-group">
           <label>Cadastro ADAGRI</label>
           <input type="text" id="cadastro_adagri" placeholder="Cadastro ADAGRI" name="cadastro_adagri"
-            [(ngModel)]="agricultor.cadastro_adagri" #cadastro_adagri="ngModel" required>
+            [(ngModel)]="agricultor.cadastro_adagri" #cadastro_adagri="ngModel" required (blur)="consultaADAGRI(agricultor.cadastro_adagri, formAgricultor)">
           <div *ngIf="!cadastro_adagri.valid && cadastro_adagri.touched" class="alert alert-danger" role="alert">
             Cadastro da ADAGRI é obrigatório
           </div>

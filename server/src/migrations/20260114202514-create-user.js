@@ -28,6 +28,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      user_pin: {
+        type: Sequelize.STRING(5),
+        allowNull: false,
+      },
       profile_id: {
         allowNull: false,
         type: Sequelize.INTEGER,

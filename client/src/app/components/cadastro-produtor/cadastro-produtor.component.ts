@@ -33,6 +33,24 @@ export class CadastroProdutorComponent implements OnInit {
     );
   }
 
+  consultaCPF(epf:any, form: any){
+      this.cadastroAgricultorService.consultarCPF(epf).subscribe((res:any) =>{
+        if(res.mensagem === 'CPF/CNPJ já cadastrado!'){
+          this.toastr.error(res.mensagem)
+          this.formAgricultor.reset();
+        }
+      })
+    }
+
+    consultaADAGRI(adagri:any, form: any){
+      this.cadastroAgricultorService.consultarADAGRI(adagri).subscribe((res:any) =>{
+        if(res.mensagem === 'Cadastro ADAGRI já cadastrado!'){
+          this.toastr.error(res.mensagem)
+          this.formAgricultor.reset();
+        }
+      })
+    }
+
   cadastrarAgricultor(){
     console.log('agricultor', this.agricultor);
     this.cadastroAgricultorService.cadastrarAgricultor(this.agricultor).subscribe({
