@@ -20,7 +20,7 @@
         <div class="form-group">
           <label>Telefone</label>
           <input type="tel" id="telefone" name="telefone"
-            [(ngModel)]="agricultor.telefone" #telefone="ngModel" required placeholder="(DDD) 9XXXX-XXXX">
+            [(ngModel)]="agricultor.telefone" #telefone="ngModel" required placeholder="(DDD) 9XXXX-XXXX" prefix="+55 " mask="(00) 0 0000-0000||(00) 0000-0000">
             <div *ngIf="!telefone.valid && telefone.touched" class="alert alert-danger" role="alert">
             Cadastro da ADAGRI é obrigatório
           </div>
@@ -29,7 +29,7 @@
         <div class="form-group">
           <label>CPF / CNPJ</label>
           <input type="text" id="cpf_cnpj" name="cpf_cnpj"
-            [(ngModel)]="agricultor.cpf_cnpj" #cpf_cnpj="ngModel" required  placeholder="Digite o CPF ou CNPJ">
+            [(ngModel)]="agricultor.cpf_cnpj" #cpf_cnpj="ngModel" required  placeholder="Digite o CPF ou CNPJ" mask="00.000.000/0000-00||000.000.000-00">
             <div *ngIf="!cpf_cnpj.valid && cpf_cnpj.touched" class="alert alert-danger" role="alert">
             Cadastro da ADAGRI é obrigatório
           </div>
