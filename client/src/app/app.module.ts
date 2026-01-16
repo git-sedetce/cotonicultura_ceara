@@ -8,7 +8,6 @@ import { FooterComponent } from './components/estrutura/footer/footer.component'
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
 import { ResetSexhaComponent } from './components/reset-sexha/reset-sexha.component';
-import { ListaUserComponent } from './components/lista-user/lista-user.component';
 import { ToastrModule } from 'ngx-toastr';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HomeComponent } from './components/home/home.component';
@@ -16,11 +15,13 @@ import { CadastroProdutorComponent } from './components/cadastro-produtor/cadast
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { NgxMaskModule } from 'ngx-mask';
+import { NgxPaginationModule } from 'ngx-pagination';
 import { DatePipe } from '@angular/common';
 import { AuthInterceptor } from './services/interceptor/auth.interceptor';
 import { ListaUsersComponent } from './components/admin/lista-users/lista-users.component';
 import { ListFarmersComponent } from './components/admin/list-farmers/list-farmers.component';
 import { WhoAreComponent } from './components/who-are/who-are.component';
+import { HomeAdminComponent } from './components/admin/home-admin/home-admin.component';
 
 @NgModule({
   declarations: [
@@ -30,12 +31,12 @@ import { WhoAreComponent } from './components/who-are/who-are.component';
     LoginComponent,
     RegisterComponent,
     ResetSexhaComponent,
-    ListaUserComponent,
     HomeComponent,
     CadastroProdutorComponent,
     ListaUsersComponent,
     ListFarmersComponent,
-    WhoAreComponent
+    WhoAreComponent,
+    HomeAdminComponent
   ],
   imports: [
     BrowserModule,
@@ -43,6 +44,7 @@ import { WhoAreComponent } from './components/who-are/who-are.component';
     AppRoutingModule,
     ToastrModule.forRoot(),
     NgxMaskModule.forRoot(),
+    NgxPaginationModule,
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule
