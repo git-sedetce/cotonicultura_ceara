@@ -5,6 +5,9 @@ import { RegisterComponent } from './components/register/register.component';
 import { ResetSexhaComponent } from './components/reset-sexha/reset-sexha.component';
 import { HomeComponent } from './components/home/home.component';
 import { CadastroProdutorComponent } from './components/cadastro-produtor/cadastro-produtor.component';
+import { WhoAreComponent } from './components/who-are/who-are.component';
+import { ListaUsersComponent } from './components/admin/lista-users/lista-users.component';
+import { ListFarmersComponent } from './components/admin/list-farmers/list-farmers.component';
 
 const routes: Routes = [
 
@@ -13,7 +16,11 @@ const routes: Routes = [
   { path: 'resetsenha', component: ResetSexhaComponent },
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'cadastroagricultor', component: CadastroProdutorComponent}
+  { path: 'cadastroagricultor', component: CadastroProdutorComponent },
+  { path: 'quemsomos', component: WhoAreComponent },
+  { path: 'listusers', component: ListaUsersComponent },
+  { path: 'listfarmers', component: ListFarmersComponent },
+
 ];
 
 @NgModule({

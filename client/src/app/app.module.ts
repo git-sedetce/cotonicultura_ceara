@@ -18,6 +18,9 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { NgxMaskModule } from 'ngx-mask';
 import { DatePipe } from '@angular/common';
 import { AuthInterceptor } from './services/interceptor/auth.interceptor';
+import { ListaUsersComponent } from './components/admin/lista-users/lista-users.component';
+import { ListFarmersComponent } from './components/admin/list-farmers/list-farmers.component';
+import { WhoAreComponent } from './components/who-are/who-are.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +32,10 @@ import { AuthInterceptor } from './services/interceptor/auth.interceptor';
     ResetSexhaComponent,
     ListaUserComponent,
     HomeComponent,
-    CadastroProdutorComponent
+    CadastroProdutorComponent,
+    ListaUsersComponent,
+    ListFarmersComponent,
+    WhoAreComponent
   ],
   imports: [
     BrowserModule,
