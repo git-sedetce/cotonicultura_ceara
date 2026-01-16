@@ -20,7 +20,7 @@
         <div class="form-group">
           <label>Telefone</label>
           <input type="tel" id="telefone" name="telefone"
-            [(ngModel)]="agricultor.telefone" #telefone="ngModel" required placeholder="(DDD) 9XXXX-XXXX" prefix="+55 " mask="(00) 0 0000-0000||(00) 0000-0000">
+            [(ngModel)]="agricultor.telefone" #telefone="ngModel" required placeholder="(DDD) 9XXXX-XXXX" mask="(00) 0 0000-0000||(00) 0000-0000">
             <div *ngIf="!telefone.valid && telefone.touched" class="alert alert-danger" role="alert">
             Telefone é obrigatório
           </div>
