@@ -134,7 +134,7 @@ class UserController {
     const user = req.body;
 
     try {
-      const verificaUser = await database.User.findOne({
+      const verificaUser = await database.user.findOne({
         where: { user_email: user.user_email },
       });
       if (!verificaUser) {
@@ -173,7 +173,7 @@ class UserController {
 
   static async pegaUsers(req, res) {
     try {     
-      const getUser = await database.User.findAll({
+      const getUser = await database.user.findAll({
         order: ["nome_completo"],
         attributes: [
           "id",
@@ -187,12 +187,12 @@ class UserController {
         include: [
           {
             association: "ass_user_profile",
-            where: (database.User.profile_id = database.Profile.id),
+            where: (database.user.profile_id = database.profile.id),
             attributes: ["id", "perfil"],
           },
           {
             association: "ass_user_sexec",
-            where: (database.User.sexec_id = database.Secretaria_Executivas.id),
+            where: (database.user.sexec_id = database.secretaria_executivas.id),
             attributes: ["id", "secretaria", "sigla"],
           },
         ],
@@ -229,8 +229,8 @@ class UserController {
       // if(!claims){
       //     return res.status(401).send({message: 'Usuário não autenticado!'})
       // }
-      await database.User.update(user, { where: { id: Number(id) } });
-      const updateUser = await database.User.findOne({
+      await database.user.update(user, { where: { id: Number(id) } });
+      const updateUser = await database.user.findOne({
         where: { id: Number(id) },
       });
       return res.status(200).json(updateUser);
@@ -248,7 +248,7 @@ class UserController {
     const user = req.body;
     //console.log('user', user)
     try {
-      const verificaUser = await database.User.findOne({
+      const verificaUser = await database.user.findOne({
         where: { user_email: user.user_email },
       });
       if (!verificaUser) {
@@ -260,7 +260,7 @@ class UserController {
       newPassword = hashedNewPassword;
       //console.log('newPassword', newPassword)
 
-      const novaSenha = await database.User.update(
+      const novaSenha = await database.user.update(
         { user_password: newPassword },
         { where: { user_email: user.user_email } }
       );
@@ -279,7 +279,7 @@ class UserController {
     const apaga = req.body;
 
     try {
-      await database.User.destroy({ where: { id: Number(id) } });
+      await database.user.destroy({ where: { id: Number(id) } });
       return res.status(200).json({
         mensagem: `O Usuario ${apaga.user_name} foi excluido com sucesso!!`,
       });

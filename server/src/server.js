@@ -10,24 +10,21 @@ app.use(express.json())
 
 
 var corsOptions = {
-    credentials: true,
-    origin: ['http://localhost:2601', 'http://cotoniculturace.sde.ce.gov.br', 'https://cotoniculturace.sde.ce.gov.br'],
-    optionsSuccessStatus: 200,
-    methods: "GET, PUT, POST, DELETE",
-    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Access-Control-Allow-Origin"],
+  origin: [
+    'http://localhost:2601', 
+    'http://cotonicultura.sde.ce.gov.br', 
+    'https://cotonicultura.sde.ce.gov.br'
+  ],
+  credentials: true,
+  methods: ['GET', 'PUT', 'POST', 'DELETE'],
+  allowedHeaders: ["Content-Type", "Authorization"],
   };
   
-app.use(cors(corsOptions))
-
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
-
-const port = process.env.PORT
+app.use(cors(corsOptions));
 
 routes(app)
+
+const port = process.env.PORT
 
 app.listen(port, () => console.log(`O servidor está On`))
 
