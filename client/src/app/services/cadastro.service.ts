@@ -91,4 +91,16 @@ export class CadastroService {
     consultarEmail(email: string) : Observable<any> {
       return this.http.get(environment.apiUrl + 'checkEmail/' + email)
     }
+
+    pegar_users(metodo: string): Observable<any> {
+      return this.http.get(environment.apiUrl + metodo)
+    }
+
+    atualizarUser(data: any, id: number): Observable<any> {
+    return this.http.put<any>(`${environment.apiUrl}atualizaUser/${id}`, data);
+  }
+
+  deleteUser(id: number): Observable<any> {
+    return this.http.delete<any>(`${environment.apiUrl}user/${id}`);
+  }
 }

@@ -172,46 +172,43 @@ class UserController {
   }
 
   static async pegaUsers(req, res) {
-    try {     
-      const getUser = await database.user.findAll({
-        order: ["nome_completo"],
-        attributes: [
-          "id",
-          "nome_completo",
-          "user_name",
-          "user_email",
-          "user_active",
-          "profile_id",
-          "sexec_id",
-        ],
-        include: [
-          {
-            association: "ass_user_profile",
-            where: (database.user.profile_id = database.profile.id),
-            attributes: ["id", "perfil"],
-          },
-          {
-            association: "ass_user_sexec",
-            where: (database.user.sexec_id = database.secretaria_executivas.id),
-            attributes: ["id", "secretaria", "sigla"],
-          },
-        ],
-      });
-      return res.status(200).json(getUser);
-    } catch (error) {
-      return res.status(500).json({ message: "Usuário não autenticado!" });
-    }
+  try {
+    const getUser = await database.user.findAll({
+      order: [["nome", "ASC"]],
+      attributes: [
+        "id",
+        "nome",
+        "user_name",
+        "user_email",
+        "user_active",
+        "profile_id",
+        "sexec_id",
+      ],
+      include: [
+        {
+          association: "ass_user_profile",
+          attributes: ["id", "perfil"],
+        },
+        {
+          association: "ass_user_sexec",
+          attributes: ["id", "secretaria", "sigla"],
+        },
+      ],
+    });
+
+    return res.status(200).json(getUser);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Erro ao buscar usuários" });
   }
+}
+
 
   static async pegaSexec(req, res) {
-    try {     
+    try {
       const getSexec = await database.secretaria_executiva.findAll({
         order: ["secretaria"],
-        attributes: [
-          "id",
-          "secretaria",
-          "sigla"
-        ],
+        attributes: ["id", "secretaria", "sigla"],
       });
       return res.status(200).json(getSexec);
     } catch (error) {

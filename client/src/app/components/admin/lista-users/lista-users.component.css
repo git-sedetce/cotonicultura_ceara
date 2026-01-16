@@ -1,0 +1,32 @@
+.user-section {
+  margin: 1rem;
+}
+
+.cabecalho {
+  background-color: #0d6efd;
+  border-radius: 8px;
+}
+
+.cabecalho h3 {
+  font-family: 'Kanit', 'Arial', sans-serif;
+  font-weight: bold;
+  font-size: clamp(1.8rem, 1.2rem + 1vw, 2.6rem);
+  letter-spacing: 0.1em;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.table th {
+  white-space: nowrap;
+}
+
+input.form-control,
+select.form-select {
+  border-radius: 8px;
+}
+
+button.btn-sm {
+  padding: 5px 10px;
+}
