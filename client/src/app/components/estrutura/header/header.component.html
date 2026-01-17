@@ -12,21 +12,22 @@
               <i class="ms-2 bi bi-house-door"></i> Home
             </a>
           </li>
-          <li>
-            <a routerLink="/quemsomos" class="nav-link text-white">
-              <i class="ms-2 bi bi-people"></i> Quem somos
-            </a>
-          </li>
-
-          <!-- <li>
-            <a routerLink="/commitment/home" class="nav-link text-white">
-              <i class="ms-2 bi bi-calendar3"></i> Compromissos
-            </a>
-          </li> -->
 
           <li *ngIf="authenticated">
             <a routerLink="/listfarmers" class="nav-link text-white">
               <i class="ms-2 bi bi-signpost-split"></i> Agricultores Cadastrados
+            </a>
+          </li>
+
+          <li *ngIf="authenticated">
+            <a routerLink="/admin" class="nav-link text-white">
+              <i class="ms-2 bi bi-kanban-fill"></i> Admin
+            </a>
+          </li>
+
+          <li *ngIf="profile === 1">
+            <a routerLink="/cadastro" class="nav-link text-white">
+              <i class="ms-2 bi bi-person-add"></i> Adicionar Usuário
             </a>
           </li>
 

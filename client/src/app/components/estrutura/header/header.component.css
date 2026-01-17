@@ -8,4 +8,5 @@ header {
 .cabecalho ul li a:hover {
   /*padding: 5px 0;*/
   background-color:#ffc107;
+  font-weight: bold;
 }

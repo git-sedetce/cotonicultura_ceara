@@ -8,6 +8,7 @@ import { CadastroProdutorComponent } from './components/cadastro-produtor/cadast
 import { WhoAreComponent } from './components/who-are/who-are.component';
 import { ListaUsersComponent } from './components/admin/lista-users/lista-users.component';
 import { ListFarmersComponent } from './components/admin/list-farmers/list-farmers.component';
+import { HomeAdminComponent } from './components/admin/home-admin/home-admin.component';
 
 const routes: Routes = [
 
@@ -20,6 +21,7 @@ const routes: Routes = [
   { path: 'quemsomos', component: WhoAreComponent },
   { path: 'listusers', component: ListaUsersComponent },
   { path: 'listfarmers', component: ListFarmersComponent },
+  { path: 'admin', component: HomeAdminComponent },
 
 ];
 
