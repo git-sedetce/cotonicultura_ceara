@@ -8,6 +8,6 @@ export class User {
     public user_password?: string,
     public confirm_password?: string,
     public profile_id?: number,
-    public sexec_id?: number,
+    public sexec_id: number | '' = '',
   ) {}
 }

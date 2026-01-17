@@ -28,7 +28,7 @@
 
             <div class="row">
               <select class="form__input form-control" id="sexec_id" name="sexec_id" #sexec_id="ngModel" [(ngModel)]="user.sexec_id" required>
-                <option value="" disabled selected>Insira a Secretaria Executiva</option>
+                <option value="" disabled hidden>Insira a Secretaria Executiva</option>
                 <option *ngFor="let sexec of lista_sexec" [value]="sexec.id">{{ sexec.secretaria }} - {{ sexec.sigla }}</option>
               </select>
               <div *ngIf="!sexec_id.valid && sexec_id.touched" class="alert alert-danger" role="alert">
