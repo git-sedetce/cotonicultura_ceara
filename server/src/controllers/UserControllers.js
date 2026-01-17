@@ -12,6 +12,7 @@ class UserController {
     novoUser.user_password = hashedPassword;
     novoUser.user_pin = Math.floor(1000 + Math.random() * 9000);
     novoUser.profile_id = 4; // Perfil padrão de usuário comum
+    novoUser.user_active = false; // Usuário inativo por padrão
 
     console.log("novoUser", novoUser);
 
@@ -52,6 +53,7 @@ class UserController {
       const { password, ...data } = await result.toJSON();
       res.send(data);
     } catch (error) {
+      console.log("error", error);
       return res.status(500).json(error.message);
     }
   }

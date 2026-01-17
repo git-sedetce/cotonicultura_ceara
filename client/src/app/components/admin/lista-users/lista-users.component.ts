@@ -27,7 +27,6 @@ export class ListaUsersComponent implements OnInit {
   lista_filtrada: any[] = [];
 
   registro!: Audit;
-
   profile_id!: any;
   user_name!: any;
 
@@ -144,7 +143,7 @@ export class ListaUsersComponent implements OnInit {
         }
       });
 
-    this.saveRegister();
+    this.saveRegister(this.userObj.user_name, 'Alteração de dados do usuário');
   }
   deletaUser(user: any) {
     this.serviceUser.deleteUser(user.id).subscribe((res) => {
@@ -152,23 +151,12 @@ export class ListaUsersComponent implements OnInit {
       this.getUsers();
     });
 
-    this.saveDeleteUser(user.user_name);
+    this.saveRegister(user.user_name, 'Exclusão de usuário');
   }
 
-  saveRegister(): void {
-    this.registro.tipo_acao = 'Alteração de dados do usuário';
-    this.registro.acao = `O usuário ${this.userObj.user_name} teve seus dados alterados pelo usuário ${this.user_name}`;
-    this.auditService.cadastrarRegistros(this.registro).subscribe({
-      next: (res: any) => {
-        // console.log('registro', res)
-      },
-      error: (e) => this.toastr.error(e),
-    });
-  }
-
-  saveDeleteUser(name: any): void {
-    this.registro.tipo_acao = 'Exclusão de usuário';
-    this.registro.acao = `O usuário ${name} foi excluido da base de dados pelo usuário ${this.user_name}`;
+  saveRegister(name: any, tipo: any): void {
+    this.registro.tipo_acao = tipo;
+    this.registro.acao = `O usuário ${name} teve seus dados alterados pelo usuário ${this.user_name}`;
     this.auditService.cadastrarRegistros(this.registro).subscribe({
       next: (res: any) => {
         // console.log('registro', res)
