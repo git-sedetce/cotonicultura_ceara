@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { Md5 } from 'ts-md5';
 import { environment } from '../../environments/environment';
 import { jwtDecode } from 'jwt-decode';
@@ -96,11 +96,18 @@ export class CadastroService {
       return this.http.get(environment.apiUrl + metodo)
     }
 
-    atualizarUser(data: any, id: number): Observable<any> {
-    return this.http.put<any>(`${environment.apiUrl}atualizaUser/${id}`, data);
-  }
+    atualizarUser(data: any, id: number){
+      return this.http.put<any>(environment.apiUrl + 'atualizaUser/' +id, data)
+      .pipe(map((res:any)=>{
+        return res;
+      }))
+    }
 
-  deleteUser(id: number): Observable<any> {
-    return this.http.delete<any>(`${environment.apiUrl}user/${id}`);
-  }
+    deleteUser(id: number){
+      return this.http.delete<any>(environment.apiUrl + 'user/' +id)
+      .pipe(map((res:any)=>{
+        return res;
+      }))
+    }
+
 }

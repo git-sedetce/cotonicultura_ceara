@@ -221,11 +221,6 @@ class UserController {
     const user = req.body;
     // console.log('user', user)
     try {
-      // const cookie = req.cookies['token']
-      // const claims = jwt.verify(cookie, process.env.ACCESS_TOKEN)
-      // if(!claims){
-      //     return res.status(401).send({message: 'Usuário não autenticado!'})
-      // }
       await database.user.update(user, { where: { id: Number(id) } });
       const updateUser = await database.user.findOne({
         where: { id: Number(id) },

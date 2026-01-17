@@ -26,6 +26,13 @@
         </select>
       </div>
 
+      <div class="col-md-3 col-sm-6 mt-2 mt-sm-0">
+        <select class="form-select shadow-sm" [(ngModel)]="searchSexec" (change)="filtrarUsuarios()">
+          <option value="">Secretaria Executiva</option>
+          <option *ngFor="let s of lista_sexec" [value]="s.sigla">{{ s.sigla }}</option>
+        </select>
+      </div>
+
     </div>
 
     <!-- Tabela -->

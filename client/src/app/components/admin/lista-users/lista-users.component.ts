@@ -18,12 +18,11 @@ export class ListaUsersComponent implements OnInit {
   lista_users!: any[];
   lista_profile!: any[];
   lista_sexec!: any[];
-  lista_secretaria!: any[];
   formUser!: FormGroup;
   userObj: User = new User();
   searchText: string = '';
   searchAtivo: string = '';
-  searchCoord: string = '';
+  searchSexec: string = '';
 
   lista_filtrada: any[] = [];
 
@@ -102,12 +101,12 @@ export class ListaUsersComponent implements OnInit {
           ? true
           : String(user.user_active) === this.searchAtivo;
 
-      const matchCoord =
-        this.searchCoord === ''
+      const matchSexec =
+        this.searchSexec === ''
           ? true
-          : user.ass_users_coord.sigla === this.searchCoord;
+          : user.ass_users_coord.sigla === this.searchSexec;
 
-      return matchTexto && matchAtivo && matchCoord;
+      return matchTexto && matchAtivo && matchSexec;
     });
 
     this.page = 1;
