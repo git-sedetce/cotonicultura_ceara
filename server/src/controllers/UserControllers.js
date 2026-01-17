@@ -14,8 +14,6 @@ class UserController {
     novoUser.profile_id = 4; // Perfil padrão de usuário comum
     novoUser.user_active = false; // Usuário inativo por padrão
 
-    console.log("novoUser", novoUser);
-
     try {
       const criarUser = await database.user.create(novoUser);
 

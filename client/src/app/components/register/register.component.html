@@ -37,13 +37,13 @@
             </div>
 
 
-            <div class="row">
+            <div class="row" *ngIf="!authenticated">
               <!-- <span class="fa fa-lock"></span> -->
               <input type="password" name="user_password" id="user_password" class="form__input form-control" #user_password="ngModel" [(ngModel)]="user.user_password" placeholder="Password" [pattern]="passwordPtn" minlength="8" required>
               <div *ngIf="!user_password.valid && user_password.touched" class="alert alert-danger" role="alert">Digite a sua senha</div>
               <div *ngIf="(user_password.touched || user_password.valid) && user_password.errors" class="alert alert-danger" role="alert">A senha deve ter no mínimo de 8 caracteres e deve conter letras, numeros,  caracteres especais e letras maiúscula.</div>
             </div>
-            <div class="row">
+            <div class="row" *ngIf="!authenticated">
               <!-- <span class="fa fa-lock"></span> -->
               <input type="password" name="user_confirm_password" id="user_confirm_password" class="form__input form-control" #user_confirm_password="ngModel" [(ngModel)]="user.confirm_password" placeholder="Confirmação de senha" [pattern]="passwordPtn" minlength="8" required>
               <div *ngIf="!user_confirm_password.valid && user_confirm_password.touched" class="alert alert-danger" role="alert">Confirmação de senha é obrigatório</div>
