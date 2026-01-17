@@ -14,7 +14,7 @@ const routes: Routes = [
 
   { path: 'login', component: LoginComponent },
   { path: 'cadastro', component: RegisterComponent },
-  { path: 'resetsenha', component: ResetSexhaComponent },
+  { path: 'resetSenha', component: ResetSexhaComponent },
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'cadastroagricultor', component: CadastroProdutorComponent },

@@ -87,14 +87,29 @@ form {
 	transition: all .5s ease;
 	width: 70%;
 	border-radius: 30px;
-	color:#008080;
+	color:#008080 !important;
 	font-weight: 600;
 	background-color: #fff;
 	border: 1px solid #008080;
-  margin: 1.5em auto 1em auto;
+  margin: .5em auto 1em auto;
 }
 
 .btn:hover, .btn:focus {
 	background-color: #008080;
-	color:#fff;
+	color:#fff !important;
 }
+
+.modal-content {
+  background-color: #ffffff;
+}
+
+.modal-title {
+  font-size: 1.1rem;
+}
+
+@media (max-width: 576px) {
+  .modal-body {
+    padding: 1rem;
+  }
+}
+

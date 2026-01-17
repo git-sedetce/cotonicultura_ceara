@@ -92,7 +92,7 @@ export class ListaUsersComponent implements OnInit {
       const termo = this.searchText.toLowerCase();
 
       const matchTexto =
-        user.name.toLowerCase().includes(termo) ||
+        user.nome.toLowerCase().includes(termo) ||
         user.user_email.toLowerCase().includes(termo);
 
       const matchAtivo =
@@ -103,7 +103,7 @@ export class ListaUsersComponent implements OnInit {
       const matchSexec =
         this.searchSexec === ''
           ? true
-          : user.ass_users_coord.sigla === this.searchSexec;
+          : user.ass_user_sexec.sigla === this.searchSexec;
 
       return matchTexto && matchAtivo && matchSexec;
     });

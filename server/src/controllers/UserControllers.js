@@ -5,56 +5,61 @@ const nodemailer = require("nodemailer");
 
 class UserController {
   static async cadastraUser(req, res) {
-    var enviarEmail = ["daniel.araujo@sde.ce.gov.br"];
+  try {
     const novoUser = req.body;
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(novoUser.user_password, salt);
-    novoUser.user_password = hashedPassword;
-    novoUser.user_pin = Math.floor(1000 + Math.random() * 9000);
-    novoUser.profile_id = 4; // Perfil padrão de usuário comum
-    novoUser.user_active = false; // Usuário inativo por padrão
 
-    try {
-      const criarUser = await database.user.create(novoUser);
-
-      var transporter = nodemailer.createTransport({
-        host: "172.26.2.26", //relay.etice.ce.gov.br
-        port: 25,
-        secure: false,
-        tls: {
-          rejectUnauthorized: false,
-        },
-      });
-
-      var mailOptions = {
-        from: "gestao.pessoas@sde.ce.gov.br",
-        to: enviarEmail,
-        subject: "Cadastro de usuário do Sistema de Cotonicultura da SDE",
-        html: `<h3>Cadastro Realizado com sucesso!!</h3><p>${novoUser.nome_completo} fez o cadastrado. Verifique o perfil dele e ative para o uso do sistema.`,
-      };
-      //   console.log("mailOptions", mailOptions);
-      var emailRetorno = null;
-      transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          //console.log(error);
-          emailRetorno = error;
-        } else {
-          //   console.log("Email enviado: " + info.response);
-          emailRetorno = {
-            messagem: "Email enviado com sucesso!",
-            info: info.response,
-          };
-        }
-      });
-
-      const result = await criarUser.save();
-      const { password, ...data } = await result.toJSON();
-      res.send(data);
-    } catch (error) {
-      console.log("error", error);
-      return res.status(500).json(error.message);
+    if (!novoUser.user_password || !novoUser.user_email) {
+      return res.status(400).json({ message: "Dados obrigatórios ausentes" });
     }
+
+    const salt = await bcrypt.genSalt(10);
+    novoUser.user_password = await bcrypt.hash(novoUser.user_password, salt);
+    novoUser.user_pin = Math.floor(1000 + Math.random() * 9000);
+    novoUser.profile_id = 4;
+    novoUser.user_active = false;
+
+    const userCriado = await database.user.create(novoUser);
+
+    const transporter = nodemailer.createTransport({
+      host: "172.26.2.26",
+      port: 25,
+      secure: false,
+      tls: { rejectUnauthorized: false },
+    });
+
+    // Email administrativo
+    await transporter.sendMail({
+      from: "gestao.pessoas@sde.ce.gov.br",
+      to: process.env.EMAIL_ADMIN,
+      subject: "Cadastro de usuário do Sistema de Cotonicultura da SDE",
+      html: `<h3>Cadastro realizado com sucesso</h3>
+             <p>${novoUser.nome_completo} realizou o cadastro.</p>`,
+    });
+
+    // Email com PIN
+    await transporter.sendMail({
+      from: "gestao.pessoas@sde.ce.gov.br",
+      to: novoUser.user_email,
+      subject: "Código PIN - Sistema de Cotonicultura da SDE",
+      html: `
+        <h2>Código PIN</h2>
+        <h3>${novoUser.user_pin}</h3>
+        <p>
+          <a href="https://www.cotonicultura.sde.ce.gov.br/resetSenha">
+            Clique aqui para criar sua senha
+          </a>
+        </p>`,
+    });
+
+    const { user_password, ...data } = userCriado.toJSON();
+    return res.status(201).json(data);
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
   }
+}
+
 
   static async checarEmail(req, res) {
     const { email } = req.params;
@@ -105,10 +110,10 @@ class UserController {
       });
 
       var mailOptions = {
-        from: "digital.nomads@sedet.ce.gov.br",
+        from: "gestao.pessoas@sde.ce.gov.br",
         to: user.user_email,
         subject: "Novo Pin para nova senha",
-        html: `<h3>Segue o novo Pin!!</h3><p><strong>${newPin}</strong><br>Crie sua nova senha no seguinte link: <a href="https://digitalnomads.ce.gov.br/resetSenha">Resetar Senha</a>`,
+        html: `<h3>Segue o novo Pin!!</h3><p><strong>${newPin}</strong><br>Crie sua nova senha no seguinte link: <a href="https://cotonicultura.sde.ce.gov.br/resetSenha">Resetar Senha</a>`,
       };
       //   console.log("mailOptions", mailOptions);
       var emailRetorno = null;
@@ -252,10 +257,17 @@ class UserController {
       newPassword = hashedNewPassword;
       //console.log('newPassword', newPassword)
 
+      if(verificaUser.user_active === false){
+        const novaSenha = await database.user.update(
+        { user_password: newPassword, user_active: true },
+        { where: { user_email: user.user_email } }
+      );
+    }else{
       const novaSenha = await database.user.update(
         { user_password: newPassword },
         { where: { user_email: user.user_email } }
       );
+    }
 
       //const  result = await novaSenha.save()
       //const { password, ...data } = await result.toJSON()

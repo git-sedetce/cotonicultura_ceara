@@ -14,5 +14,6 @@ router.put('/atualizaUser/:id', auth.authenticatedUser, checkRole.checkRole([1])
 router.post('/logout', UserController.logout)
 router.post('/reset', UserController.resetPassword)
 router.delete('/user/:id', auth.authenticatedUser, checkRole.checkRole([1]), UserController.deletaUsers)
+router.post('/newPin', UserController.gerarPin)
 
 module.exports = router

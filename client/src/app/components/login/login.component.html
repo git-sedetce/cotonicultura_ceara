@@ -14,13 +14,18 @@
         <div class="row">
           <form control="" class="form-group" #formLogin="ngForm">
             <div class="row">
-              <input type="email" name="user_email" id="user_email" class="form__input form-control" (blur)="verificaEmail(user_email)" #user_email="ngModel" [(ngModel)]="loginUsers.user_email" placeholder="Email do usuário" required>
-              <div *ngIf="!user_email.valid && user_email.touched" class="alert alert-danger" role="alert">Informe o email do usuário</div>
+              <input type="email" name="user_email" id="user_email" class="form__input form-control"
+                (blur)="verificaEmail(user_email)" #user_email="ngModel" [(ngModel)]="loginUsers.user_email"
+                placeholder="Email do usuário" required>
+              <div *ngIf="!user_email.valid && user_email.touched" class="alert alert-danger" role="alert">Informe o
+                email do usuário</div>
             </div>
             <div class="row">
               <!-- <span class="fa fa-lock"></span> -->
-              <input type="password" name="user_password" id="user_password" class="form__input form-control" #user_password="ngModel" [(ngModel)]="loginUsers.user_password" placeholder="Password" required>
-              <div *ngIf="!user_password.valid && user_password.touched" class="alert alert-danger" role="alert">Digite a sua senha</div>
+              <input type="password" name="user_password" id="user_password" class="form__input form-control"
+                #user_password="ngModel" [(ngModel)]="loginUsers.user_password" placeholder="Password" required>
+              <div *ngIf="!user_password.valid && user_password.touched" class="alert alert-danger" role="alert">Digite
+                a sua senha</div>
             </div>
             <!--<div class="row remember">
               <input type="checkbox" name="remember_me" id="remember_me" class="col-sm-3 col-12">
@@ -35,9 +40,61 @@
           <p>Não possui conta? <a routerLink="/cadastro">Registre-se aqui</a></p>
         </div>
         <div class="row">
-          <p>Esqueceu sua senha? <a routerLink="/resetsenha">Clique aqui</a></p>
+          <button type="button" class="btn btn-warning fw-bold text-white" data-bs-toggle="modal"
+            data-bs-target="#modalReset">Esqueceu sua senha?</button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!--Modal de gerar Pin-->
+
+<div class="modal fade" id="modalReset" tabindex="-1" aria-labelledby="modalResetLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm modal-lg">
+    <div class="modal-content rounded-4 shadow">
+
+      <!-- HEADER -->
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-semibold" id="modalResetLabel">
+          Recuperação de Senha
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body pt-2">
+        <p class="text-muted small mb-3">
+          Informe o e-mail utilizado no cadastro para gerar o PIN de acesso.
+        </p>
+
+        <form #formReset="ngForm">
+          <div class="mb-3">
+            <label for="user_email_reset" class="form-label">
+              E-mail
+            </label>
+
+            <input type="email" id="user_email_reset" name="user_email_reset" class="form-control form-control-lg"
+              placeholder="exemplo@email.com" required [(ngModel)]="loginUsers.user_email" #user_email="ngModel" />
+
+            <div class="invalid-feedback d-block" *ngIf="user_email.invalid && user_email.touched">
+              Informe um e-mail válido.
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer border-0 pt-0 d-flex flex-column flex-sm-row gap-2">
+        <button type="button" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">
+          Cancelar
+        </button>
+
+        <button type="button" class="btn btn-primary w-100" [disabled]="formReset.invalid" (click)="gerarPin()">
+          Gerar PIN
+        </button>
+      </div>
+
     </div>
   </div>
 </div>

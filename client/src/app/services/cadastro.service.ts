@@ -96,6 +96,10 @@ export class CadastroService {
       return this.http.get(environment.apiUrl + metodo)
     }
 
+    resetPin(data:any): Observable<any> {
+      return this.http.post(environment.apiUrl + 'newPin',  data)
+    }
+
     atualizarUser(data: any, id: number){
       return this.http.put<any>(environment.apiUrl + 'atualizaUser/' +id, data)
       .pipe(map((res:any)=>{
@@ -108,6 +112,10 @@ export class CadastroService {
       .pipe(map((res:any)=>{
         return res;
       }))
+    }
+
+    reset_password(data:any) : Observable<any> {
+      return this.http.post(environment.apiUrl + 'reset', data)
     }
 
 }

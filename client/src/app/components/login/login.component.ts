@@ -42,4 +42,18 @@ export class LoginComponent implements OnInit {
 
   }
 
+  gerarPin(){
+    this.serviceUser.resetPin(this.loginUsers).subscribe(
+      () =>{
+        this.toastr.success('Verifique seu Email');
+        this.formLogin.reset();
+      },
+      (error) => {
+        this.toastr.error('Erro durante o processo', error.error.message);
+        this.formLogin.reset();
+      }
+    );
+
+  }
+
 }
