@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   produtor_rural.init({
+    pedido: DataTypes.STRING,
     nome: DataTypes.STRING,
     telefone: DataTypes.STRING,
     cpf_cnpj: DataTypes.STRING,
@@ -23,6 +24,8 @@ module.exports = (sequelize, DataTypes) => {
     ponto_referencia: DataTypes.STRING,
     area_total: DataTypes.DOUBLE,
     area_algodao: DataTypes.DOUBLE,
+    pedido_atendido: DataTypes.BOOLEAN,
+    sementes_recebidas: DataTypes.DOUBLE,
     regime_cultivo: DataTypes.STRING,
     cadastro_adagri: DataTypes.STRING,
     confirma_informacao: DataTypes.BOOLEAN

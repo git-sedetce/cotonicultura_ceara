@@ -16,16 +16,18 @@ declare var bootstrap: any;
 })
 export class ListFarmersComponent implements OnInit {
 
-  lista_farmers!: any[];
-  lista_cidade!: any[];
   lista_regiao!: any[];
+  lista_farmers: any[] = [];
+  lista_filtrada: any[] = [];
+  lista_cidade: any[] = [];
+
   formFarmer!: FormGroup;
   farmerObj: Agricultor = new Agricultor();
   searchFarmers: string = '';
   searchCidade: string = '';
   searchRegiao: string = '';
-
-  lista_filtrada: any[] = [];
+  searchPedidoAtendido: boolean | '' = '';
+  numeroPedido: number | '' = '';
 
   registro!: Audit;
   profile_id!: any;
@@ -55,9 +57,11 @@ export class ListFarmersComponent implements OnInit {
       ponto_referencia:[''],
       area_total:[''],
       area_algodao:[''],
+      pedido_atendido: [''],
+      sementes_recebidas:[''],
       regime_cultivo:[''],
       cadastro_adagri:[''],
-      confirma_informação:[''],
+      confirma_informacao:[''],
     });
 
     this.registro = new Audit();
@@ -103,44 +107,70 @@ export class ListFarmersComponent implements OnInit {
     );
   }
 
-  filtrarUsuarios() {
-    this.lista_filtrada = this.lista_farmers.filter((user) => {
-      const termo = this.searchFarmers.toLowerCase();
+  private normalize(value: any): string {
+  return (value ?? '')
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
 
-      const matchFarmer =
-        user.nome.toLowerCase().includes(termo)
+  filtrarUsuarios(): void {
+  const termo = this.normalize(this.searchFarmers);
 
-      const matchCidade =
-        this.searchCidade === ''
-          ? true
-          : String(user.ass_produtor_rural_cidade.nome_municipio) === this.searchCidade;
+  this.lista_filtrada = (this.lista_farmers || []).filter((farmer) => {
 
-      const matchRegiao =
-        this.searchRegiao === ''
-          ? true
-          : user.ass_produtor_rural_cidade.ass_municipio_regiao.nome === this.searchRegiao;
+    const matchNome =
+      this.normalize(farmer.nome).includes(termo);
 
-      return matchFarmer && matchCidade && matchRegiao;
-    });
+    const matchCidade =
+      !this.searchCidade ||
+      farmer?.ass_produtor_rural_cidade?.nome_municipio === this.searchCidade;
 
-    this.page = 1;
-  }
+    const matchRegiao =
+      !this.searchRegiao ||
+      farmer?.ass_produtor_rural_cidade?.ass_municipio_regiao?.nome === this.searchRegiao;
 
-  onEdit(user: any) {
-    this.farmerObj.id = user.id;
-    this.formFarmer.controls['nome'].setValue(user.nome);
-    this.formFarmer.controls['telefone'].setValue(user.telefone);
-    this.formFarmer.controls['cpf_cnpj'].setValue(user.cpf_cnpj);
-    this.formFarmer.controls['rg'].setValue(user.rg);
-    this.formFarmer.controls['endereco'].setValue(user.endereco);
-    this.formFarmer.controls['cidade'].setValue(user.cidade);
-    this.formFarmer.controls['nome_propriedade'].setValue(user.nome_propriedade);
-    this.formFarmer.controls['ponto_referencia'].setValue(user.ponto_referencia);
-    this.formFarmer.controls['area_total'].setValue(user.area_total);
-    this.formFarmer.controls['area_algodao'].setValue(user.area_algodao);
-    this.formFarmer.controls['regime_cultivo'].setValue(user.regime_cultivo);
-    this.formFarmer.controls['cadastro_adagri'].setValue(user.cadastro_adagri);
-    this.formFarmer.controls['confirma_informação'].setValue(user.confirma_informação);
+    const matchPedido =
+      this.searchPedidoAtendido === '' ||
+      farmer?.pedido_atendido === this.searchPedidoAtendido;
+
+    return matchNome && matchCidade && matchRegiao && matchPedido;
+  });
+
+  this.page = 1;
+}
+
+exibirTodos(): void {
+  this.searchFarmers = '';
+  this.searchCidade = '';
+  this.searchRegiao = '';
+  this.searchPedidoAtendido = '';
+
+  this.lista_filtrada = [...this.lista_farmers];
+  this.page = 1;
+}
+
+
+
+  onEdit(farmer: any) {
+    this.farmerObj.id = farmer.id;
+    this.numeroPedido = farmer.pedido;
+    this.formFarmer.controls['nome'].setValue(farmer.nome);
+    this.formFarmer.controls['telefone'].setValue(farmer.telefone);
+    this.formFarmer.controls['cpf_cnpj'].setValue(farmer.cpf_cnpj);
+    this.formFarmer.controls['rg'].setValue(farmer.rg);
+    this.formFarmer.controls['endereco'].setValue(farmer.endereco);
+    this.formFarmer.controls['cidade'].setValue(farmer.cidade);
+    this.formFarmer.controls['nome_propriedade'].setValue(farmer.nome_propriedade);
+    this.formFarmer.controls['ponto_referencia'].setValue(farmer.ponto_referencia);
+    this.formFarmer.controls['area_total'].setValue(farmer.area_total);
+    this.formFarmer.controls['area_algodao'].setValue(farmer.area_algodao);
+    this.formFarmer.controls['regime_cultivo'].setValue(farmer.regime_cultivo);
+    this.formFarmer.controls['cadastro_adagri'].setValue(farmer.cadastro_adagri);
+    this.formFarmer.controls['confirma_informacao'].setValue(farmer.confirma_informacao);
+    this.formFarmer.controls['sementes_recebidas'].setValue(farmer.sementes_recebidas);
+    this.formFarmer.controls['pedido_atendido'].setValue(farmer.pedido_atendido);
   }
   updateFarmer() {
     this.farmerObj.nome = this.formFarmer.value.nome;
@@ -155,6 +185,9 @@ export class ListFarmersComponent implements OnInit {
     this.farmerObj.area_algodao = this.formFarmer.value.area_algodao;
     this.farmerObj.regime_cultivo = this.formFarmer.value.regime_cultivo;
     this.farmerObj.cadastro_adagri = this.formFarmer.value.cadastro_adagri;
+    this.farmerObj.confirma_informacao = this.formFarmer.value.confirma_informacao;
+    this.farmerObj.sementes_recebidas = this.formFarmer.value.sementes_recebidas;
+    this.farmerObj.pedido_atendido = this.formFarmer.value.pedido_atendido;
 
     this.cadastroAgricultorService
       .atualizarAgricultor(this.farmerObj, Number(this.farmerObj.id))
@@ -171,7 +204,7 @@ export class ListFarmersComponent implements OnInit {
         }
       });
 
-    // this.saveRegister(this.userObj.user_name, 'Alteração de dados do usuário');
+    this.saveRegister(this.farmerObj.nome, 'Alteração de dados do agricultor');
   }
   deletaFarmer(user: any) {
     this.cadastroAgricultorService.deleteAgricultor(user.id).subscribe((res) => {
@@ -179,7 +212,18 @@ export class ListFarmersComponent implements OnInit {
       this.getFarmers();
     });
 
-    // this.saveRegister(user.user_name, 'Exclusão de usuário');
+    this.saveRegister(user.user_name, 'Exclusão de usuário');
+  }
+
+  saveRegister(name: any, tipo: any): void {
+    this.registro.tipo_acao = tipo;
+    this.registro.acao = `O usuário ${this.user_name} alterou os dados do agricultor ${name}`;
+    this.auditService.cadastrarRegistros(this.registro).subscribe({
+      next: (res: any) => {
+        // console.log('registro', res)
+      },
+      error: (e) => this.toastr.error(e),
+    });
   }
 
 

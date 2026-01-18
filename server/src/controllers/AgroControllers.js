@@ -4,14 +4,19 @@ const { Op } = require("sequelize");
 class AgroControllers {
   static async registerAgro(req, res) {
     const newRegister = req.body;
+    console.log('newRegister', newRegister);
     // console.log('newRegister', newRegister);
     try {
       const novoProdutor = await database.produtor_rural.create(newRegister);
+      const numeroPedido = `PED-${String(novoProdutor.id).padStart(6, '0')}`;
+
+      await novoProdutor.update({ pedido: numeroPedido });''
       return res.status(200).json(novoProdutor);
     } catch (error) {
       return res.status(500).json(error.message);
     }
   }
+
 
   static async pegaCidades(req, res) {
     try {
@@ -110,6 +115,7 @@ class AgroControllers {
           order: [["nome", "ASC"]],
           attributes: [
             "id",
+            "pedido",
             "nome",
             "telefone",
             "cpf_cnpj",
@@ -120,6 +126,8 @@ class AgroControllers {
             "ponto_referencia",
             "area_total",
             "area_algodao",
+            "pedido_atendido",
+            "sementes_recebidas",
             "regime_cultivo",
             "cadastro_adagri",
             "confirma_informacao",

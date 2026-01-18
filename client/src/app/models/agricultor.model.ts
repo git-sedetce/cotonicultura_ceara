@@ -1,6 +1,7 @@
 export class Agricultor {
   constructor(
     public id?: number,
+    public pedido?: string,
     public nome?: string,
     public telefone?: string,
     public cpf_cnpj?: string,
@@ -11,6 +12,8 @@ export class Agricultor {
     public nome_propriedade?: string,
     public area_total?: number,
     public area_algodao?: number,
+    public pedido_atendido: boolean = false,
+    public sementes_recebidas?: number,
     public regime_cultivo?: string,
     public cadastro_adagri?: string,
     public confirma_informacao?: boolean,

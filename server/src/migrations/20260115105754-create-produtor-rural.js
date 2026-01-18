@@ -9,6 +9,11 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      pedido: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        unique: true
+      },
       nome: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -20,6 +25,7 @@ module.exports = {
       cpf_cnpj: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true
       },
       rg: {
         type: Sequelize.STRING
@@ -48,6 +54,14 @@ module.exports = {
         type: Sequelize.DOUBLE,
         allowNull: false,
       },
+      pedido_atendido: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+      },
+      sementes_recebidas: {
+        type: Sequelize.DOUBLE,
+        allowNull: true,
+      },
       regime_cultivo: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -55,6 +69,7 @@ module.exports = {
       cadastro_adagri: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true
       },
       confirma_informacao: {
         type: Sequelize.BOOLEAN,
