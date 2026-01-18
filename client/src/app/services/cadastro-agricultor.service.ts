@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -17,11 +17,37 @@ export class CadastroAgricultorService {
     return this.http.get(environment.apiUrl + metodo);
   }
 
+  getRegiaos(metodo: string): Observable<any> {
+    return this.http.get(environment.apiUrl + metodo);
+  }
+
   consultarCPF(cpf: string): Observable<any> {
     return this.http.get(environment.apiUrl + 'checkcpf/' + cpf);
   }
 
   consultarADAGRI(adagri: string): Observable<any> {
     return this.http.get(environment.apiUrl + 'checkcadastro/' + adagri);
+  }
+
+  agricultorRural(metodo: string): Observable<any> {
+    return this.http.get(environment.apiUrl + metodo);
+  }
+
+  atualizarAgricultor(data: any, id: number) {
+    return this.http
+      .put<any>(environment.apiUrl + 'atualizaFarmer/' + id, data)
+      .pipe(
+        map((res: any) => {
+          return res;
+        }),
+      );
+  }
+
+  deleteAgricultor(id: number) {
+    return this.http.delete<any>(environment.apiUrl + 'farmer/' + id).pipe(
+      map((res: any) => {
+        return res;
+      }),
+    );
   }
 }
