@@ -45,31 +45,7 @@ module.exports = {
       sigla: 'ADECE',
       createdAt: new Date(),
       updatedAt: new Date()
-     },
-     {
-      secretaria: 'Instituto de Pesos e Medidas do Estado do Ceará',
-      sigla: 'IPEM-CE',
-      createdAt: new Date(),
-      updatedAt: new Date()
-     },
-     {
-      secretaria: 'Junta Comercial do Estado do Ceará',
-      sigla: 'JUCEC',
-      createdAt: new Date(),
-      updatedAt: new Date()
-     },
-     {
-      secretaria: 'PECÉM - Complexo Industrial e Portuário',
-      sigla: 'CIPP',
-      createdAt: new Date(),
-      updatedAt: new Date()
-     },
-     {
-      secretaria: 'ZPE CEARÁ',
-      sigla: 'ZPE',
-      createdAt: new Date(),
-      updatedAt: new Date()
-     },
+     },     
     ], {});
   },
 
