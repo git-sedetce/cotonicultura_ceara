@@ -2,6 +2,7 @@ const express = require('express')
 const agricultor = require('./agroRoutes')
 const user = require('./userRoutes')
 const audit = require('./auditRoutes')
+const statistics = require('./statisticsRoutes')
 
 
 module.exports = app => {
@@ -9,6 +10,7 @@ module.exports = app => {
             express.urlencoded({ extended: false }),
             agricultor,
             user,
-            audit
+            audit,
+            statistics
             )
 }

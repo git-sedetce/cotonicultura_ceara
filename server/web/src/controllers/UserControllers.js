@@ -5,21 +5,38 @@ const nodemailer = require("nodemailer");
 
 class UserController {
   static async cadastraUser(req, res) {
-  try {
-    const novoUser = req.body;
+    try {
+      const novoUser = req.body;
 
-    if (!novoUser.user_password || !novoUser.user_email) {
-      return res.status(400).json({ message: "Dados obrigatórios ausentes" });
+      if (!novoUser.user_password || !novoUser.user_email) {
+        return res.status(400).json({ message: "Dados obrigatórios ausentes" });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      novoUser.user_password = await bcrypt.hash(novoUser.user_password, salt);
+      novoUser.user_pin = Math.floor(1000 + Math.random() * 9000);
+      novoUser.profile_id = 4;
+      novoUser.user_active = false;
+
+      const userCriado = await database.user.create(novoUser);
+
+      // Remove a senha antes de responder
+      const { user_password, ...data } = userCriado.toJSON();
+
+      // 🔹 Retorna o cadastro imediatamente
+      res.status(201).json(data);
+
+      // 🔹 Envio de e-mails em background
+      this.enviarEmailsCadastro(novoUser).catch((err) => {
+        console.error("Erro ao enviar e-mail:", err);
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: error.message });
     }
+  }
 
-    const salt = await bcrypt.genSalt(10);
-    novoUser.user_password = await bcrypt.hash(novoUser.user_password, salt);
-    novoUser.user_pin = Math.floor(1000 + Math.random() * 9000);
-    novoUser.profile_id = 4;
-    novoUser.user_active = false;
-
-    const userCriado = await database.user.create(novoUser);
-
+  static async enviarEmailsCadastro(user) {
     const transporter = nodemailer.createTransport({
       host: "172.26.2.26",
       port: 25,
@@ -32,34 +49,28 @@ class UserController {
       from: "gestao.pessoas@sde.ce.gov.br",
       to: process.env.EMAIL_ADMIN,
       subject: "Cadastro de usuário do Sistema de Cotonicultura da SDE",
-      html: `<h3>Cadastro realizado com sucesso</h3>
-             <p>${novoUser.nome_completo} realizou o cadastro.</p>`,
+      html: `
+      <h3>Cadastro realizado com sucesso</h3>
+      <p>${user.nome_completo} realizou o cadastro.</p>
+    `,
     });
 
     // Email com PIN
     await transporter.sendMail({
       from: "gestao.pessoas@sde.ce.gov.br",
-      to: novoUser.user_email,
+      to: user.user_email,
       subject: "Código PIN - Sistema de Cotonicultura da SDE",
       html: `
-        <h2>Código PIN</h2>
-        <h3>${novoUser.user_pin}</h3>
-        <p>
-          <a href="https://www.cotonicultura.sde.ce.gov.br/resetSenha">
-            Clique aqui para criar sua senha
-          </a>
-        </p>`,
+      <h2>Código PIN</h2>
+      <h3>${user.user_pin}</h3>
+      <p>
+        <a href="https://www.cotonicultura.sde.ce.gov.br/resetSenha">
+          Clique aqui para criar sua senha
+        </a>
+      </p>
+    `,
     });
-
-    const { user_password, ...data } = userCriado.toJSON();
-    return res.status(201).json(data);
-
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: error.message });
   }
-}
-
 
   static async checarEmail(req, res) {
     const { email } = req.params;
@@ -177,37 +188,36 @@ class UserController {
   }
 
   static async pegaUsers(req, res) {
-  try {
-    const getUser = await database.user.findAll({
-      order: [["nome", "ASC"]],
-      attributes: [
-        "id",
-        "nome",
-        "user_name",
-        "user_email",
-        "user_active",
-        "profile_id",
-        "sexec_id",
-      ],
-      include: [
-        {
-          association: "ass_user_profile",
-          attributes: ["id", "perfil"],
-        },
-        {
-          association: "ass_user_sexec",
-          attributes: ["id", "secretaria", "sigla"],
-        },
-      ],
-    });
+    try {
+      const getUser = await database.user.findAll({
+        order: [["nome", "ASC"]],
+        attributes: [
+          "id",
+          "nome",
+          "user_name",
+          "user_email",
+          "user_active",
+          "profile_id",
+          "sexec_id",
+        ],
+        include: [
+          {
+            association: "ass_user_profile",
+            attributes: ["id", "perfil"],
+          },
+          {
+            association: "ass_user_sexec",
+            attributes: ["id", "secretaria", "sigla"],
+          },
+        ],
+      });
 
-    return res.status(200).json(getUser);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Erro ao buscar usuários" });
+      return res.status(200).json(getUser);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Erro ao buscar usuários" });
+    }
   }
-}
-
 
   static async pegaSexec(req, res) {
     try {
@@ -257,17 +267,17 @@ class UserController {
       newPassword = hashedNewPassword;
       //console.log('newPassword', newPassword)
 
-      if(verificaUser.user_active === false){
+      if (verificaUser.user_active === false) {
         const novaSenha = await database.user.update(
-        { user_password: newPassword, user_active: true },
-        { where: { user_email: user.user_email } }
-      );
-    }else{
-      const novaSenha = await database.user.update(
-        { user_password: newPassword },
-        { where: { user_email: user.user_email } }
-      );
-    }
+          { user_password: newPassword, user_active: true },
+          { where: { user_email: user.user_email } }
+        );
+      } else {
+        const novaSenha = await database.user.update(
+          { user_password: newPassword },
+          { where: { user_email: user.user_email } }
+        );
+      }
 
       //const  result = await novaSenha.save()
       //const { password, ...data } = await result.toJSON()
