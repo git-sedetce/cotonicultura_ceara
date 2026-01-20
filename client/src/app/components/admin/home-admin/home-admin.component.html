@@ -12,6 +12,7 @@
 
     <!-- MAPA -->
     <div class="map-container">
+      <h4 class="map-title">Distribuição de Sementes por Município – Ceará</h4>
       <div id="mapa-ceara" class="mapa"></div>
     </div>
 
@@ -20,10 +21,11 @@
 
       <div class="chart-card">
         <apx-chart
-          [series]="cultivoChart.series"
-          [chart]="cultivoChart.chart"
-          [labels]="cultivoChart.labels"
-          [responsive]="cultivoChart.responsive">
+          [series]="cultivoChart.series!"
+          [chart]="cultivoChart.chart!"
+          [labels]="cultivoChart.labels!"
+          [title]="cultivoChart.title!"
+          [responsive]="cultivoChart.responsive!">
         </apx-chart>
       </div>
 
@@ -38,10 +40,11 @@
 
       <div class="chart-card">
         <apx-chart
-          [series]="sementesMunicipioChart.series"
-          [chart]="sementesMunicipioChart.chart"
-          [labels]="sementesMunicipioChart.labels"
-          [responsive]="sementesMunicipioChart.responsive">
+          [series]="farmersMunicipioChart.series!"
+          [chart]="farmersMunicipioChart.chart!"
+          [labels]="farmersMunicipioChart.labels!"
+          [title]="farmersMunicipioChart.title!"
+          [responsive]="farmersMunicipioChart.responsive!">
         </apx-chart>
       </div>
 

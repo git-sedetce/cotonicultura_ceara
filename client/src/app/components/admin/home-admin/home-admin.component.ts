@@ -96,12 +96,12 @@ export class HomeAdminComponent implements OnInit {
 
     // TIPO DE CULTIVO (DONUT) Sementes por Município
     this.statisticsService
-      .sementesDistribuidasPorMunicipio({})
+      .contarMunicipio({})
       .subscribe((res) => {
-        this.sementesMunicipioChart.series = res.map((c: any) =>
-          Number(c.total_sementes),
+        this.farmersMunicipioChart.series = res.map((c: any) =>
+          Number(c.qtd_agricultores),
         );
-        this.sementesMunicipioChart.labels = res.map(
+        this.farmersMunicipioChart.labels = res.map(
           (c: any) => c.nome_municipio,
         );
         this.municipios = res;
@@ -187,17 +187,20 @@ getCor(qtd: number): string {
 }
   // ================= FIM MAPA =================
 
-  cultivoChart: {
-    series: ApexNonAxisChartSeries;
-    chart: ApexChart;
-    labels: string[];
-    responsive: ApexResponsive[];
-  } = {
+  cultivoChart: ApexOptions = {
     series: [],
     chart: {
       type: 'donut',
       height: 280,
     },
+    title: {
+    text: 'Tipo de Cultivo',
+    align: 'center',
+    style: {
+      fontSize: '18px',
+      fontWeight: '600',
+    },
+  },
     labels: [],
     responsive: [
       {
@@ -210,17 +213,20 @@ getCor(qtd: number): string {
     ],
   };
 
-  sementesMunicipioChart: {
-    series: ApexNonAxisChartSeries;
-    chart: ApexChart;
-    labels: string[];
-    responsive: ApexResponsive[];
-  } = {
+  farmersMunicipioChart: ApexOptions = {
     series: [],
     chart: {
       type: 'donut',
       height: 280,
     },
+    title: {
+    text: 'Agricultores cadastrados',
+    align: 'center',
+    style: {
+      fontSize: '18px',
+      fontWeight: '600',
+    },
+  },
     labels: [],
     responsive: [
       {

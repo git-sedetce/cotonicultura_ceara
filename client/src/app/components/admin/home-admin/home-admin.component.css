@@ -30,6 +30,12 @@
   width: 100%;
 }
 
+.map-title {
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
 .mapa {
   height: 100%;
   min-height: 500px;
