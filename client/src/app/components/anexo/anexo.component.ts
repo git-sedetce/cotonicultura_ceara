@@ -30,15 +30,15 @@ export class AnexoComponent implements OnInit {
   user_name!: any;
 
   anexos: any = {
-    identidade: {
-      label: 'Documento Oficial com Foto',
-      accept: '.png,.jpg,.jpeg,.webp,.gif,.pdf',
-      endpoint: 'anexoIdentidade',
-      multiple: false,
-      file: null,
-      uploaded: false,
-      error: '',
-    },
+    // identidade: {
+    //   label: 'Documento Oficial com Foto',
+    //   accept: '.png,.jpg,.jpeg,.webp,.gif,.pdf',
+    //   endpoint: 'anexoIdentidade',
+    //   multiple: false,
+    //   file: null,
+    //   uploaded: false,
+    //   error: '',
+    // },
     cpf_cnpj: {
       label: 'CPF/CNPJ',
       accept: '.png,.jpg,.jpeg,.pdf',
@@ -58,22 +58,22 @@ export class AnexoComponent implements OnInit {
       error: '',
     },
 
-    propriedade: {
-      label: 'Comprovante de Propriedade',
-      accept: 'application/pdf',
-      endpoint: 'anexoPropriedade',
-      multiple: false,
-      file: null,
-      uploaded: false,
-      error: '',
-    },
+    // propriedade: {
+    //   label: 'Comprovante de Propriedade',
+    //   accept: 'application/pdf',
+    //   endpoint: 'anexoPropriedade',
+    //   multiple: false,
+    //   file: null,
+    //   uploaded: false,
+    //   error: '',
+    // },
   };
 
   uploadedMap: any = {
-  identidade: 'identidade',
+  // identidade: 'identidade',
   comprovante_cpf_cnpj: 'cpf_cnpj',
   comprovante_residencia: 'residencia',
-  comprovante_propriedade: 'propriedade',
+  // comprovante_propriedade: 'propriedade',
 };
 
   get anexosList() {
