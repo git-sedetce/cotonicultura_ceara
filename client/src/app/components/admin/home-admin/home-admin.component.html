@@ -1,1 +1,59 @@
-<p>home-admin works!</p>
+<div class="dashboard">
+
+  <!-- CARDS -->
+  <div class="cards">
+    <div class="card">Total Agricultores<br><strong>{{ totalAgricultores }}</strong></div>
+    <div class="card">Atendidos<br><strong>{{ agricultoresAtendidos }}</strong></div>
+    <div class="card">Sementes Distribuídas<br><strong>{{ totalSementes }}</strong></div>
+  </div>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="content">
+
+    <!-- MAPA -->
+    <div class="map-container">
+      <div id="mapa-ceara" class="mapa"></div>
+    </div>
+
+    <!-- GRÁFICOS -->
+    <div class="charts-container">
+
+      <div class="chart-card">
+        <apx-chart
+          [series]="cultivoChart.series"
+          [chart]="cultivoChart.chart"
+          [labels]="cultivoChart.labels"
+          [responsive]="cultivoChart.responsive">
+        </apx-chart>
+      </div>
+
+      <div class="chart-card">
+        <apx-chart
+          [series]="regiaoChart.series"
+          [chart]="regiaoChart.chart"
+          [xaxis]="regiaoChart.xaxis">
+        </apx-chart>
+      </div>
+
+      <div class="chart-card">
+        <apx-chart
+          [series]="sementesMunicipioChart.series"
+          [chart]="sementesMunicipioChart.chart"
+          [labels]="sementesMunicipioChart.labels"
+          [responsive]="sementesMunicipioChart.responsive">
+        </apx-chart>
+      </div>
+
+      <div class="chart-card">
+        <apx-chart
+          [series]="regiaoSementesChart.series"
+          [chart]="regiaoSementesChart.chart"
+          [xaxis]="regiaoSementesChart.xaxis">
+        </apx-chart>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+

@@ -22,6 +22,7 @@ import { ListaUsersComponent } from './components/admin/lista-users/lista-users.
 import { ListFarmersComponent } from './components/admin/list-farmers/list-farmers.component';
 import { WhoAreComponent } from './components/who-are/who-are.component';
 import { HomeAdminComponent } from './components/admin/home-admin/home-admin.component';
+import { NgxApexchartsModule } from 'ngx-apexcharts';
 
 @NgModule({
   declarations: [
@@ -46,6 +47,7 @@ import { HomeAdminComponent } from './components/admin/home-admin/home-admin.com
     NgxMaskModule.forRoot(),
     NgxPaginationModule,
     FormsModule,
+    NgxApexchartsModule,
     ReactiveFormsModule,
     HttpClientModule
   ],

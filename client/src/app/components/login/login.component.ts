@@ -34,7 +34,7 @@ export class LoginComponent implements OnInit {
 
   login(): void {
     this.loginUsers.user_password = this.serviceUser.CriptografarMD5(this.loginUsers.user_password)
-    // console.log('loginUser', this.loginUsers)
+    console.log('loginUser', this.loginUsers)
     this.serviceUser.login(this.loginUsers).subscribe({
       next: (res) => res,
       error: (e) => (this.toastr.error(e), this.formLogin.reset())
