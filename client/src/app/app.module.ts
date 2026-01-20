@@ -23,6 +23,7 @@ import { ListFarmersComponent } from './components/admin/list-farmers/list-farme
 import { WhoAreComponent } from './components/who-are/who-are.component';
 import { HomeAdminComponent } from './components/admin/home-admin/home-admin.component';
 import { NgxApexchartsModule } from 'ngx-apexcharts';
+import { AnexoComponent } from './components/anexo/anexo.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { NgxApexchartsModule } from 'ngx-apexcharts';
     ListaUsersComponent,
     ListFarmersComponent,
     WhoAreComponent,
-    HomeAdminComponent
+    HomeAdminComponent,
+    AnexoComponent
   ],
   imports: [
     BrowserModule,

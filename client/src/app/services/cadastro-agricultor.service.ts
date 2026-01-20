@@ -7,6 +7,9 @@ import { environment } from '../../environments/environment';
   providedIn: 'root',
 })
 export class CadastroAgricultorService {
+
+  private agricultorEmEdicao: number | null = null;
+
   constructor(private http: HttpClient) {}
 
   cadastrarAgricultor(data: any): Observable<any> {
@@ -33,6 +36,10 @@ export class CadastroAgricultorService {
     return this.http.get(environment.apiUrl + metodo);
   }
 
+  agricultorById(id: number): Observable<any> {
+    return this.http.get(environment.apiUrl + 'umAgricultor/' + id)
+  }
+
   atualizarAgricultor(data: any, id: number) {
     return this.http
       .put<any>(environment.apiUrl + 'atualizaFarmer/' + id, data)
@@ -49,5 +56,18 @@ export class CadastroAgricultorService {
         return res;
       }),
     );
+  }
+
+  //EM EDIÇÃO
+  setAgricultor(id: number) {
+    this.agricultorEmEdicao = id;
+  }
+
+  getAgricultor(): number | null {
+    return this.agricultorEmEdicao;
+  }
+
+  clear() {
+    this.agricultorEmEdicao = null;
   }
 }

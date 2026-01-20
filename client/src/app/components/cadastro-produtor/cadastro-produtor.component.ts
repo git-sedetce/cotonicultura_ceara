@@ -3,6 +3,7 @@ import { NgForm } from '@angular/forms';
 import { Agricultor } from '../../models/agricultor.model';
 import { ToastrService } from 'ngx-toastr';
 import { CadastroAgricultorService } from '../../services/cadastro-agricultor.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-cadastro-produtor',
@@ -16,6 +17,7 @@ export class CadastroProdutorComponent implements OnInit {
   city_list!: any[];
 
   constructor(
+    private router: Router,
     private toastr: ToastrService,
     private cadastroAgricultorService: CadastroAgricultorService
   ) { }
@@ -57,7 +59,9 @@ export class CadastroProdutorComponent implements OnInit {
       next: (res: any) => {
         // console.log('res', res)
         this.toastr.success('Cadastro realizado com sucesso!');
+        this.cadastroAgricultorService.setAgricultor(Number(res.id));
         this.formAgricultor.reset();
+        this.router.navigate(['/anexo'])
       },
       error: (e) => console.error('erro',e)//(this.toastr.error(e.message))
     });

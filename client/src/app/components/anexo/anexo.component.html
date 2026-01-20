@@ -1,0 +1,96 @@
+<section id="form-anexo">
+  <div class="container py-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-primary text-white text-center py-3">
+        <h3 class="m-0 text-uppercase">Anexos</h3>
+      </div>
+
+      <form #formAnexo="ngForm" class="p-4">
+        <fieldset>
+          <div class="form-card">
+            <h4 class="form-title">Informações do Agricultor</h4>
+
+            <div class="row g-3 form-center" *ngIf="!has_farmer">
+
+              <!-- Colaborador -->
+              <div class="col-md-4 col-colaborador">
+                <label class="form-label">Agricultor:</label>
+                <select class="form-select" required [(ngModel)]="anexo.agricultor_id" id="agricultor_id"
+                  name="agricultor_id" #colab="ngModel" (change)="showInputs(); checkFiles(colab.value)">
+                  <option [ngValue]="null" disabled selected>
+                    Selecione o agricultor
+                  </option>
+
+                  <option *ngFor="let c of lista_farmers" [ngValue]="c.id">
+                    {{ c.nome }}
+                  </option>
+                </select>
+
+                <div *ngIf="colab.invalid && colab.touched" class="text-danger small">
+                  Informe o colaborador.
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-3 form-center" *ngIf="has_farmer">
+
+              <div class="form-floating col-md-12 col-colaborador">
+
+                <div class="form-floating">
+                  <input type="text" class="form-control" [value]="nomeAgricultor" readonly>
+                  <label>Agricultor</label>
+                </div>
+
+                <!-- mantém o ID no formulário -->
+                <input type="hidden" name="agricultor_id" [(ngModel)]="anexo.agricultor_id">
+              </div>
+            </div>
+          </div>
+
+
+          <hr class="my-4">
+
+          <!-- <legend class="fw-bold text-secondary">Arquivos</legend> -->
+
+          <!-- Uploads dinâmicos -->
+          <div class="row g-4" *ngIf="viewInputs">
+            <div class="col-md-4" *ngFor="let item of anexosList">
+              <div class="card h-100 shadow-sm p-3">
+                <div class="custom-file-upload">
+                  <input type="file" id="file-{{item.key}}" [accept]="item.accept" [multiple]="item.multiple"
+                    [disabled]="item.uploaded"
+                    (change)="item.multiple ? onSelectMultiple(item.key, $event) : onSelectSingle(item.key, $event)" />
+
+                  <label for="file-{{item.key}}">
+                    {{ item.file ? (item.multiple ? (item.file.length + ' arquivo(s)') : item.file.name) : 'Selecionar
+                    arquivo...' }}
+                  </label>
+                </div>
+
+                <button class="btn btn-primary w-100 mt-2" [disabled]="item.uploaded || !item.file"
+                  (click)="uploadFile(item.key)">
+                  Enviar
+                </button>
+
+                <span class="file-info">{{ item.label }}</span>
+
+                <div *ngIf="item.uploaded" class="alert alert-success mt-2 py-1">
+                  Arquivo enviado!
+                </div>
+
+                <div *ngIf="item.error" class="alert alert-danger mt-2 py-1">
+                  {{ item.error }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-success w-100 mt-4 text-uppercase" [disabled]="!todosAnexosEnviados"
+            (click)="finish()">
+            Finalizar
+          </button>
+        </fieldset>
+      </form>
+    </div>
+  </div>
+</section>

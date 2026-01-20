@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       produtor_rural.belongsTo(models.cidades, { foreignKey: 'cidade', as: 'ass_produtor_rural_cidade' })
+      produtor_rural.hasMany(models.anexo, { foreignKey: 'agricultor_id', as: 'ass_agricultor_anexo' });
     }
   }
   produtor_rural.init({

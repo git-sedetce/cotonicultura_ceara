@@ -4,3 +4,4 @@ server/web/.env
 server/config/dockerfile
 server/docker-compose.yml
 client/docker-compose.yml
+server/web/src/uploads/*

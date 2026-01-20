@@ -1,0 +1,98 @@
+/* CARD PRINCIPAL */
+.form-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 25px 15px;
+  max-width: 1000px;            /* controla a largura total */
+  margin: 25px auto;           /* centraliza na página */
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+}
+
+/* TÍTULO DO CARD */
+.form-title {
+  text-align: center;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 25px;
+}
+
+/* CONTAINER DOS CAMPOS */
+.form-center {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  flex-wrap: wrap;              /* adapta no mobile */
+}
+
+/* COLUNAS */
+.form-center .col-md-4 {
+  min-width: 260px;             /* responsivo */
+}
+
+/* LABELS */
+.form-card label {
+  font-weight: 500;
+  color: #555;
+}
+
+/* SELECT CUSTOMIZADO */
+.form-card .form-select {
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-card .form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.25);
+}
+
+.form-center .col-md-4.col-colaborador {
+  min-width: 300px;  /* aumenta bastante */
+  flex: 1;           /* ocupa mais espaço */
+}
+
+.custom-file-upload {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.custom-file-upload input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload label {
+  background: #f8f9fa;
+  border: 1px solid #ced4da;
+  padding: 10px 15px;
+  width: 100%;
+  text-align: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+  display: block;
+}
+
+.custom-file-upload label:hover {
+  background: #e9ecef;
+}
+
+/* Estilo do texto informativo (span) */
+.file-info {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  text-align: center;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.custom-file-upload input[disabled] + label {
+  background-color: #dcdcdc;
+  cursor: not-allowed;
+  border-color: #bfbfbf;
+  color: #777;
+}
+

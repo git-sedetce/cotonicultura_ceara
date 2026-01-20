@@ -3,6 +3,7 @@ const agricultor = require('./agroRoutes')
 const user = require('./userRoutes')
 const audit = require('./auditRoutes')
 const statistics = require('./statisticsRoutes')
+const anexo = require('./anexoRoutes')
 
 
 module.exports = app => {
@@ -11,6 +12,7 @@ module.exports = app => {
             agricultor,
             user,
             audit,
-            statistics
+            statistics, 
+            anexo
             )
 }
