@@ -4,7 +4,6 @@ const { Op, Sequelize } = require("sequelize");
 class AgroControllers {
   static async registerAgro(req, res) {
     const newRegister = req.body;
-    console.log("newRegister", newRegister);
     // console.log('newRegister', newRegister);
     try {
       const novoProdutor = await database.produtor_rural.create(newRegister);
@@ -144,6 +143,10 @@ class AgroControllers {
                 attributes: ["id", "nome"],
               },
             ],
+          },
+          {
+            association: "ass_agricultor_anexo",
+            attributes: ["id", "tipo_anexo"]
           },
         ],
       });

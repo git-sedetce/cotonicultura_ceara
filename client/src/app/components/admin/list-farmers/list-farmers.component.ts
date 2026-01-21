@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Agricultor } from '../../../models/agricultor.model';
 import { Audit } from '../../../models/audit.model';
 import { CadastroAgricultorService } from '../../../services/cadastro-agricultor.service';
@@ -6,6 +6,10 @@ import { AuditService } from '../../../services/audit.service';
 import { ToastrService } from 'ngx-toastr';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { CadastroService } from '../../../services/cadastro.service';
+import { Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { AnexoService } from '../../../services/anexo.service';
+import { Anexo } from '../../../models/anexo.model';
 declare var bootstrap: any;
 
 @Component({
@@ -16,12 +20,15 @@ declare var bootstrap: any;
 })
 export class ListFarmersComponent implements OnInit {
 
+  @ViewChild('atualizaAnexo') atualizaAnexo!:ElementRef
+  anexoObj: Anexo = new Anexo();
+
   lista_regiao!: any[];
   lista_farmers: any[] = [];
   lista_filtrada: any[] = [];
   lista_cidade: any[] = [];
 
-  formFarmer!: FormGroup;
+
   farmerObj: Agricultor = new Agricultor();
   searchFarmers: string = '';
   searchCidade: string = '';
@@ -33,14 +40,22 @@ export class ListFarmersComponent implements OnInit {
   profile_id!: any;
   user_name!: any;
 
+  formAnexo!: FormGroup;
+  formFiltro!: FormGroup;
+  formFarmer!: FormGroup;
+  arquivoUrl: SafeResourceUrl | null = null
+
   page: number = 1; // Página atual
   itemsPerPage: number = 10; // Itens por página
 
   constructor(
     private formBuilder: FormBuilder,
     private toastr: ToastrService,
+    private sanitizer: DomSanitizer,
+    private anexo: AnexoService,
     private auditService: AuditService,
     private serviceUser: CadastroService,
+    private router: Router,
     private cadastroAgricultorService: CadastroAgricultorService
   ) { }
 
@@ -64,11 +79,31 @@ export class ListFarmersComponent implements OnInit {
       confirma_informacao:[''],
     });
 
+    this.formFiltro = this.formBuilder.group({
+    nome: [''],
+    cidade: [''],
+    regiao: [''],
+    pedidoAtendido: ['']
+  });
+
+    this.formAnexo = this.formBuilder.group({
+      id: [''],
+      tipo_anexo: [''],
+      mimetype: [''],
+      filename: [''],
+      path: [''],
+      agricultor_id: [''],
+    });
+
     this.registro = new Audit();
     this.pegarCidades();
     this.pegarRegioes();
     this.loadUserData();
     this.getFarmers();
+
+    this.formFiltro.valueChanges.subscribe(() => {
+    this.filtrarUsuarios();
+  });
   }
 
   pegarCidades(){
@@ -116,29 +151,37 @@ export class ListFarmersComponent implements OnInit {
 }
 
   filtrarUsuarios(): void {
-  const termo = this.normalize(this.searchFarmers);
+  const { nome, cidade, regiao, pedidoAtendido } = this.formFiltro.value;
 
-  this.lista_filtrada = (this.lista_farmers || []).filter((farmer) => {
+  const termo = this.normalize(nome);
+
+  this.lista_filtrada = this.lista_farmers.filter(farmer => {
 
     const matchNome =
       this.normalize(farmer.nome).includes(termo);
 
     const matchCidade =
-      !this.searchCidade ||
-      farmer?.ass_produtor_rural_cidade?.nome_municipio === this.searchCidade;
+      !cidade || farmer?.ass_produtor_rural_cidade?.nome_municipio === cidade;
 
     const matchRegiao =
-      !this.searchRegiao ||
-      farmer?.ass_produtor_rural_cidade?.ass_municipio_regiao?.nome === this.searchRegiao;
+      !regiao || farmer?.ass_produtor_rural_cidade?.ass_municipio_regiao?.nome === regiao;
 
     const matchPedido =
-      this.searchPedidoAtendido === '' ||
-      farmer?.pedido_atendido === this.searchPedidoAtendido;
+      pedidoAtendido === '' || farmer?.pedido_atendido === pedidoAtendido;
 
     return matchNome && matchCidade && matchRegiao && matchPedido;
   });
 
   this.page = 1;
+}
+
+limparFiltros(): void {
+  this.formFiltro.reset({
+    nome: '',
+    cidade: '',
+    regiao: '',
+    pedidoAtendido: ''
+  });
 }
 
 exibirTodos(): void {
@@ -151,7 +194,10 @@ exibirTodos(): void {
   this.page = 1;
 }
 
-
+anexarArquivo(id: number) {
+  this.cadastroAgricultorService.setAgricultor(Number(id));
+  this.router.navigate(['/anexo'])
+}
 
   onEdit(farmer: any) {
     this.farmerObj.id = farmer.id;
@@ -206,6 +252,73 @@ exibirTodos(): void {
 
     this.saveRegister(this.farmerObj.nome, 'Alteração de dados do agricultor');
   }
+
+  getFile(id: any, tipo_anexo: any): void {
+    this.anexo.pegarArquivos(id, tipo_anexo).subscribe(
+      (data: any) => {
+        // console.log('data', data)
+        const byteArray = new Uint8Array(
+          atob(data.base64)
+            .split("")
+            .map((char) => char.charCodeAt(0))
+        );
+        const file = new Blob([byteArray], { type: 'application/pdf' });
+        const fileURL = URL.createObjectURL(file);
+        this.arquivoUrl =
+          this.sanitizer.bypassSecurityTrustResourceUrl(fileURL);
+      },
+      (error) => {
+        console.error('Erro ao carregar o PDF:', error.error.message);
+      }
+    );
+}
+onFileChange(event: Event): void {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+
+  this.formAnexo.patchValue({ file });
+}
+
+updateDocumento(): void {
+  const file = this.formAnexo.value.file;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  this.anexo.atualizAnexo(formData, this.anexoObj.id).subscribe(() => {
+    this.toastr.success('Documento atualizado com sucesso');
+    this.formAnexo.reset();
+  });
+}
+
+  updateComprovante() {
+    const newRegister = this.atualizaAnexo.nativeElement.files[0]
+    const novoAnexo = new FormData();
+    novoAnexo.append('file', newRegister)
+
+    // console.log('novoAnexo', novoAnexo)
+
+    this.anexo.atualizAnexo(novoAnexo, this.anexoObj.id).subscribe({
+      next: (res: any) => {
+        this.toastr.success('Comprovante de residência atualizado com sucesso!!!')
+        const myModal = bootstrap.Modal.getInstance(
+          document.getElementById('modalCertificado') as HTMLElement
+        );
+        if (myModal) {
+          myModal.hide();
+        }
+        this.formAnexo.reset();
+      },
+      error:(e) => {
+        console.error(e);
+        this.toastr.error(e.error.message)
+        this.formAnexo.reset()
+      }
+    })
+    // this.saveRegister(this.formPlanoCapacitacao.value.nome_completo, 'atualiza_certificado', this.formPlanoCapacitacao.value.curso, this.formPlanoCapacitacao.value.ano_plano)
+
+  }
+
   deletaFarmer(user: any) {
     this.cadastroAgricultorService.deleteAgricultor(user.id).subscribe((res) => {
       this.toastr.success('Exclusão realizada com sucesso!!!');

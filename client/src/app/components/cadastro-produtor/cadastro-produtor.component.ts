@@ -54,7 +54,6 @@ export class CadastroProdutorComponent implements OnInit {
     }
 
   cadastrarAgricultor(){
-    console.log('agricultor', this.agricultor);
     this.cadastroAgricultorService.cadastrarAgricultor(this.agricultor).subscribe({
       next: (res: any) => {
         // console.log('res', res)

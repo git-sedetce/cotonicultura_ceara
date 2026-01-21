@@ -1,7 +1,7 @@
 const database = require("../models");
 const path = require("path");
 const fs = require("fs");
-const baseUrl = process.cwd() + "/api"; //__dirname + '.
+const baseUrl = process.cwd() + "/src"; //__dirname + '.
 
 class AnexoControllers {  
 
@@ -198,10 +198,11 @@ class AnexoControllers {
 
   static async pegarArquivoById(req, res) {
     const { id } = req.params;
+    const { tipo_anexo } = req.query;
 
     try {
       const mostraAnexo = await database.anexo.findOne({
-        where: { id: Number(id) },
+        where: { agricultor_id: Number(id), tipo_anexo: tipo_anexo  },
         attributes: ["tipo_anexo", "path", "mimetype", "filename"],
       });
 

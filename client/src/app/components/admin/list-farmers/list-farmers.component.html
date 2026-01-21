@@ -20,13 +20,14 @@
 
     <!-- Área de filtros -->
     <div class="row mb-3 g-2">
+      <form [formGroup]="formFiltro" class="row mb-3 g-2">
       <div class="col-lg-4 col-md-6 col-sm-12">
         <input type="text" class="form-control shadow-sm" placeholder="🔍 Pesquisar por Nome ou Email..."
-          [(ngModel)]="searchFarmers" (keyup)="filtrarUsuarios()" />
+          formControlName="nome" (keyup)="filtrarUsuarios()" />
       </div>
 
       <div class="col-lg-2 col-md-6 col-sm-6">
-        <select class="form-select shadow-sm" [(ngModel)]="searchCidade" (change)="filtrarUsuarios()">
+        <select class="form-select shadow-sm" formControlName="cidade" (change)="filtrarUsuarios()">
           <option value="">Cidade</option>
           <option *ngFor="let c of lista_cidade" [value]="c.nome_municipio">
             {{ c.nome_municipio }}
@@ -35,7 +36,7 @@
       </div>
 
       <div class="col-lg-2 col-md-6 col-sm-6">
-        <select class="form-select shadow-sm" [(ngModel)]="searchRegiao" (change)="filtrarUsuarios()">
+        <select class="form-select shadow-sm" formControlName="regiao" (change)="filtrarUsuarios()">
           <option value="">Região</option>
           <option *ngFor="let r of lista_regiao" [value]="r.nome">
             {{ r.nome }}
@@ -44,7 +45,7 @@
       </div>
 
       <div class="col-lg-2 col-md-6 col-sm-6">
-        <select class="form-select shadow-sm" [(ngModel)]="searchPedidoAtendido" (change)="filtrarUsuarios()">
+        <select class="form-select shadow-sm" formControlName="pedidoAtendido" (change)="filtrarUsuarios()">
           <option value="">Pedido Atendido</option>
           <option [ngValue]="true">Sim</option>
           <option [ngValue]="false">Não</option>
@@ -52,20 +53,21 @@
       </div>
 
       <div class="col-lg-2 col-md-6 col-sm-6">
-        <button type="button" class="btn btn-success w-100 shadow-sm" [disabled]="
+        <button type="button"
+      class="btn btn-success w-100"
+      (click)="limparFiltros()">
+      Exibir todos
+     </button>
+        <!--<button type="button" class="btn btn-success w-100 shadow-sm" [disabled]="
         !searchFarmers &&
         !searchCidade &&
         !searchRegiao &&
         searchPedidoAtendido === ''" (click)="exibirTodos()">
           Exibir todos
-        </button>
+        </button> -->
       </div>
-
-
-
-
+      </form>
     </div>
-
 
     <!-- Tabela -->
     <div class="table-responsive shadow-sm rounded">
@@ -77,7 +79,7 @@
             <th class="text-center">Foi Atendido?</th>
             <th class="text-center">Município</th>
             <th class="text-center">Região</th>
-            <th class="text-center" colspan="2">Ações</th>
+            <th class="text-center" colspan="4">Ações</th>
           </tr>
         </thead>
 
@@ -96,6 +98,26 @@
               <button class="btn btn-warning btn-sm" (click)="onEdit(farmer)" data-bs-toggle="modal"
                 data-bs-target="#modalEdit">
                 <i class="bi bi-pencil-square"></i>
+              </button>
+            </td>
+
+            <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length <= 0">
+              <button class="btn btn-info btn-sm" (click)="anexarArquivo(farmer.id)" title="Anexar Documentos">
+                <i class="bi bi-file-earmark-excel-fill"></i>
+              </button>
+            </td>
+
+             <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 0">
+              <button class="btn btn-success btn-sm" (click)="getFile(farmer.id, 'comprovante_cpf_cnpj')" data-bs-toggle="modal"
+                data-bs-target="#modalDocumento" title="CPF/CNPJ">
+                <i class="bi bi-file-earmark-person-fill"></i>
+              </button>
+            </td>
+
+            <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 0">
+              <button class="btn btn-primary btn-sm" (click)="getFile(farmer.id, 'comprovante_residencia')" data-bs-toggle="modal"
+                data-bs-target="#modalResidencia" title="Comprovante de Residência">
+                <i class="bi bi-file-earmark-pdf-fill"></i>
               </button>
             </td>
 
@@ -261,3 +283,72 @@
     </div>
   </div>
 </div>
+
+<!--Modal editar documento-->
+<div class="modal fade" id="modalDocumento" tabindex="-1" aria-labelledby="modalDocumentoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable mt-5">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalDocumentoLabel">Atualizar CPF/CNPJ</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="formAnexo">
+          <div class="row">
+            <div class="col-sm-12 col-12 mb-3">
+              <label for="documento" class="form-label">Atualiza CPF/CNPJ</label>
+              <input class="form-control" type="file" id="documento" name="documento" (change)="onFileChange($event)" required #atualizaAnexo>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="mt-2">
+              <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe>
+            </div>
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancel" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" (click)="updateDocumento()" class="btn btn-warning">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--Modal editar comprovante-->
+<div class="modal fade" id="modalResidencia" tabindex="-1" aria-labelledby="modalResidenciaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable mt-5">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalResidenciaLabel">Atualizar Comprovante</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="formAnexo">
+          <div class="row">
+            <div class="col-sm-12 col-12 mb-3">
+              <label for="comprovante" class="form-label">Atualiza Comprovante</label>
+              <input class="form-control" type="file" id="comprovante" name="comprovante" (change)="onFileChange($event)" required #atualizaAnexo>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="mt-2">
+              <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe>
+            </div>
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancel" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" (click)="updateDocumento()" class="btn btn-warning">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
