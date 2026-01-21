@@ -36,17 +36,17 @@ export class HomeAdminComponent implements OnInit {
 
   carregarIndicadores() {
     this.statisticsService.contarAgricultores({}).subscribe((res) => {
-      console.log('totalAgricultores', res);
+      // console.log('totalAgricultores', res);
       this.totalAgricultores = res.total;
     });
 
     this.statisticsService.contarAtendidos({}).subscribe((res) => {
-      console.log('reagricultoresAtendidoss', res);
+      // console.log('reagricultoresAtendidoss', res);
       this.agricultoresAtendidos = res.agricultores_atendidos;
     });
 
     this.statisticsService.sementesDistribuidas({}).subscribe((res) => {
-      console.log('totalSementes', res);
+      // console.log('totalSementes', res);
       this.totalSementes = res.total_sementes_distribuidas;
     });
   }
@@ -156,11 +156,11 @@ getQtdPorMunicipio(nomeMunicipio: string): number {
 
   const qtd = parseInt(m.total_sementes as any, 10);
 
-  console.log({
-  geojson: nomeMunicipio,
-  api: m?.nome_municipio,
-  valor: m?.total_sementes
-});
+//   console.log({
+//   geojson: nomeMunicipio,
+//   api: m?.nome_municipio,
+//   valor: m?.total_sementes
+// });
 
   return isNaN(qtd) ? 0 : qtd;
 }

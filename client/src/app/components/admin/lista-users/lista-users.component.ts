@@ -81,7 +81,7 @@ export class ListaUsersComponent implements OnInit {
       (usr: any[]) => {
         this.lista_users = usr;
         this.lista_filtrada = usr; // inicia filtrada
-        console.log('lista_users', this.lista_users)
+        // console.log('lista_users', this.lista_users)
       },
       (erro: any) => console.error(erro)
     );

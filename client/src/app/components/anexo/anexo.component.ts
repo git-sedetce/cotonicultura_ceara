@@ -153,7 +153,6 @@ export class AnexoComponent implements OnInit {
 
   checkFiles(id: number) {
     this.anexoService.checarArquivos(id).subscribe((resp: any[]) => {
-      console.log('resp', resp);
       resp.forEach((anexo) => {
         const key = this.uploadedMap[anexo.tipo_anexo];
 
@@ -211,8 +210,13 @@ export class AnexoComponent implements OnInit {
       });
   }
 
-  finish() {
-    this.toastr.success('Inscrição finalizada com sucesso!');
-    this.router.navigate(['/home']);
+  finish(has_farmer: boolean) {
+    if (!has_farmer) {
+      this.toastr.success('Inscrição finalizada com sucesso!');
+      this.router.navigate(['/home']);
+    } else {
+      this.toastr.success('Inscrição finalizada com sucesso!');
+      this.router.navigate(['/listfarmers']);
+    }
   }
 }

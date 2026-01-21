@@ -108,7 +108,6 @@ export class RegisterComponent implements OnInit {
   }
 
   saveRegister(name: any, tipo: any): void {
-    console.log('authenticated', this.authenticated);
     this.registro.tipo_acao = tipo;
     if (this.authenticated === true) {
       this.registro.acao = `O usuário ${name} foi cadastrado pelo usuário ${this.user_name}`;
