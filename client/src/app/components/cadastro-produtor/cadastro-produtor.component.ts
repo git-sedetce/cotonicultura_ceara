@@ -60,7 +60,7 @@ export class CadastroProdutorComponent implements OnInit {
         this.toastr.success('Cadastro realizado com sucesso!');
         this.cadastroAgricultorService.setAgricultor(Number(res.id));
         this.formAgricultor.reset();
-        // this.router.navigate(['/anexo'])
+        this.router.navigate(['/anexo'])
       },
       error: (e) => console.error('erro',e)//(this.toastr.error(e.message))
     });
