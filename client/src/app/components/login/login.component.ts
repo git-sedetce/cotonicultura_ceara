@@ -37,7 +37,7 @@ export class LoginComponent implements OnInit {
     // console.log('loginUser', this.loginUsers)
     this.serviceUser.login(this.loginUsers).subscribe({
       next: (res) => res,
-      error: (e) => (this.toastr.error(e), this.formLogin.reset())
+      error: (e) => (this.toastr.error(e.error.message), this.formLogin.reset())
     })
 
   }

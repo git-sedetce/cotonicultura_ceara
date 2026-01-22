@@ -27,12 +27,14 @@ class UserController {
       res.status(201).json(data);
 
       // 🔹 Envio de e-mails em background
-      this.enviarEmailsCadastro(novoUser).catch((err) => {
-        console.error("Erro ao enviar e-mail:", err);
-      });
+      UserController.enviarEmailsCadastro(novoUser).catch((err) =>
+        console.error("Erro ao enviar e-mail:", err),
+      );
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: error.message });
+      if (!res.headersSent) {
+        return res.status(500).json({ message: error.message });
+      }
     }
   }
 
@@ -46,7 +48,7 @@ class UserController {
 
     // Email administrativo
     await transporter.sendMail({
-      from: "gestao.pessoas@sde.ce.gov.br",
+      from: "cotec@sde.ce.gov.br",
       to: process.env.EMAIL_ADMIN,
       subject: "Cadastro de usuário do Sistema de Cotonicultura da SDE",
       html: `
@@ -57,7 +59,7 @@ class UserController {
 
     // Email com PIN
     await transporter.sendMail({
-      from: "gestao.pessoas@sde.ce.gov.br",
+      from: "cotec@sde.ce.gov.br",
       to: user.user_email,
       subject: "Código PIN - Sistema de Cotonicultura da SDE",
       html: `
@@ -106,7 +108,7 @@ class UserController {
 
       const novoPin = await database.user.update(
         { user_pin: newPin },
-        { where: { user_email: user.user_email } }
+        { where: { user_email: user.user_email } },
       );
 
       res.send({ message: "Pin alterado com sucesso!" });
@@ -121,7 +123,7 @@ class UserController {
       });
 
       var mailOptions = {
-        from: "gestao.pessoas@sde.ce.gov.br",
+        from: "cotec@sde.ce.gov.br",
         to: user.user_email,
         subject: "Novo Pin para nova senha",
         html: `<h3>Segue o novo Pin!!</h3><p><strong>${newPin}</strong><br>Crie sua nova senha no seguinte link: <a href="https://cotonicultura.sde.ce.gov.br/resetSenha">Resetar Senha</a>`,
@@ -130,7 +132,7 @@ class UserController {
       var emailRetorno = null;
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
-          console.log(error);
+          console.error(error);
           emailRetorno = error;
         } else {
           //   console.log("Email enviado: " + info.response);
@@ -175,7 +177,7 @@ class UserController {
         process.env.ACCESS_TOKEN,
         {
           expiresIn: "8h",
-        }
+        },
       );
       return res.json({
         auth: true,
@@ -269,13 +271,13 @@ class UserController {
 
       if (verificaUser.user_active === false) {
         const novaSenha = await database.user.update(
-          { user_password: newPassword, user_active: true },
-          { where: { user_email: user.user_email } }
+          { user_password: newPassword },
+          { where: { user_email: user.user_email } },
         );
       } else {
         const novaSenha = await database.user.update(
           { user_password: newPassword },
-          { where: { user_email: user.user_email } }
+          { where: { user_email: user.user_email } },
         );
       }
 
