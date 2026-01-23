@@ -243,7 +243,11 @@ class AgroControllers {
 
   static async deletaFarmer(req, res) {
     const { id } = req.params;
-    const apaga = req.body;
+
+    const apaga = await database.produtor_rural.findOne({
+      where: { id: Number(id) },
+      attributes: ["nome"],
+    });
 
     try {
       await database.produtor_rural.destroy({ where: { id: Number(id) } });
@@ -251,7 +255,8 @@ class AgroControllers {
         mensagem: `O Produtor ${apaga.nome} foi excluido com sucesso!!`,
       });
     } catch (erro) {
-      return res.status(500).json(error.message);
+      console.error(erro);
+      return res.status(500).json(erro.message);
     }
   }
 }

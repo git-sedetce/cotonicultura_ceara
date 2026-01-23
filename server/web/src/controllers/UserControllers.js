@@ -292,15 +292,19 @@ class UserController {
 
   static async deletaUsers(req, res) {
     const { id } = req.params;
-    const apaga = req.body;
+
+    const apaga = await database.user.findOne({
+          where: { id: Number(id) },
+          attributes: ["nome"],
+        });
 
     try {
       await database.user.destroy({ where: { id: Number(id) } });
       return res.status(200).json({
-        mensagem: `O Usuario ${apaga.user_name} foi excluido com sucesso!!`,
+        mensagem: `O Usuario ${apaga.nome} foi excluido com sucesso!!`,
       });
     } catch (erro) {
-      return res.status(500).json(error.message);
+      return res.status(500).json(erro.message);
     }
   }
 }

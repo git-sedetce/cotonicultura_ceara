@@ -147,7 +147,7 @@ export class ListaUsersComponent implements OnInit {
   }
   deletaUser(user: any) {
     this.serviceUser.deleteUser(user.id).subscribe((res) => {
-      this.toastr.success('Exclusão realizada com sucesso!!!');
+      this.toastr.success(res.mensagem);
       this.getUsers();
     });
 

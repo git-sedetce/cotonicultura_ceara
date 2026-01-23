@@ -314,10 +314,14 @@ anexarArquivo(id: number) {
     this.saveRegister(this.farmerObj.nome, 'Alteração de dados do agricultor');
   }
 
+  anexo_id!: number;
+
   getFile(id: any, tipo_anexo: any): void {
     this.anexo.pegarArquivos(id, tipo_anexo).subscribe(
       (data: any) => {
-        // console.log('data', data)
+        console.log('data', data)
+        this.anexo_id = data.id_anexo;
+        console.log('this.anexo_id', this.anexo_id)
         const byteArray = new Uint8Array(
           atob(data.base64)
             .split("")
@@ -335,6 +339,7 @@ anexarArquivo(id: number) {
 }
 onFileChange(event: Event): void {
   const file = (event.target as HTMLInputElement).files?.[0];
+  console.log('file', file)
   if (!file) return;
 
   this.formAnexo.patchValue({ file });
@@ -346,10 +351,14 @@ updateDocumento(): void {
   const formData = new FormData();
   formData.append('file', file);
 
-  this.anexo.atualizAnexo(formData, this.anexoObj.id).subscribe(() => {
+  console.log('this.anexoObj.id', this.anexo_id)
+
+  this.anexo.atualizAnexo(formData, this.anexo_id).subscribe(() => {
     this.toastr.success('Documento atualizado com sucesso');
     this.formAnexo.reset();
   });
+
+  this.saveRegister(this.farmerObj.nome, 'Atualização de documento');
 }
 
   updateComprovante() {
@@ -376,17 +385,17 @@ updateDocumento(): void {
         this.formAnexo.reset()
       }
     })
-    // this.saveRegister(this.formPlanoCapacitacao.value.nome_completo, 'atualiza_certificado', this.formPlanoCapacitacao.value.curso, this.formPlanoCapacitacao.value.ano_plano)
+    this.saveRegister(this.farmerObj.nome, 'Atualização de comprovante');
 
   }
 
   deletaFarmer(user: any) {
     this.cadastroAgricultorService.deleteAgricultor(user.id).subscribe((res) => {
-      this.toastr.success('Exclusão realizada com sucesso!!!');
+      this.toastr.success(res.mensagem);
       this.getFarmers();
     });
 
-    this.saveRegister(user.user_name, 'Exclusão de usuário');
+    this.saveRegister(user.nome, 'Exclusão de produtor rural');
   }
 
   saveRegister(name: any, tipo: any): void {
