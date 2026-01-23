@@ -3,8 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const baseUrl = process.cwd() + "/src"; //__dirname + '.
 
-class AnexoControllers {  
-
+class AnexoControllers {
   static async anexoIdentidade(req, res) {
     const file = req.file;
     const { id } = req.params;
@@ -88,7 +87,9 @@ class AnexoControllers {
           raw: true,
         });
         // console.log('anexarParceiro', anexarParceiro)
-        return res.status(200).json({ message: "CPF/CNPJ anexado com Sucesso!" });
+        return res
+          .status(200)
+          .json({ message: "CPF/CNPJ anexado com Sucesso!" });
       } catch (error) {
         return res.status(500).json(error.message);
       }
@@ -98,7 +99,6 @@ class AnexoControllers {
       });
     }
   }
-  
 
   static async anexoPropriedade(req, res) {
     const file = req.file;
@@ -130,7 +130,7 @@ class AnexoControllers {
         message: "Somente arquivo .pdf",
       });
     }
-  }  
+  }
 
   //consulta anexo
   static async pegaAnexo(req, res) {
@@ -139,12 +139,11 @@ class AnexoControllers {
         order: ["id"],
         attributes: ["id", "tipo_anexo", "mimetype", "filename", "path"],
         include: [
-            {
-              association: "ass_anexo_agricultor",
-              attributes: ["id", "nome"],
-            },
-            
-          ],
+          {
+            association: "ass_anexo_agricultor",
+            attributes: ["id", "nome"],
+          },
+        ],
       });
       return res.status(200).json(mostraAnexos);
     } catch (error) {
@@ -160,12 +159,11 @@ class AnexoControllers {
         order: ["id"],
         attributes: ["id", "tipo_anexo", "mimetype", "filename", "path"],
         include: [
-            {
-              association: "ass_anexo_agricultor",
-              attributes: ["id", "nome"],
-            },
-            
-          ],
+          {
+            association: "ass_anexo_agricultor",
+            attributes: ["id", "nome"],
+          },
+        ],
       });
       return res.status(200).json(mostraAnexo);
     } catch (error) {
@@ -181,12 +179,11 @@ class AnexoControllers {
         where: { agricultor_id: Number(id) },
         attributes: ["id", "tipo_anexo", "mimetype", "filename", "path"],
         include: [
-            {
-              association: "ass_anexo_agricultor",
-              attributes: ["id", "nome"],
-            },
-            
-          ],
+          {
+            association: "ass_anexo_agricultor",
+            attributes: ["id", "nome"],
+          },
+        ],
       });
       mostraAnexo.path = __dirname + mostraAnexo.path;
       //console.log('mostraAnexos.path', mostraAnexo.path)
@@ -202,8 +199,8 @@ class AnexoControllers {
 
     try {
       const mostraAnexo = await database.anexo.findOne({
-        where: { agricultor_id: Number(id), tipo_anexo: tipo_anexo  },
-        attributes: ["tipo_anexo", "path", "mimetype", "filename"],
+        where: { agricultor_id: Number(id), tipo_anexo: tipo_anexo },
+        attributes: ["id", "tipo_anexo", "path", "mimetype", "filename"],
       });
 
       if (!mostraAnexo) {
@@ -238,6 +235,7 @@ class AnexoControllers {
           mimetype: mimetype,
           filename: mostraAnexo.filename,
           tipo_anexo: mostraAnexo.tipo_anexo,
+          id_anexo: mostraAnexo.id,
         });
       });
     } catch (error) {
@@ -250,6 +248,12 @@ class AnexoControllers {
   static async atualizarAnexo(req, res) {
     const { id } = req.params;
     const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({
+        error: "Nenhum arquivo enviado para atualização",
+      });
+    }
 
     try {
       // 1️⃣ Busca o anexo existente no banco
@@ -268,9 +272,10 @@ class AnexoControllers {
       if (anexoExistente.path) {
         const caminhoAntigo = path.join(
           process.cwd(), // raiz do projeto
-          process.env.SPLIT, // api-gestao_rh/api
-          anexoExistente.path // caminho armazenado no banco
+          process.env.SPLIT, // src
+          anexoExistente.path, // caminho armazenado no banco
         );
+        console.log("caminhoAntigo", caminhoAntigo);
 
         if (fs.existsSync(caminhoAntigo)) {
           fs.unlinkSync(caminhoAntigo);
@@ -281,6 +286,7 @@ class AnexoControllers {
       }
       // 3️⃣ Pega o novo caminho
       const novoCaminho = file.path.split(process.env.SPLIT)[1];
+      console.log("novoCaminho", novoCaminho);
 
       // remove a primeira barra caso exista
       const novoCaminhoLimpo = novoCaminho.startsWith("/")
@@ -290,7 +296,7 @@ class AnexoControllers {
       // 4️⃣ Atualiza o banco
       await database.anexo.update(
         { path: novoCaminhoLimpo },
-        { where: { id: Number(id) } }
+        { where: { id: Number(id) } },
       );
 
       // 5️⃣ Retorna o anexo atualizado

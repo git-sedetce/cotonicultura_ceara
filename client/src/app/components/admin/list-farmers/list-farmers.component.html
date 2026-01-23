@@ -311,8 +311,8 @@
           <div class="row">
             <div class="col-sm-12 col-12 mb-3">
               <label for="documento" class="form-label">Atualiza CPF/CNPJ</label>
-              <input class="form-control" type="file" id="documento" name="documento" (change)="onFileChange($event)"
-                required #atualizaAnexo>
+              <input class="form-control" type="file" id="documento" name="documento" formControlName="file" (change)="onFileChange($event)"
+                required >
             </div>
           </div>
 

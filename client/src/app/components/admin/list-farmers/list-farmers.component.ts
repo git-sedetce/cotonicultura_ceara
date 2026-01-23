@@ -18,18 +18,16 @@ declare var bootstrap: any;
   selector: 'app-list-farmers',
   standalone: false,
   templateUrl: './list-farmers.component.html',
-  styleUrl: './list-farmers.component.css'
+  styleUrl: './list-farmers.component.css',
 })
 export class ListFarmersComponent implements OnInit {
-
-  @ViewChild('atualizaAnexo') atualizaAnexo!:ElementRef
+  @ViewChild('atualizaAnexo') atualizaAnexo!: ElementRef;
   anexoObj: Anexo = new Anexo();
 
   lista_regiao!: any[];
   lista_farmers: any[] = [];
   lista_filtrada: any[] = [];
   lista_cidade: any[] = [];
-
 
   farmerObj: Agricultor = new Agricultor();
   searchFarmers: string = '';
@@ -46,7 +44,7 @@ export class ListFarmersComponent implements OnInit {
   formAnexo!: FormGroup;
   formFiltro!: FormGroup;
   formFarmer!: FormGroup;
-  arquivoUrl: SafeResourceUrl | null = null
+  arquivoUrl: SafeResourceUrl | null = null;
 
   page: number = 1; // Página atual
   itemsPerPage: number = 10; // Itens por página
@@ -59,35 +57,35 @@ export class ListFarmersComponent implements OnInit {
     private auditService: AuditService,
     private serviceUser: CadastroService,
     private router: Router,
-    private cadastroAgricultorService: CadastroAgricultorService
-  ) { }
+    private cadastroAgricultorService: CadastroAgricultorService,
+  ) {}
 
   ngOnInit(): void {
     this.formFarmer = this.formBuilder.group({
       id: [''],
-      nome:[''],
-      telefone:[''],
-      cpf_cnpj:[''],
-      rg:[''],
-      endereco:[''],
-      cidade:[''],
-      nome_propriedade:[''],
-      ponto_referencia:[''],
-      area_total:[''],
-      area_algodao:[''],
+      nome: [''],
+      telefone: [''],
+      cpf_cnpj: [''],
+      rg: [''],
+      endereco: [''],
+      cidade: [''],
+      nome_propriedade: [''],
+      ponto_referencia: [''],
+      area_total: [''],
+      area_algodao: [''],
       pedido_atendido: [''],
-      sementes_recebidas:[''],
-      regime_cultivo:[''],
-      cadastro_adagri:[''],
-      confirma_informacao:[''],
+      sementes_recebidas: [''],
+      regime_cultivo: [''],
+      cadastro_adagri: [''],
+      confirma_informacao: [''],
     });
 
     this.formFiltro = this.formBuilder.group({
-    nome: [''],
-    cidade: [''],
-    regiao: [''],
-    pedidoAtendido: ['']
-  });
+      nome: [''],
+      cidade: [''],
+      regiao: [''],
+      pedidoAtendido: [''],
+    });
 
     this.formAnexo = this.formBuilder.group({
       id: [''],
@@ -96,6 +94,7 @@ export class ListFarmersComponent implements OnInit {
       filename: [''],
       path: [''],
       agricultor_id: [''],
+      file: [null], // ← OBRIGATÓRIO
     });
 
     this.registro = new Audit();
@@ -105,23 +104,27 @@ export class ListFarmersComponent implements OnInit {
     this.getFarmers();
 
     this.formFiltro.valueChanges.subscribe(() => {
-    this.filtrarUsuarios();
-  });
+      this.filtrarUsuarios();
+    });
   }
 
-  pegarCidades(){
-    this.cadastroAgricultorService.getCitys('takecitys').subscribe((cityCE: any[]) => {
-      // console.log('cityCE', cityCE)
-      this.lista_cidade = cityCE;
-    }, (erro: any) => console.error('erro', erro)
+  pegarCidades() {
+    this.cadastroAgricultorService.getCitys('takecitys').subscribe(
+      (cityCE: any[]) => {
+        // console.log('cityCE', cityCE)
+        this.lista_cidade = cityCE;
+      },
+      (erro: any) => console.error('erro', erro),
     );
   }
 
-  pegarRegioes(){
-    this.cadastroAgricultorService.getRegiaos('takeregion').subscribe((regiaoCE: any[]) => {
-      // console.log('regiaoCE', regiaoCE)
-      this.lista_regiao = regiaoCE;
-    }, (erro: any) => console.error('erro', erro)
+  pegarRegioes() {
+    this.cadastroAgricultorService.getRegiaos('takeregion').subscribe(
+      (regiaoCE: any[]) => {
+        // console.log('regiaoCE', regiaoCE)
+        this.lista_regiao = regiaoCE;
+      },
+      (erro: any) => console.error('erro', erro),
     );
   }
 
@@ -141,124 +144,120 @@ export class ListFarmersComponent implements OnInit {
         this.lista_filtrada = usr; // inicia filtrada
         // console.log('lista_users', this.lista_farmers)
       },
-      (erro: any) => console.error(erro)
+      (erro: any) => console.error(erro),
     );
   }
 
   private normalize(value: any): string {
-  return (value ?? '')
-    .toString()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-}
-
-  filtrarUsuarios(): void {
-  const { nome, cidade, regiao, pedidoAtendido } = this.formFiltro.value;
-
-  const termo = this.normalize(nome);
-
-  this.lista_filtrada = this.lista_farmers.filter(farmer => {
-
-    const matchNome =
-      this.normalize(farmer.nome).includes(termo);
-
-    const matchCidade =
-      !cidade || farmer?.ass_produtor_rural_cidade?.nome_municipio === cidade;
-
-    const matchRegiao =
-      !regiao || farmer?.ass_produtor_rural_cidade?.ass_municipio_regiao?.nome === regiao;
-
-    const matchPedido =
-      pedidoAtendido === '' || farmer?.pedido_atendido === pedidoAtendido;
-
-    this.filtroFarmers = true;
-
-    return matchNome && matchCidade && matchRegiao && matchPedido;
-  });
-
-  this.page = 1;
-}
-
-limparFiltros(): void {
-  this.formFiltro.reset({
-    nome: '',
-    cidade: '',
-    regiao: '',
-    pedidoAtendido: ''
-  });
-  this.filtroFarmers = false;
-}
-
-exibirTodos(): void {
-  this.searchFarmers = '';
-  this.searchCidade = '';
-  this.searchRegiao = '';
-  this.searchPedidoAtendido = '';
-
-  this.lista_filtrada = [...this.lista_farmers];
-  this.page = 1;
-}
-
-exportarPlanilha(tipo: 'todos' | 'filtrados'): void {
-
-  const dados =
-    tipo === 'todos'
-      ? this.lista_farmers
-      : this.lista_filtrada;
-
-  if (!dados || dados.length === 0) {
-    this.toastr.warning('Nenhum dado para exportar');
-    return;
+    return (value ?? '')
+      .toString()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   }
 
-  const planilha = dados.map(farmer => ({
-    Pedido: farmer.pedido,
-    Nome: farmer.nome,
-    Telefone: farmer.telefone,
-    CPF_CNPJ: farmer.cpf_cnpj,
-    RG: farmer.rg,
-    Endereço: farmer.endereco,
-    Município: farmer.ass_produtor_rural_cidade?.nome_municipio ?? '',
-    Região: farmer.ass_produtor_rural_cidade?.ass_municipio_regiao?.nome ?? '',
-    Nome_Propriedade: farmer.nome_propriedade,
-    Ponto_Referência: farmer.ponto_referencia,
-    Area_Total: farmer.area_total,
-    Area_Algodão: farmer.area_algodao,
-    'Pedido Atendido': farmer.pedido_atendido ? 'Sim' : 'Não',
-    Sementes_Recebidas: farmer.sementes_recebidas,
-    Regime_Cultivo: farmer.regime_cultivo,
-    Cadastro_adagri: farmer.cadastro_adagri
-  }));
+  filtrarUsuarios(): void {
+    const { nome, cidade, regiao, pedidoAtendido } = this.formFiltro.value;
 
-  const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(planilha);
-  const workbook: XLSX.WorkBook = {
-    Sheets: { 'Agricultores': worksheet },
-    SheetNames: ['Agricultores']
-  };
+    const termo = this.normalize(nome);
 
-  const excelBuffer: any = XLSX.write(workbook, {
-    bookType: 'xlsx',
-    type: 'array'
-  });
+    this.lista_filtrada = this.lista_farmers.filter((farmer) => {
+      const matchNome = this.normalize(farmer.nome).includes(termo);
 
-  const blob = new Blob([excelBuffer], {
-    type:
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-  });
+      const matchCidade =
+        !cidade || farmer?.ass_produtor_rural_cidade?.nome_municipio === cidade;
 
-  const nomeArquivo =
-    tipo === 'todos'
-      ? 'agricultores_todos.xlsx'
-      : 'agricultores_filtrados.xlsx';
+      const matchRegiao =
+        !regiao ||
+        farmer?.ass_produtor_rural_cidade?.ass_municipio_regiao?.nome ===
+          regiao;
 
-  saveAs(blob, nomeArquivo);
-}
+      const matchPedido =
+        pedidoAtendido === '' || farmer?.pedido_atendido === pedidoAtendido;
 
-anexarArquivo(id: number) {
-  this.cadastroAgricultorService.setAgricultor(Number(id));
-  this.router.navigate(['/anexo'])
-}
+      this.filtroFarmers = true;
+
+      return matchNome && matchCidade && matchRegiao && matchPedido;
+    });
+
+    this.page = 1;
+  }
+
+  limparFiltros(): void {
+    this.formFiltro.reset({
+      nome: '',
+      cidade: '',
+      regiao: '',
+      pedidoAtendido: '',
+    });
+    this.filtroFarmers = false;
+  }
+
+  exibirTodos(): void {
+    this.searchFarmers = '';
+    this.searchCidade = '';
+    this.searchRegiao = '';
+    this.searchPedidoAtendido = '';
+
+    this.lista_filtrada = [...this.lista_farmers];
+    this.page = 1;
+  }
+
+  exportarPlanilha(tipo: 'todos' | 'filtrados'): void {
+    const dados = tipo === 'todos' ? this.lista_farmers : this.lista_filtrada;
+
+    if (!dados || dados.length === 0) {
+      this.toastr.warning('Nenhum dado para exportar');
+      return;
+    }
+
+    const planilha = dados.map((farmer) => ({
+      Pedido: farmer.pedido,
+      Nome: farmer.nome,
+      Telefone: farmer.telefone,
+      CPF_CNPJ: farmer.cpf_cnpj,
+      RG: farmer.rg,
+      Endereço: farmer.endereco,
+      Município: farmer.ass_produtor_rural_cidade?.nome_municipio ?? '',
+      Região:
+        farmer.ass_produtor_rural_cidade?.ass_municipio_regiao?.nome ?? '',
+      Nome_Propriedade: farmer.nome_propriedade,
+      Ponto_Referência: farmer.ponto_referencia,
+      Area_Total: farmer.area_total,
+      Area_Algodão: farmer.area_algodao,
+      'Pedido Atendido': farmer.pedido_atendido ? 'Sim' : 'Não',
+      Sementes_Recebidas: farmer.sementes_recebidas,
+      Regime_Cultivo: farmer.regime_cultivo,
+      Cadastro_adagri: farmer.cadastro_adagri,
+    }));
+
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(planilha);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { Agricultores: worksheet },
+      SheetNames: ['Agricultores'],
+    };
+
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
+
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+
+    const nomeArquivo =
+      tipo === 'todos'
+        ? 'agricultores_todos.xlsx'
+        : 'agricultores_filtrados.xlsx';
+
+    saveAs(blob, nomeArquivo);
+  }
+
+  anexarArquivo(id: number) {
+    this.cadastroAgricultorService.setAgricultor(Number(id));
+    this.router.navigate(['/anexo']);
+  }
 
   onEdit(farmer: any) {
     this.farmerObj.id = farmer.id;
@@ -269,15 +268,27 @@ anexarArquivo(id: number) {
     this.formFarmer.controls['rg'].setValue(farmer.rg);
     this.formFarmer.controls['endereco'].setValue(farmer.endereco);
     this.formFarmer.controls['cidade'].setValue(farmer.cidade);
-    this.formFarmer.controls['nome_propriedade'].setValue(farmer.nome_propriedade);
-    this.formFarmer.controls['ponto_referencia'].setValue(farmer.ponto_referencia);
+    this.formFarmer.controls['nome_propriedade'].setValue(
+      farmer.nome_propriedade,
+    );
+    this.formFarmer.controls['ponto_referencia'].setValue(
+      farmer.ponto_referencia,
+    );
     this.formFarmer.controls['area_total'].setValue(farmer.area_total);
     this.formFarmer.controls['area_algodao'].setValue(farmer.area_algodao);
     this.formFarmer.controls['regime_cultivo'].setValue(farmer.regime_cultivo);
-    this.formFarmer.controls['cadastro_adagri'].setValue(farmer.cadastro_adagri);
-    this.formFarmer.controls['confirma_informacao'].setValue(farmer.confirma_informacao);
-    this.formFarmer.controls['sementes_recebidas'].setValue(farmer.sementes_recebidas);
-    this.formFarmer.controls['pedido_atendido'].setValue(farmer.pedido_atendido);
+    this.formFarmer.controls['cadastro_adagri'].setValue(
+      farmer.cadastro_adagri,
+    );
+    this.formFarmer.controls['confirma_informacao'].setValue(
+      farmer.confirma_informacao,
+    );
+    this.formFarmer.controls['sementes_recebidas'].setValue(
+      farmer.sementes_recebidas,
+    );
+    this.formFarmer.controls['pedido_atendido'].setValue(
+      farmer.pedido_atendido,
+    );
   }
   updateFarmer() {
     this.farmerObj.nome = this.formFarmer.value.nome;
@@ -292,8 +303,10 @@ anexarArquivo(id: number) {
     this.farmerObj.area_algodao = this.formFarmer.value.area_algodao;
     this.farmerObj.regime_cultivo = this.formFarmer.value.regime_cultivo;
     this.farmerObj.cadastro_adagri = this.formFarmer.value.cadastro_adagri;
-    this.farmerObj.confirma_informacao = this.formFarmer.value.confirma_informacao;
-    this.farmerObj.sementes_recebidas = this.formFarmer.value.sementes_recebidas;
+    this.farmerObj.confirma_informacao =
+      this.formFarmer.value.confirma_informacao;
+    this.farmerObj.sementes_recebidas =
+      this.formFarmer.value.sementes_recebidas;
     this.farmerObj.pedido_atendido = this.formFarmer.value.pedido_atendido;
 
     this.cadastroAgricultorService
@@ -306,7 +319,9 @@ anexarArquivo(id: number) {
         // 🔥 Fechar modal
         const modalEl = document.getElementById('modalEdit');
         if (modalEl) {
-          const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+          const modal =
+            bootstrap.Modal.getInstance(modalEl) ||
+            new bootstrap.Modal(modalEl);
           modal.hide();
         }
       });
@@ -319,13 +334,13 @@ anexarArquivo(id: number) {
   getFile(id: any, tipo_anexo: any): void {
     this.anexo.pegarArquivos(id, tipo_anexo).subscribe(
       (data: any) => {
-        console.log('data', data)
+        console.log('data', data);
         this.anexo_id = data.id_anexo;
-        console.log('this.anexo_id', this.anexo_id)
+        console.log('this.anexo_id', this.anexo_id);
         const byteArray = new Uint8Array(
           atob(data.base64)
-            .split("")
-            .map((char) => char.charCodeAt(0))
+            .split('')
+            .map((char) => char.charCodeAt(0)),
         );
         const file = new Blob([byteArray], { type: 'application/pdf' });
         const fileURL = URL.createObjectURL(file);
@@ -334,66 +349,68 @@ anexarArquivo(id: number) {
       },
       (error) => {
         console.error('Erro ao carregar o PDF:', error.error.message);
-      }
+      },
     );
-}
-onFileChange(event: Event): void {
-  const file = (event.target as HTMLInputElement).files?.[0];
-  console.log('file', file)
-  if (!file) return;
+  }
+  onFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
 
-  this.formAnexo.patchValue({ file });
-}
+    this.formAnexo.patchValue({
+      file: input.files[0],
+    });
+  }
 
-updateDocumento(): void {
-  const file = this.formAnexo.value.file;
+  updateDocumento(): void {
+    if (this.formAnexo.invalid) return;
 
-  const formData = new FormData();
-  formData.append('file', file);
+    const formData = new FormData();
+    formData.append('file', this.formAnexo.get('file')!.value);
 
-  console.log('this.anexoObj.id', this.anexo_id)
+    this.anexo.atualizAnexo(formData, this.anexo_id).subscribe(() => {
+      this.toastr.success('Documento atualizado com sucesso');
+      this.formAnexo.reset();
+    });
 
-  this.anexo.atualizAnexo(formData, this.anexo_id).subscribe(() => {
-    this.toastr.success('Documento atualizado com sucesso');
-    this.formAnexo.reset();
-  });
-
-  this.saveRegister(this.farmerObj.nome, 'Atualização de documento');
-}
+    this.saveRegister(this.farmerObj.nome, 'Atualização de documento');
+  }
 
   updateComprovante() {
-    const newRegister = this.atualizaAnexo.nativeElement.files[0]
+    const newRegister = this.atualizaAnexo.nativeElement.files[0];
     const novoAnexo = new FormData();
-    novoAnexo.append('file', newRegister)
+    novoAnexo.append('file', newRegister);
 
     // console.log('novoAnexo', novoAnexo)
 
     this.anexo.atualizAnexo(novoAnexo, this.anexoObj.id).subscribe({
       next: (res: any) => {
-        this.toastr.success('Comprovante de residência atualizado com sucesso!!!')
+        this.toastr.success(
+          'Comprovante de residência atualizado com sucesso!!!',
+        );
         const myModal = bootstrap.Modal.getInstance(
-          document.getElementById('modalCertificado') as HTMLElement
+          document.getElementById('modalCertificado') as HTMLElement,
         );
         if (myModal) {
           myModal.hide();
         }
         this.formAnexo.reset();
       },
-      error:(e) => {
+      error: (e) => {
         console.error(e);
-        this.toastr.error(e.error.message)
-        this.formAnexo.reset()
-      }
-    })
+        this.toastr.error(e.error.message);
+        this.formAnexo.reset();
+      },
+    });
     this.saveRegister(this.farmerObj.nome, 'Atualização de comprovante');
-
   }
 
   deletaFarmer(user: any) {
-    this.cadastroAgricultorService.deleteAgricultor(user.id).subscribe((res) => {
-      this.toastr.success(res.mensagem);
-      this.getFarmers();
-    });
+    this.cadastroAgricultorService
+      .deleteAgricultor(user.id)
+      .subscribe((res) => {
+        this.toastr.success(res.mensagem);
+        this.getFarmers();
+      });
 
     this.saveRegister(user.nome, 'Exclusão de produtor rural');
   }
@@ -408,7 +425,4 @@ updateDocumento(): void {
       error: (e) => this.toastr.error(e),
     });
   }
-
-
-
 }
