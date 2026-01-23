@@ -24,6 +24,7 @@ import { WhoAreComponent } from './components/who-are/who-are.component';
 import { HomeAdminComponent } from './components/admin/home-admin/home-admin.component';
 import { NgxApexchartsModule } from 'ngx-apexcharts';
 import { AnexoComponent } from './components/anexo/anexo.component';
+import { TelefoneValidoDirective } from './services/diretiva/telefone-valido.directive';
 
 @NgModule({
   declarations: [
@@ -39,7 +40,8 @@ import { AnexoComponent } from './components/anexo/anexo.component';
     ListFarmersComponent,
     WhoAreComponent,
     HomeAdminComponent,
-    AnexoComponent
+    AnexoComponent,
+    TelefoneValidoDirective
   ],
   imports: [
     BrowserModule,
