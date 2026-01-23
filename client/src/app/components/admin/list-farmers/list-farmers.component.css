@@ -57,3 +57,12 @@ button.btn-sm {
   color: #666;
   font-size: 1rem;
 }
+
+.btn-form {
+  height: 38px;            /* mesma altura do form-control */
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}

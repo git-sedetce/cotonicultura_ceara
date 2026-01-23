@@ -18,9 +18,8 @@
       <h3 class="text-center text-uppercase m-0">Agricultores Cadastrados</h3>
     </div>
 
-    <!-- Área de filtros -->
-    <div class="row mb-3 g-2">
-      <form [formGroup]="formFiltro" class="row mb-3 g-2">
+    <form [formGroup]="formFiltro" class="row g-2 align-items-end mb-3">
+
       <div class="col-lg-4 col-md-6 col-sm-12">
         <input type="text" class="form-control shadow-sm" placeholder="🔍 Pesquisar por Nome ou Email..."
           formControlName="nome" (keyup)="filtrarUsuarios()" />
@@ -52,22 +51,36 @@
         </select>
       </div>
 
-      <div class="col-lg-2 col-md-6 col-sm-6">
-        <button type="button"
-      class="btn btn-success w-100"
-      (click)="limparFiltros()">
-      Exibir todos
-     </button>
-        <!--<button type="button" class="btn btn-success w-100 shadow-sm" [disabled]="
-        !searchFarmers &&
-        !searchCidade &&
-        !searchRegiao &&
-        searchPedidoAtendido === ''" (click)="exibirTodos()">
-          Exibir todos
-        </button> -->
+      <!-- Botões com mesma altura dos selects -->
+      <div class="col-lg-2 col-md-12 col-sm-12">
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-success btn-form w-100" (click)="limparFiltros()">
+            Exibir todos
+          </button>
+
+          <div class="btn-group w-100">
+            <button type="button" [disabled]="profile_id === 2 || profile_id === 4" class="btn btn-outline-primary btn-form dropdown-toggle" data-bs-toggle="dropdown">
+              Exportar
+            </button>
+            <ul class="dropdown-menu">
+              <li>
+                <button class="dropdown-item" (click)="exportarPlanilha('todos')">
+                  Todos os agricultores
+                </button>
+              </li>
+              <li>
+                <button class="dropdown-item" [disabled]="!filtroFarmers" (click)="exportarPlanilha('filtrados')">
+                  Agricultores filtrados
+                </button>
+              </li>
+            </ul>
+          </div>
+
+        </div>
       </div>
-      </form>
-    </div>
+
+    </form>
+
 
     <!-- Tabela -->
     <div class="table-responsive shadow-sm rounded">
@@ -107,16 +120,16 @@
               </button>
             </td>
 
-             <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 0">
-              <button class="btn btn-success btn-sm" (click)="getFile(farmer.id, 'comprovante_cpf_cnpj')" data-bs-toggle="modal"
-                data-bs-target="#modalDocumento" title="CPF/CNPJ">
+            <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 0">
+              <button class="btn btn-success btn-sm" (click)="getFile(farmer.id, 'comprovante_cpf_cnpj')"
+                data-bs-toggle="modal" data-bs-target="#modalDocumento" title="CPF/CNPJ">
                 <i class="bi bi-file-earmark-person-fill"></i>
               </button>
             </td>
 
             <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 0">
-              <button class="btn btn-primary btn-sm" (click)="getFile(farmer.id, 'comprovante_residencia')" data-bs-toggle="modal"
-                data-bs-target="#modalResidencia" title="Comprovante de Residência">
+              <button class="btn btn-primary btn-sm" (click)="getFile(farmer.id, 'comprovante_residencia')"
+                data-bs-toggle="modal" data-bs-target="#modalResidencia" title="Comprovante de Residência">
                 <i class="bi bi-file-earmark-pdf-fill"></i>
               </button>
             </td>
@@ -278,7 +291,8 @@
       </div>
       <div class="modal-footer">
         <button type="button" id="cancel" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" (click)="updateFarmer()" [disabled]="profile_id !== 1 && profile_id !== 3" class="btn btn-warning">Update</button>
+        <button type="button" (click)="updateFarmer()" [disabled]="profile_id !== 1 && profile_id !== 3"
+          class="btn btn-warning">Update</button>
       </div>
     </div>
   </div>
@@ -297,7 +311,8 @@
           <div class="row">
             <div class="col-sm-12 col-12 mb-3">
               <label for="documento" class="form-label">Atualiza CPF/CNPJ</label>
-              <input class="form-control" type="file" id="documento" name="documento" (change)="onFileChange($event)" required #atualizaAnexo>
+              <input class="form-control" type="file" id="documento" name="documento" (change)="onFileChange($event)"
+                required #atualizaAnexo>
             </div>
           </div>
 
@@ -331,7 +346,8 @@
           <div class="row">
             <div class="col-sm-12 col-12 mb-3">
               <label for="comprovante" class="form-label">Atualiza Comprovante</label>
-              <input class="form-control" type="file" id="comprovante" name="comprovante" (change)="onFileChange($event)" required #atualizaAnexo>
+              <input class="form-control" type="file" id="comprovante" name="comprovante"
+                (change)="onFileChange($event)" required #atualizaAnexo>
             </div>
           </div>
 
@@ -350,5 +366,3 @@
     </div>
   </div>
 </div>
-
-

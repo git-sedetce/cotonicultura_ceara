@@ -10,6 +10,8 @@ import { Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AnexoService } from '../../../services/anexo.service';
 import { Anexo } from '../../../models/anexo.model';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 declare var bootstrap: any;
 
 @Component({
@@ -39,6 +41,7 @@ export class ListFarmersComponent implements OnInit {
   registro!: Audit;
   profile_id!: any;
   user_name!: any;
+  filtroFarmers: boolean = false;
 
   formAnexo!: FormGroup;
   formFiltro!: FormGroup;
@@ -169,6 +172,8 @@ export class ListFarmersComponent implements OnInit {
     const matchPedido =
       pedidoAtendido === '' || farmer?.pedido_atendido === pedidoAtendido;
 
+    this.filtroFarmers = true;
+
     return matchNome && matchCidade && matchRegiao && matchPedido;
   });
 
@@ -182,6 +187,7 @@ limparFiltros(): void {
     regiao: '',
     pedidoAtendido: ''
   });
+  this.filtroFarmers = false;
 }
 
 exibirTodos(): void {
@@ -192,6 +198,61 @@ exibirTodos(): void {
 
   this.lista_filtrada = [...this.lista_farmers];
   this.page = 1;
+}
+
+exportarPlanilha(tipo: 'todos' | 'filtrados'): void {
+
+  const dados =
+    tipo === 'todos'
+      ? this.lista_farmers
+      : this.lista_filtrada;
+
+  if (!dados || dados.length === 0) {
+    this.toastr.warning('Nenhum dado para exportar');
+    return;
+  }
+
+  const planilha = dados.map(farmer => ({
+    Pedido: farmer.pedido,
+    Nome: farmer.nome,
+    Telefone: farmer.telefone,
+    CPF_CNPJ: farmer.cpf_cnpj,
+    RG: farmer.rg,
+    Endereço: farmer.endereco,
+    Município: farmer.ass_produtor_rural_cidade?.nome_municipio ?? '',
+    Região: farmer.ass_produtor_rural_cidade?.ass_municipio_regiao?.nome ?? '',
+    Nome_Propriedade: farmer.nome_propriedade,
+    Ponto_Referência: farmer.ponto_referencia,
+    Area_Total: farmer.area_total,
+    Area_Algodão: farmer.area_algodao,
+    'Pedido Atendido': farmer.pedido_atendido ? 'Sim' : 'Não',
+    Sementes_Recebidas: farmer.sementes_recebidas,
+    Regime_Cultivo: farmer.regime_cultivo,
+    Cadastro_adagri: farmer.cadastro_adagri
+  }));
+
+  const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(planilha);
+  const workbook: XLSX.WorkBook = {
+    Sheets: { 'Agricultores': worksheet },
+    SheetNames: ['Agricultores']
+  };
+
+  const excelBuffer: any = XLSX.write(workbook, {
+    bookType: 'xlsx',
+    type: 'array'
+  });
+
+  const blob = new Blob([excelBuffer], {
+    type:
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  });
+
+  const nomeArquivo =
+    tipo === 'todos'
+      ? 'agricultores_todos.xlsx'
+      : 'agricultores_filtrados.xlsx';
+
+  saveAs(blob, nomeArquivo);
 }
 
 anexarArquivo(id: number) {
