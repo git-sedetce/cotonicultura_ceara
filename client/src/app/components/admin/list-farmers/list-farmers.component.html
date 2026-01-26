@@ -121,7 +121,7 @@
             </td>
 
             <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 0">
-              <button class="btn btn-success btn-sm" (click)="getFile(farmer.id, 'comprovante_cpf_cnpj')"
+              <button class="btn btn-success btn-sm" (click)="getFile(farmer, 'comprovante_cpf_cnpj')"
                 data-bs-toggle="modal" data-bs-target="#modalDocumento" title="CPF/CNPJ">
                 <i class="bi bi-file-earmark-person-fill"></i>
               </button>
@@ -311,18 +311,16 @@
           <div class="row">
             <div class="col-sm-12 col-12 mb-3">
               <label for="documento" class="form-label">Atualiza CPF/CNPJ</label>
-              <input class="form-control" type="file" id="documento" name="documento" formControlName="file" (change)="onFileChange($event)"
-                required >
+              <input class="form-control" type="file" id="documento" name="documento" #atualizaDocumento>
             </div>
           </div>
+          </form>
 
           <div class="row">
             <div class="mt-2">
               <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe>
             </div>
           </div>
-
-        </form>
       </div>
       <div class="modal-footer">
         <button type="button" id="cancel" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -346,10 +344,10 @@
           <div class="row">
             <div class="col-sm-12 col-12 mb-3">
               <label for="comprovante" class="form-label">Atualiza Comprovante</label>
-              <input class="form-control" type="file" id="comprovante" name="comprovante"
-                (change)="onFileChange($event)" required #atualizaAnexo>
+              <input class="form-control" type="file" id="comprovante" name="comprovante" required #atualizaComprovante>
             </div>
           </div>
+          </form>
 
           <div class="row">
             <div class="mt-2">
@@ -357,11 +355,11 @@
             </div>
           </div>
 
-        </form>
+
       </div>
       <div class="modal-footer">
         <button type="button" id="cancel" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" (click)="updateDocumento()" class="btn btn-warning">Update</button>
+        <button type="button" (click)="updateComprovante()" class="btn btn-warning">Update</button>
       </div>
     </div>
   </div>

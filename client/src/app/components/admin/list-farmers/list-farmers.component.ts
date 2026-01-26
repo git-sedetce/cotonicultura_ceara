@@ -12,6 +12,7 @@ import { AnexoService } from '../../../services/anexo.service';
 import { Anexo } from '../../../models/anexo.model';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+
 declare var bootstrap: any;
 
 @Component({
@@ -21,7 +22,8 @@ declare var bootstrap: any;
   styleUrl: './list-farmers.component.css',
 })
 export class ListFarmersComponent implements OnInit {
-  @ViewChild('atualizaAnexo') atualizaAnexo!: ElementRef;
+  @ViewChild('atualizaDocumento') atualizaDocumento!: ElementRef;
+  @ViewChild('atualizaComprovante') atualizaComprovante!:ElementRef
   anexoObj: Anexo = new Anexo();
 
   lista_regiao!: any[];
@@ -40,6 +42,9 @@ export class ListFarmersComponent implements OnInit {
   profile_id!: any;
   user_name!: any;
   filtroFarmers: boolean = false;
+
+  anexo_id!: number;
+  farmer_name!: string;
 
   formAnexo!: FormGroup;
   formFiltro!: FormGroup;
@@ -329,14 +334,11 @@ export class ListFarmersComponent implements OnInit {
     this.saveRegister(this.farmerObj.nome, 'Alteração de dados do agricultor');
   }
 
-  anexo_id!: number;
-
-  getFile(id: any, tipo_anexo: any): void {
-    this.anexo.pegarArquivos(id, tipo_anexo).subscribe(
+  getFile(farmer: any, tipo_anexo: any): void {
+    this.anexo.pegarArquivos(farmer.id, tipo_anexo).subscribe(
       (data: any) => {
-        console.log('data', data);
         this.anexo_id = data.id_anexo;
-        console.log('this.anexo_id', this.anexo_id);
+        this.farmer_name = farmer.nome;
         const byteArray = new Uint8Array(
           atob(data.base64)
             .split('')
@@ -352,43 +354,49 @@ export class ListFarmersComponent implements OnInit {
       },
     );
   }
-  onFileChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
 
-    this.formAnexo.patchValue({
-      file: input.files[0],
-    });
-  }
+  updateDocumento() {
+    const newRegister = this.atualizaDocumento.nativeElement.files[0]
+    const novoDocumento = new FormData();
+    novoDocumento.append('file', newRegister)
 
-  updateDocumento(): void {
-    if (this.formAnexo.invalid) return;
+    // console.log('novoDocumento', novoDocumento)
 
-    const formData = new FormData();
-    formData.append('file', this.formAnexo.get('file')!.value);
+    this.anexo.atualizAnexo(novoDocumento, this.anexo_id).subscribe({
+      next: (res: any) => {
+        this.toastr.success('Certificado atualizado com sucesso!!!')
+        const myModal = bootstrap.Modal.getInstance(
+          document.getElementById('modalDocumento') as HTMLElement,
+        );
+        if (myModal) {
+          myModal.hide();
+        }
+        this.formAnexo.reset();
+      },
+      error:(e) => {
+        console.error(e);
+        this.toastr.error(e.error.message)
+        this.formAnexo.reset()
+      }
+    })
+    this.saveRegister(this.farmer_name, 'Atualização de documento');
 
-    this.anexo.atualizAnexo(formData, this.anexo_id).subscribe(() => {
-      this.toastr.success('Documento atualizado com sucesso');
-      this.formAnexo.reset();
-    });
-
-    this.saveRegister(this.farmerObj.nome, 'Atualização de documento');
   }
 
   updateComprovante() {
-    const newRegister = this.atualizaAnexo.nativeElement.files[0];
+    const newRegister = this.atualizaComprovante.nativeElement.files[0];
     const novoAnexo = new FormData();
     novoAnexo.append('file', newRegister);
 
     // console.log('novoAnexo', novoAnexo)
 
-    this.anexo.atualizAnexo(novoAnexo, this.anexoObj.id).subscribe({
+    this.anexo.atualizAnexo(novoAnexo, this.anexo_id).subscribe({
       next: (res: any) => {
         this.toastr.success(
           'Comprovante de residência atualizado com sucesso!!!',
         );
         const myModal = bootstrap.Modal.getInstance(
-          document.getElementById('modalCertificado') as HTMLElement,
+          document.getElementById('modalResidencia') as HTMLElement,
         );
         if (myModal) {
           myModal.hide();
@@ -401,7 +409,7 @@ export class ListFarmersComponent implements OnInit {
         this.formAnexo.reset();
       },
     });
-    this.saveRegister(this.farmerObj.nome, 'Atualização de comprovante');
+    this.saveRegister(this.farmer_name, 'Atualização de comprovante');
   }
 
   deletaFarmer(user: any) {
