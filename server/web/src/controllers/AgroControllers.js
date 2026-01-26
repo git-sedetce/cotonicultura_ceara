@@ -1,5 +1,7 @@
 const database = require("../models");
 const { Op, Sequelize } = require("sequelize");
+const fs = require("fs");
+const path = require("path");
 
 class AgroControllers {
   static async registerAgro(req, res) {
@@ -146,7 +148,7 @@ class AgroControllers {
           },
           {
             association: "ass_agricultor_anexo",
-            attributes: ["id", "tipo_anexo"]
+            attributes: ["id", "tipo_anexo"],
           },
         ],
       });
@@ -244,19 +246,51 @@ class AgroControllers {
   static async deletaFarmer(req, res) {
     const { id } = req.params;
 
-    const apaga = await database.produtor_rural.findOne({
-      where: { id: Number(id) },
-      attributes: ["nome"],
-    });
-
     try {
-      await database.produtor_rural.destroy({ where: { id: Number(id) } });
+      const produtor = await database.produtor_rural.findOne({
+        where: { id: Number(id) },
+        attributes: ["id", "nome"],
+        include: [
+          {
+            model: database.anexo,
+            as: "ass_agricultor_anexo",
+            attributes: ["id", "path"],
+          },
+        ],
+      });
+
+      if (!produtor) {
+        return res.status(404).json({ error: "Produtor não encontrado" });
+      }
+
+      // 🔹 Remove os arquivos físicos
+      for (const anexo of produtor.ass_agricultor_anexo) {
+        if (anexo.path) {
+          const caminhoArquivo = path.resolve(anexo.path);
+          console.log("Caminho do arquivo:", caminhoArquivo);
+
+          if (fs.existsSync(caminhoArquivo)) {
+            fs.unlinkSync(caminhoArquivo);
+          }
+        }
+      }
+
+      // 🔹 Remove os registros dos anexos
+      await database.anexo.destroy({
+        where: { agricultor_id: produtor.id },
+      });
+
+      // 🔹 Remove o produtor
+      await database.produtor_rural.destroy({
+        where: { id: produtor.id },
+      });
+
       return res.status(200).json({
-        mensagem: `O Produtor ${apaga.nome} foi excluido com sucesso!!`,
+        mensagem: `O Produtor ${produtor.nome} foi excluído com sucesso!!`,
       });
     } catch (erro) {
       console.error(erro);
-      return res.status(500).json(erro.message);
+      return res.status(500).json({ error: erro.message });
     }
   }
 }
