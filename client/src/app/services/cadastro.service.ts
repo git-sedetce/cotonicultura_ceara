@@ -67,7 +67,7 @@ export class CadastroService {
         const decoded = jwtDecode(response.token);
         this.userSubject.next(decoded);
 
-        this.router.navigate(['/home']);
+        this.router.navigate(['/admin']);
       })
     );
   }

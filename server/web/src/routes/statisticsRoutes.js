@@ -12,6 +12,8 @@ router.get('/totalSementesDistribuidas', auth.authenticatedUser, checkRole.check
 router.get('/sementesPorRegiao', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.sementesPorRegiao);
 router.get('/sementesPorMunicipio', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.sementesPorMunicipio);
 router.get('/countPorTipoCultivo', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.countPorTipoCultivo);
+router.get('/hectareMunicipio', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.sumAreaCultivo);
+router.get('/hectareRegiao', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.sumAreaCultivoRegiao);
 
 
 module.exports = router

@@ -1,14 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { StatisticsService } from '../../../services/statistics.service';
 import * as L from 'leaflet';
-import {
-  ApexNonAxisChartSeries,
-  ApexAxisChartSeries,
-  ApexChart,
-  ApexXAxis,
-  ApexResponsive,
-  ApexOptions
-} from 'ngx-apexcharts';
+import { ApexOptions } from 'ngx-apexcharts';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-home-admin',
@@ -20,12 +14,12 @@ export class HomeAdminComponent implements OnInit {
   totalAgricultores = 0;
   agricultoresAtendidos = 0;
   totalSementes = 0;
-  sementesRegiao = 0;
-  sementesMunicipio = 0;
 
   municipios: any[] = [];
   regioes: any[] = [];
   cultivo: any[] = [];
+
+  private map!: L.Map;
 
   constructor(private statisticsService: StatisticsService) {}
 
@@ -34,165 +28,166 @@ export class HomeAdminComponent implements OnInit {
     this.carregarGraficos();
   }
 
+  // ================= INDICADORES =================
   carregarIndicadores() {
-    this.statisticsService.contarAgricultores({}).subscribe((res) => {
-      // console.log('totalAgricultores', res);
-      this.totalAgricultores = res.total;
-    });
-
-    this.statisticsService.contarAtendidos({}).subscribe((res) => {
-      // console.log('reagricultoresAtendidoss', res);
-      this.agricultoresAtendidos = res.agricultores_atendidos;
-    });
-
-    this.statisticsService.sementesDistribuidas({}).subscribe((res) => {
-      // console.log('totalSementes', res);
-      this.totalSementes = res.total_sementes_distribuidas;
+    forkJoin({
+      agricultores: this.statisticsService.contarAgricultores({}),
+      atendidos: this.statisticsService.contarAtendidos({}),
+      sementes: this.statisticsService.sementesDistribuidas({}),
+    }).subscribe((res) => {
+      this.totalAgricultores = Number(res.agricultores.total) || 0;
+      this.agricultoresAtendidos =
+        Number(res.atendidos.agricultores_atendidos) || 0;
+      this.totalSementes =
+        Number(res.sementes.total_sementes_distribuidas) || 0;
     });
   }
 
+  // ================= GRÁFICOS =================
   carregarGraficos() {
-    // REGIÕES (BARRA)
+    // Agricultores por Região
     this.statisticsService.contarRegiao({}).subscribe((res) => {
       this.regiaoChart.series = [
-        {
-          name: 'Agricultores',
-          data: res.map((r: any) => Number(r.qtd_agricultores)),
-        },
+        { name: 'Agricultores', data: res.map((r: any) => Number(r.qtd_agricultores)) },
       ];
-
-      this.regiaoChart.xaxis!.categories = res.map(
-    (r: any) => r.nome_regiao,
-  );
-      this.regioes = res; // mantém para o mapa
+      this.regiaoChart.xaxis!.categories = res.map((r: any) => r.nome_regiao);
     });
 
-    // TIPO DE CULTIVO (DONUT)
+    // Cultivo (Donut)
     this.statisticsService.estatiticaCultivo({}).subscribe((res) => {
-      this.cultivoChart.series = res.map((c: any) =>
+      this.cultivoChart.series = res.map((c: any) => Number(c.qtd_agricultores));
+      this.cultivoChart.labels = res.map((c: any) => c.tipo_cultivo);
+    });
+
+    // Sementes por Região
+    this.statisticsService.sementesDistribuidasPorRegiao({}).subscribe((res) => {
+      this.regiaoSementesChart.series = [
+        { name: 'Sementes', data: res.map((r: any) => Number(r.total_sementes)) },
+      ];
+      this.regiaoSementesChart.xaxis!.categories = res.map(
+        (r: any) => r.nome_regiao,
+      );
+    });
+
+    // Agricultores por Município (Donut)
+    this.statisticsService.contarMunicipio({}).subscribe((res) => {
+      this.farmersMunicipioChart.series = res.map((c: any) =>
         Number(c.qtd_agricultores),
       );
-      this.cultivoChart.labels = res.map((c: any) => c.tipo_cultivo);
-      this.cultivo = res;
+      this.farmersMunicipioChart.labels = res.map(
+        (c: any) => c.nome_municipio,
+      );
     });
 
-    // REGIÕES (BARRA) Sementes por Região
+    // 🔴 IMPORTANTE: sementes por município + mapa
     this.statisticsService
-      .sementesDistribuidasPorRegiao({})
+      .sementesDistribuidasPorMunicipio({})
       .subscribe((res) => {
-        this.regiaoSementesChart.series = [
-          {
-            name: 'Agricultores',
-            data: res.map((r: any) => Number(r.total_sementes)),
-          },
-        ];
-
-        this.regiaoSementesChart.xaxis!.categories = res.map(
-          (r: any) => r.nome_regiao,
-        );
-
-        this.regioes = res; // mantém para o mapa
-      });
-
-    // TIPO DE CULTIVO (DONUT) Sementes por Município
-    this.statisticsService
-      .contarMunicipio({})
-      .subscribe((res) => {
-        this.farmersMunicipioChart.series = res.map((c: any) =>
-          Number(c.qtd_agricultores),
-        );
-        this.farmersMunicipioChart.labels = res.map(
-          (c: any) => c.nome_municipio,
-        );
         this.municipios = res;
         this.initMapa();
       });
+
+    // Área por Município
+    this.statisticsService.somaAreaCultivoMunicipio({}).subscribe((res) => {
+      this.cultivoMunicipioChart.series = [
+        { name: 'Área (ha)', data: res.map((r: any) => Number(r.area_algodao)) },
+      ];
+      this.cultivoMunicipioChart.xaxis!.categories = res.map(
+        (r: any) => r.nome_municipio,
+      );
+    });
+
+    // Área por Região
+    this.statisticsService.somaAreaCultivoRegiao({}).subscribe((res) => {
+      this.cultivoRegiaoChart.series = [
+        {
+          name: 'Área (ha)',
+          data: res.map((r: any) => Number(r.total_area_cultivo)),
+        },
+      ];
+      this.cultivoRegiaoChart.xaxis!.categories = res.map(
+        (r: any) => r.nome_regiao,
+      );
+    });
   }
 
   // ================= MAPA =================
-initMapa() {
-  const map = L.map('mapa-ceara').setView([-5.2, -39.5], 7);
+  initMapa() {
+    if (this.map) {
+      this.map.remove();
+    }
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap',
-  }).addTo(map);
+    this.map = L.map('mapa-ceara').setView([-5.2, -39.5], 7);
 
-  fetch('assets/geojson/geojs-mun.json')
-    .then(res => res.json())
-    .then(geoJson => {
-      L.geoJSON(geoJson, {
-        style: feature => this.estiloMunicipio(feature),
-        onEachFeature: (feature, layer) => {
-          const nome = feature.properties.name;
-          const qtd = this.getQtdPorMunicipio(nome);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+    }).addTo(this.map);
 
-          layer.bindPopup(`
-            <strong>${nome}</strong><br>
-            Sementes Distribuidas: ${qtd}
-          `);
-        },
-      }).addTo(map);
-    });
-}
+    fetch('assets/geojson/geojs-mun.json')
+      .then((res) => res.json())
+      .then((geoJson) => {
+        L.geoJSON(geoJson, {
+          style: (feature) => this.estiloMunicipio(feature),
+          onEachFeature: (feature, layer) => {
+            const nome = feature.properties.name;
+            const qtd = this.getQtdPorMunicipio(nome);
 
-normalize(text: string): string {
-  return text
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
-}
-
-getQtdPorMunicipio(nomeMunicipio: string): number {
-  const m = this.municipios.find(
-    x =>
-      this.normalize(x.nome_municipio) ===
-      this.normalize(nomeMunicipio)
-  );
-
-  if (!m) {
-    return 0;
+            layer.bindPopup(`
+              <strong>${nome}</strong><br>
+              Sementes Distribuídas: ${qtd}
+            `);
+          },
+        }).addTo(this.map);
+      });
   }
 
-  const qtd = parseInt(m.total_sementes as any, 10);
+  normalize(text: string): string {
+    return text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  }
 
-//   console.log({
-//   geojson: nomeMunicipio,
-//   api: m?.nome_municipio,
-//   valor: m?.total_sementes
-// });
+  getQtdPorMunicipio(nomeMunicipio: string): number {
+    const municipio = this.municipios.find(
+      (m) =>
+        this.normalize(m.nome_municipio) ===
+        this.normalize(nomeMunicipio),
+    );
 
-  return isNaN(qtd) ? 0 : qtd;
-}
+    if (!municipio) return 0;
 
+    const qtd = Number(municipio.total_sementes);
+    return isNaN(qtd) ? 0 : qtd;
+  }
 
-estiloMunicipio(feature: any) {
-  const nome = feature.properties.name;
-  const qtd = this.getQtdPorMunicipio(nome);
+  estiloMunicipio(feature: any) {
+    const qtd = this.getQtdPorMunicipio(feature.properties.name);
+    return {
+      fillColor: this.getCor(qtd),
+      weight: 1,
+      color: '#555',
+      fillOpacity: 0.75,
+    };
+  }
 
-  return {
-    fillColor: this.getCor(qtd),
-    weight: 1,
-    color: '#555',
-    fillOpacity: 0.75,
-  };
-}
+  getCor(qtd: number): string {
+    return qtd > 20
+      ? '#800026'
+      : qtd > 10
+      ? '#BD0026'
+      : qtd > 5
+      ? '#E31A1C'
+      : qtd > 1
+      ? '#FD8D3C'
+      : '#FFEDA0';
+  }
 
-getCor(qtd: number): string {
-  return qtd > 20 ? '#800026' :
-         qtd > 10 ? '#BD0026' :
-         qtd > 5  ? '#E31A1C' :
-         qtd > 1  ? '#FD8D3C' :
-                    '#FFEDA0';
-}
-  // ================= FIM MAPA =================
-
+  // ================= CONFIG CHARTS =================
   cultivoChart: ApexOptions = {
     series: [],
-    chart: {
-      type: 'donut',
-      height: 280,
-    },
+    chart: { type: 'donut', height: 280 },
     title: {
     text: 'Tipo de Cultivo',
     align: 'center',
@@ -202,23 +197,11 @@ getCor(qtd: number): string {
     },
   },
     labels: [],
-    responsive: [
-      {
-        breakpoint: 480,
-        options: {
-          chart: { width: 300 },
-          legend: { position: 'bottom' },
-        },
-      },
-    ],
   };
 
   farmersMunicipioChart: ApexOptions = {
     series: [],
-    chart: {
-      type: 'donut',
-      height: 280,
-    },
+    chart: { type: 'donut', height: 280 },
     title: {
     text: 'Agricultores cadastrados',
     align: 'center',
@@ -228,23 +211,11 @@ getCor(qtd: number): string {
     },
   },
     labels: [],
-    responsive: [
-      {
-        breakpoint: 480,
-        options: {
-          chart: { width: 300 },
-          legend: { position: 'bottom' },
-        },
-      },
-    ],
   };
 
   regiaoChart: ApexOptions = {
     series: [],
-    chart: {
-      type: 'bar',
-      height: 280,
-    },
+    chart: { type: 'bar', height: 280 },
     title: {
     text: 'Agricultores por Região',
     align: 'center',
@@ -253,17 +224,12 @@ getCor(qtd: number): string {
       fontWeight: '600',
     },
   },
-    xaxis: {
-      categories: [],
-    },
+    xaxis: { categories: [] },
   };
 
   regiaoSementesChart: ApexOptions = {
     series: [],
-    chart: {
-      type: 'bar',
-      height: 280,
-    },
+    chart: { type: 'bar', height: 280 },
     title: {
     text: 'Distribuição de sementes por região',
     align: 'center',
@@ -272,8 +238,34 @@ getCor(qtd: number): string {
       fontWeight: '600',
     },
   },
-    xaxis: {
-      categories: [],
+    xaxis: { categories: [] },
+  };
+
+  cultivoMunicipioChart: ApexOptions = {
+    series: [],
+    chart: { type: 'bar', height: 280 },
+    title: {
+    text: 'Area de Cultivo por Município (ha)',
+    align: 'center',
+    style: {
+      fontSize: '18px',
+      fontWeight: '600',
     },
+  },
+    xaxis: { categories: [] },
+  };
+
+  cultivoRegiaoChart: ApexOptions = {
+    series: [],
+    chart: { type: 'bar', height: 280 },
+    title: {
+    text: 'Area de Cultivo por Região (ha)',
+    align: 'center',
+    style: {
+      fontSize: '18px',
+      fontWeight: '600',
+    },
+  },
+    xaxis: { categories: [] },
   };
 }

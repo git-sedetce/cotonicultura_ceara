@@ -10,13 +10,13 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <div class="content">
 
-    <!-- MAPA -->
+    <!-- MAPA (ESQUERDA) -->
     <div class="map-container">
       <h4 class="map-title">Distribuição de Sementes por Município – Ceará</h4>
       <div id="mapa-ceara" class="mapa"></div>
     </div>
 
-    <!-- GRÁFICOS -->
+    <!-- GRÁFICOS (DIREITA) -->
     <div class="charts-container">
 
       <div class="chart-card">
@@ -26,15 +26,6 @@
           [labels]="cultivoChart.labels!"
           [title]="cultivoChart.title!"
           [responsive]="cultivoChart.responsive!">
-        </apx-chart>
-      </div>
-
-      <div class="chart-card">
-        <apx-chart
-          [series]="regiaoChart.series!"
-          [chart]="regiaoChart.chart!"
-          [title]="regiaoChart.title!"
-          [xaxis]="regiaoChart.xaxis!">
         </apx-chart>
       </div>
 
@@ -50,6 +41,15 @@
 
       <div class="chart-card">
         <apx-chart
+          [series]="regiaoChart.series!"
+          [chart]="regiaoChart.chart!"
+          [title]="regiaoChart.title!"
+          [xaxis]="regiaoChart.xaxis!">
+        </apx-chart>
+      </div>
+
+      <div class="chart-card">
+        <apx-chart
           [series]="regiaoSementesChart.series!"
           [chart]="regiaoSementesChart.chart!"
           [title]="regiaoSementesChart.title!"
@@ -57,8 +57,25 @@
         </apx-chart>
       </div>
 
+      <div class="chart-card">
+        <apx-chart
+          [series]="cultivoMunicipioChart.series!"
+          [chart]="cultivoMunicipioChart.chart!"
+          [title]="cultivoMunicipioChart.title!"
+          [xaxis]="cultivoMunicipioChart.xaxis!">
+        </apx-chart>
+      </div>
+
+      <div class="chart-card">
+        <apx-chart
+          [series]="cultivoRegiaoChart.series!"
+          [chart]="cultivoRegiaoChart.chart!"
+          [title]="cultivoRegiaoChart.title!"
+          [xaxis]="cultivoRegiaoChart.xaxis!">
+        </apx-chart>
+      </div>
+
     </div>
   </div>
 
 </div>
-

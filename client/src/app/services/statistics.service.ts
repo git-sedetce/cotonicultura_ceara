@@ -40,4 +40,12 @@ export class StatisticsService {
   estatiticaCultivo(data: any): Observable<any> {
     return this.http.get(environment.apiUrl + 'countPorTipoCultivo', data);
   }
+
+  somaAreaCultivoMunicipio(data: any): Observable<any> {
+    return this.http.get(environment.apiUrl + 'hectareMunicipio', data);
+  }
+
+  somaAreaCultivoRegiao(data: any): Observable<any> {
+    return this.http.get(environment.apiUrl + 'hectareRegiao', data);
+  }
 }
