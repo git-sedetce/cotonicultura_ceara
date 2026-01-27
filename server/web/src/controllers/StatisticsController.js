@@ -122,6 +122,28 @@ class StatisticsController {
     }
   }
 
+  static async totalAreaCultivo(req, res) {
+    try {
+      const resultado = await database.produtor_rural.findOne({
+        attributes: [
+          [
+            fn("COALESCE", fn("SUM", col("area_algodao")), 0),
+            "area_algodao",
+          ],
+        ],
+      });
+
+      return res.status(200).json({
+        total_area_cultivo: resultado.get("area_algodao"),
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: "Erro ao somar área de cultivo",
+      });
+    }
+  }
+
   static async sementesPorRegiao(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({

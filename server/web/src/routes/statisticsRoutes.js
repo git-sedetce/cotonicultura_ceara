@@ -9,6 +9,7 @@ router.get('/countPorMunicipio', auth.authenticatedUser, checkRole.checkRole([1,
 router.get('/countPorRegiao', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.countPorRegiao);
 router.get('/countAtendidos', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.countAgricultoresAtendidos);
 router.get('/totalSementesDistribuidas', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.totalSementesDistribuidas);
+router.get('/totalAreaCultivo', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.totalAreaCultivo);
 router.get('/sementesPorRegiao', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.sementesPorRegiao);
 router.get('/sementesPorMunicipio', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.sementesPorMunicipio);
 router.get('/countPorTipoCultivo', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.countPorTipoCultivo);

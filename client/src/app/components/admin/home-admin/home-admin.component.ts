@@ -14,6 +14,7 @@ export class HomeAdminComponent implements OnInit {
   totalAgricultores = 0;
   agricultoresAtendidos = 0;
   totalSementes = 0;
+  areaParaCultivo = 0;
 
   municipios: any[] = [];
   regioes: any[] = [];
@@ -34,12 +35,16 @@ export class HomeAdminComponent implements OnInit {
       agricultores: this.statisticsService.contarAgricultores({}),
       atendidos: this.statisticsService.contarAtendidos({}),
       sementes: this.statisticsService.sementesDistribuidas({}),
+      area: this.statisticsService.areaParaCultivar({}),
     }).subscribe((res) => {
       this.totalAgricultores = Number(res.agricultores.total) || 0;
       this.agricultoresAtendidos =
         Number(res.atendidos.agricultores_atendidos) || 0;
       this.totalSementes =
         Number(res.sementes.total_sementes_distribuidas) || 0;
+        this.totalSementes =
+        Number(res.sementes.total_sementes_distribuidas) || 0;
+      this.areaParaCultivo = Number(res.area.total_area_cultivo) || 0;
     });
   }
 

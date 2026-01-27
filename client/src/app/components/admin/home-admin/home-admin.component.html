@@ -5,6 +5,7 @@
     <div class="card">Total Agricultores<br><strong>{{ totalAgricultores }}</strong></div>
     <div class="card">Atendidos<br><strong>{{ agricultoresAtendidos }}</strong></div>
     <div class="card">Sementes Distribuídas<br><strong>{{ totalSementes }}</strong></div>
+    <div class="card">Área para Cultivo<br><strong>{{ areaParaCultivo }} ha</strong></div>
   </div>
 
   <!-- CONTEÚDO PRINCIPAL -->
@@ -41,24 +42,6 @@
 
       <div class="chart-card">
         <apx-chart
-          [series]="regiaoChart.series!"
-          [chart]="regiaoChart.chart!"
-          [title]="regiaoChart.title!"
-          [xaxis]="regiaoChart.xaxis!">
-        </apx-chart>
-      </div>
-
-      <div class="chart-card">
-        <apx-chart
-          [series]="regiaoSementesChart.series!"
-          [chart]="regiaoSementesChart.chart!"
-          [title]="regiaoSementesChart.title!"
-          [xaxis]="regiaoSementesChart.xaxis!">
-        </apx-chart>
-      </div>
-
-      <div class="chart-card">
-        <apx-chart
           [series]="cultivoMunicipioChart.series!"
           [chart]="cultivoMunicipioChart.chart!"
           [title]="cultivoMunicipioChart.title!"
@@ -75,6 +58,23 @@
         </apx-chart>
       </div>
 
+      <div class="chart-card">
+        <apx-chart
+          [series]="regiaoChart.series!"
+          [chart]="regiaoChart.chart!"
+          [title]="regiaoChart.title!"
+          [xaxis]="regiaoChart.xaxis!">
+        </apx-chart>
+      </div>
+
+      <div class="chart-card">
+        <apx-chart
+          [series]="regiaoSementesChart.series!"
+          [chart]="regiaoSementesChart.chart!"
+          [title]="regiaoSementesChart.title!"
+          [xaxis]="regiaoSementesChart.xaxis!">
+        </apx-chart>
+      </div>
 
   </div>
 
