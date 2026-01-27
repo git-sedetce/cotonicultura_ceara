@@ -42,8 +42,6 @@ export class HomeAdminComponent implements OnInit {
         Number(res.atendidos.agricultores_atendidos) || 0;
       this.totalSementes =
         Number(res.sementes.total_sementes_distribuidas) || 0;
-        this.totalSementes =
-        Number(res.sementes.total_sementes_distribuidas) || 0;
       this.areaParaCultivo = Number(res.area.total_area_cultivo) || 0;
     });
   }
@@ -64,6 +62,22 @@ export class HomeAdminComponent implements OnInit {
         Number(c.qtd_agricultores),
       );
       this.farmersMunicipioChart.labels = res.map((c: any) => c.nome_municipio);
+    });
+
+    // Agricultores por Município (Donut)
+    this.statisticsService.somaAreaCultivoMunicipio({}).subscribe((res) => {
+      this.cultivoMunicipioChart.series = res.map((c: any) =>
+        Number(c.area_algodao),
+      );
+      this.cultivoMunicipioChart.labels = res.map((c: any) => c.nome_municipio);
+    });
+
+    // Agricultores por Município (Donut)
+    this.statisticsService.somaAreaCultivoRegiao({}).subscribe((res) => {
+      this.cultivoRegiaoChart.series = res.map((c: any) =>
+        Number(c.total_area_cultivo),
+      );
+      this.cultivoRegiaoChart.labels = res.map((c: any) => c.nome_regiao);
     });
 
     // Agricultores por Região
@@ -113,46 +127,6 @@ export class HomeAdminComponent implements OnInit {
         this.municipios = res;
         this.initMapa();
       });
-
-    // Área por Município
-    this.statisticsService.somaAreaCultivoMunicipio({}).subscribe((res) => {
-
-      const categorias = res.map((r: any) => r.nome_municipio);
-      const dados = res.map((r: any) => Number(r.area_algodao));
-
-      this.cultivoMunicipioChart = {
-        ...this.cultivoMunicipioChart,
-        series: [
-          {
-            name: 'Área (ha)',
-            data: dados,
-          },
-        ],
-        xaxis: {
-          categories: categorias,
-        },
-      };
-    });
-
-    // Área por Região
-    this.statisticsService.somaAreaCultivoRegiao({}).subscribe((res) => {
-
-      const categorias = res.map((r: any) => r.nome_regiao);
-      const dados = res.map((r: any) => Number(r.total_area_cultivo));
-
-      this.cultivoRegiaoChart = {
-        ...this.cultivoRegiaoChart,
-        series: [
-          {
-            name: 'Área (ha)',
-            data: dados,
-          },
-        ],
-        xaxis: {
-          categories: categorias,
-        },
-      };
-    });
   }
 
   // ================= MAPA =================
@@ -255,6 +229,34 @@ export class HomeAdminComponent implements OnInit {
     labels: [],
   };
 
+  cultivoMunicipioChart: ApexOptions = {
+    series: [],
+    chart: { type: 'donut', height: 240 },
+    title: {
+      text: 'Area de Cultivo por Município (ha)',
+      align: 'center',
+      style: {
+        fontSize: '18px',
+        fontWeight: '600',
+      },
+    },
+    labels: [],
+  };
+
+  cultivoRegiaoChart: ApexOptions = {
+    series: [],
+    chart: { type: 'donut', height: 240 },
+    title: {
+      text: 'Area de Cultivo por Região (ha)',
+      align: 'center',
+      style: {
+        fontSize: '18px',
+        fontWeight: '600',
+      },
+    },
+    labels: [],
+  };
+
   regiaoChart: ApexOptions = {
     series: [],
     chart: { type: 'bar', height: 260 },
@@ -285,33 +287,33 @@ export class HomeAdminComponent implements OnInit {
     xaxis: { categories: [] },
   };
 
-  cultivoMunicipioChart: ApexOptions = {
-    series: [],
-    chart: { type: 'bar', height: 260 },
-    title: {
-      text: 'Area de Cultivo por Município (ha)',
-      align: 'center',
-      margin: 50,
-      style: {
-        fontSize: '18px',
-        fontWeight: '600',
-      },
-    },
-    xaxis: { categories: [] },
-  };
+  // cultivoMunicipioChart: ApexOptions = {
+  //   series: [],
+  //   chart: { type: 'bar', height: 260 },
+  //   title: {
+  //     text: 'Area de Cultivo por Município (ha)',
+  //     align: 'center',
+  //     margin: 50,
+  //     style: {
+  //       fontSize: '18px',
+  //       fontWeight: '600',
+  //     },
+  //   },
+  //   xaxis: { categories: [] },
+  // };
 
-  cultivoRegiaoChart: ApexOptions = {
-    series: [],
-    chart: { type: 'bar', height: 260 },
-    title: {
-      text: 'Area de Cultivo por Região (ha)',
-      align: 'center',
-      margin: 50,
-      style: {
-        fontSize: '18px',
-        fontWeight: '600',
-      },
-    },
-    xaxis: { categories: [] },
-  };
+  // cultivoRegiaoChart: ApexOptions = {
+  //   series: [],
+  //   chart: { type: 'bar', height: 260 },
+  //   title: {
+  //     text: 'Area de Cultivo por Região (ha)',
+  //     align: 'center',
+  //     margin: 50,
+  //     style: {
+  //       fontSize: '18px',
+  //       fontWeight: '600',
+  //     },
+  //   },
+  //   xaxis: { categories: [] },
+  // };
 }
