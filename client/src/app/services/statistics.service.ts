@@ -48,4 +48,8 @@ export class StatisticsService {
   somaAreaCultivoRegiao(data: any): Observable<any> {
     return this.http.get(environment.apiUrl + 'hectareRegiao', data);
   }
+
+  areaParaCultivar(data: any): Observable<any> {
+    return this.http.get(environment.apiUrl + 'totalAreaCultivo', data);
+  }
 }

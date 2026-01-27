@@ -275,7 +275,6 @@ class AnexoControllers {
           process.env.SPLIT, // src
           anexoExistente.path, // caminho armazenado no banco
         );
-        console.log("caminhoAntigo", caminhoAntigo);
 
         if (fs.existsSync(caminhoAntigo)) {
           fs.unlinkSync(caminhoAntigo);
@@ -286,7 +285,6 @@ class AnexoControllers {
       }
       // 3️⃣ Pega o novo caminho
       const novoCaminho = file.path.split(process.env.SPLIT)[1];
-      console.log("novoCaminho", novoCaminho);
 
       // remove a primeira barra caso exista
       const novoCaminhoLimpo = novoCaminho.startsWith("/")

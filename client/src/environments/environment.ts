@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:1426/',
+  apiUrl: 'https://api-cotonicultura.sde.ce.gov.br/',
 };
 
 //apiUrl: 'https://api-gestaoprojetos.sde.ce.gov.br/',

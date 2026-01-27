@@ -26,11 +26,9 @@ export class ResetSexhaComponent implements OnInit {
   }
 
   reset(): void {
-    console.log('nova_senha',this.resetSenha)
     this.resetSenha.user_password = this.serviceUser.CriptografarMD5(this.resetSenha.user_password);
     this.serviceUser.reset_password(this.resetSenha).subscribe({
       next:(res:any) => {
-        console.log('res',res)
         this.toastr.success('Senha alterada com sucesso!!!')
         this.router.navigate(['/login'])
       },error: (e) => {
