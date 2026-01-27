@@ -2,6 +2,8 @@
 const {
   Model
 } = require('sequelize');
+
+const formatarTextoPtBr = require('../utils/formatarTextoPtBr');
 module.exports = (sequelize, DataTypes) => {
   class produtor_rural extends Model {
     /**
@@ -33,6 +35,35 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'produtor_rural',
+
+    // ✅ HOOKS NO LUGAR CERTO
+      hooks: {
+        beforeCreate: (instance) => {
+          formatarCamposString(instance);
+        },
+        beforeUpdate: (instance) => {
+          formatarCamposString(instance);
+        }
+      }
   });
   return produtor_rural;
 };
+
+const CAMPOS_EXCLUIDOS = [
+  'pedido', 'regime_cultivo'
+];
+
+// 🔹 Função genérica: percorre TODOS os campos STRING
+function formatarCamposString(instance) {
+  Object.keys(instance.dataValues).forEach((campo) => {
+
+    // ⛔ pula campos excluídos
+    if (CAMPOS_EXCLUIDOS.includes(campo)) return;
+
+    const valor = instance.dataValues[campo];
+
+    if (typeof valor === 'string') {
+      instance.dataValues[campo] = formatarTextoPtBr(valor.trim());
+    }
+  });
+}
