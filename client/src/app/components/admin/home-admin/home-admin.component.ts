@@ -21,6 +21,7 @@ export class HomeAdminComponent implements OnInit {
   cultivo: any[] = [];
 
   private map!: L.Map;
+  mapaFullscreen = false;
 
   constructor(private statisticsService: StatisticsService) {}
 
@@ -121,12 +122,58 @@ export class HomeAdminComponent implements OnInit {
       });
 
     // 🔴 IMPORTANTE: sementes por município + mapa
-    this.statisticsService
-      .sementesDistribuidasPorMunicipio({})
-      .subscribe((res) => {
-        this.municipios = res;
-        this.initMapa();
-      });
+    this.statisticsService.dadosMapa().subscribe((res) => {
+      this.municipios = res;
+      console.log('res', res);
+      this.initMapa();
+    });
+  }
+
+  //PONTOS DE DISTRIBUIÇÃO
+
+  pontosDistribuicao = [
+    {
+      nome: 'Tauá',
+      lat: -6.0029,
+      lng: -40.2928,
+    },
+    {
+      nome: 'Morada Nova',
+      lat: -5.1077,
+      lng: -38.3721,
+    },
+    {
+      nome: 'Quixeramobim',
+      lat: -5.1989,
+      lng: -39.2951,
+    },
+  ];
+
+  iconeDistribuicao = L.icon({
+    iconUrl: 'assets/icons/pin-distribuicao.png', // pode ser o pin padrão também
+    iconSize: [30, 40],
+    iconAnchor: [15, 40],
+    popupAnchor: [0, -40],
+  });
+
+  adicionarPontosDistribuicao() {
+    this.pontosDistribuicao.forEach((ponto) => {
+      L.marker([ponto.lat, ponto.lng], {
+        icon: this.iconeDistribuicao,
+      }).addTo(this.map).bindPopup(`
+        <strong>${ponto.nome}</strong><br>
+        📍 Ponto de distribuição de sementes
+      `);
+    });
+  }
+
+  toggleFullscreen() {
+    this.mapaFullscreen = !this.mapaFullscreen;
+
+    // Aguarda o DOM atualizar antes de recalcular o mapa
+    setTimeout(() => {
+      this.map.invalidateSize();
+    }, 300);
   }
 
   // ================= MAPA =================
@@ -144,18 +191,24 @@ export class HomeAdminComponent implements OnInit {
     fetch('assets/geojson/geojs-mun.json')
       .then((res) => res.json())
       .then((geoJson) => {
+        // 🔹 Municípios (polígonos)
         L.geoJSON(geoJson, {
           style: (feature) => this.estiloMunicipio(feature),
           onEachFeature: (feature, layer) => {
             const nome = feature.properties.name;
-            const qtd = this.getQtdPorMunicipio(nome);
+            const dados = this.getDadosMunicipio(nome);
 
             layer.bindPopup(`
-              <strong>${nome}</strong><br>
-              Sementes Distribuídas: ${qtd}
-            `);
+            <strong>${nome}</strong><br>
+            🌱 Sementes distribuídas: <strong>${dados.sementes}</strong><br>
+            👩‍🌾 Agricultores cadastrados: <strong>${dados.agricultores}</strong><br>
+            🌾 Área de algodão: <strong>${dados.area.toFixed(2)} ha</strong>
+          `);
           },
         }).addTo(this.map);
+
+        // 🔴 Pins dos pontos de distribuição
+        this.adicionarPontosDistribuicao();
       });
   }
 
@@ -167,21 +220,30 @@ export class HomeAdminComponent implements OnInit {
       .trim();
   }
 
-  getQtdPorMunicipio(nomeMunicipio: string): number {
+  getDadosMunicipio(nomeMunicipio: string) {
     const municipio = this.municipios.find(
       (m) => this.normalize(m.nome_municipio) === this.normalize(nomeMunicipio),
     );
 
-    if (!municipio) return 0;
+    if (!municipio) {
+      return {
+        sementes: 0,
+        agricultores: 0,
+        area: 0,
+      };
+    }
 
-    const qtd = Number(municipio.total_sementes);
-    return isNaN(qtd) ? 0 : qtd;
+    return {
+      sementes: Number(municipio.total_sementes) || 0,
+      agricultores: Number(municipio.total_agricultores) || 0,
+      area: Number(municipio.total_area_algodao) || 0,
+    };
   }
 
   estiloMunicipio(feature: any) {
-    const qtd = this.getQtdPorMunicipio(feature.properties.name);
+    const dados = this.getDadosMunicipio(feature.properties.name);
     return {
-      fillColor: this.getCor(qtd),
+      fillColor: this.getCor(dados.agricultores),
       weight: 1,
       color: '#555',
       fillOpacity: 0.75,

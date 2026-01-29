@@ -12,70 +12,59 @@
   <div class="dashboard-grid">
 
     <!-- MAPA (ESQUERDA) -->
-    <div class="map-container">
-      <h4 class="map-title">Distribuição de Sementes por Município – Ceará</h4>
+
+    <div class="map-wrapper" [class.fullscreen]="mapaFullscreen">
+      <div class="map-header">
+        <h4 class="map-title">Acompanhamento por Município</h4>
+
+        <button class="btn-fullscreen" (click)="toggleFullscreen()">
+          {{ mapaFullscreen ? 'Sair da tela cheia' : 'Tela cheia' }}
+        </button>
+      </div>
+
       <div id="mapa-ceara" class="mapa"></div>
     </div>
 
     <!-- GRÁFICOS (DIREITA) -->
 
-      <div class="chart-card">
-        <apx-chart
-          [series]="cultivoChart.series!"
-          [chart]="cultivoChart.chart!"
-          [labels]="cultivoChart.labels!"
-          [title]="cultivoChart.title!"
-          [responsive]="cultivoChart.responsive!">
-        </apx-chart>
-      </div>
+    <div class="chart-card">
+      <apx-chart [series]="cultivoChart.series!" [chart]="cultivoChart.chart!" [labels]="cultivoChart.labels!"
+        [title]="cultivoChart.title!" [responsive]="cultivoChart.responsive!">
+      </apx-chart>
+    </div>
 
-      <div class="chart-card">
-        <apx-chart
-          [series]="farmersMunicipioChart.series!"
-          [chart]="farmersMunicipioChart.chart!"
-          [labels]="farmersMunicipioChart.labels!"
-          [title]="farmersMunicipioChart.title!"
-          [responsive]="farmersMunicipioChart.responsive!">
-        </apx-chart>
-      </div>
+    <div class="chart-card">
+      <apx-chart [series]="farmersMunicipioChart.series!" [chart]="farmersMunicipioChart.chart!"
+        [labels]="farmersMunicipioChart.labels!" [title]="farmersMunicipioChart.title!"
+        [responsive]="farmersMunicipioChart.responsive!">
+      </apx-chart>
+    </div>
 
-      <div class="chart-card">
-        <apx-chart
-          [series]="cultivoMunicipioChart.series!"
-          [chart]="cultivoMunicipioChart.chart!"
-          [labels]="cultivoMunicipioChart.labels!"
-          [title]="cultivoMunicipioChart.title!"
-          [responsive]="cultivoMunicipioChart.responsive!">
-        </apx-chart>
-      </div>
+    <div class="chart-card">
+      <apx-chart [series]="cultivoMunicipioChart.series!" [chart]="cultivoMunicipioChart.chart!"
+        [labels]="cultivoMunicipioChart.labels!" [title]="cultivoMunicipioChart.title!"
+        [responsive]="cultivoMunicipioChart.responsive!">
+      </apx-chart>
+    </div>
 
-      <div class="chart-card">
-        <apx-chart
-          [series]="cultivoRegiaoChart.series!"
-          [chart]="cultivoRegiaoChart.chart!"
-          [labels]="cultivoRegiaoChart.labels!"
-          [title]="cultivoRegiaoChart.title!"
-          [responsive]="cultivoRegiaoChart.responsive!">
-        </apx-chart>
-      </div>
+    <div class="chart-card">
+      <apx-chart [series]="cultivoRegiaoChart.series!" [chart]="cultivoRegiaoChart.chart!"
+        [labels]="cultivoRegiaoChart.labels!" [title]="cultivoRegiaoChart.title!"
+        [responsive]="cultivoRegiaoChart.responsive!">
+      </apx-chart>
+    </div>
 
-      <div class="chart-card">
-        <apx-chart
-          [series]="regiaoChart.series!"
-          [chart]="regiaoChart.chart!"
-          [title]="regiaoChart.title!"
-          [xaxis]="regiaoChart.xaxis!">
-        </apx-chart>
-      </div>
+    <div class="chart-card">
+      <apx-chart [series]="regiaoChart.series!" [chart]="regiaoChart.chart!" [title]="regiaoChart.title!"
+        [xaxis]="regiaoChart.xaxis!">
+      </apx-chart>
+    </div>
 
-      <div class="chart-card">
-        <apx-chart
-          [series]="regiaoSementesChart.series!"
-          [chart]="regiaoSementesChart.chart!"
-          [title]="regiaoSementesChart.title!"
-          [xaxis]="regiaoSementesChart.xaxis!">
-        </apx-chart>
-      </div>
+    <div class="chart-card">
+      <apx-chart [series]="regiaoSementesChart.series!" [chart]="regiaoSementesChart.chart!"
+        [title]="regiaoSementesChart.title!" [xaxis]="regiaoSementesChart.xaxis!">
+      </apx-chart>
+    </div>
 
   </div>
 

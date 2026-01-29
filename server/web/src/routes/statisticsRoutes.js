@@ -16,5 +16,7 @@ router.get('/countPorTipoCultivo', auth.authenticatedUser, checkRole.checkRole([
 router.get('/hectareMunicipio', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.sumAreaCultivo);
 router.get('/hectareRegiao', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.sumAreaCultivoRegiao);
 
+router.get('/mapa', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.dadosMapa);
+
 
 module.exports = router

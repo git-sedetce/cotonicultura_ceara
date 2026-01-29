@@ -33,8 +33,8 @@ export class StatisticsService {
     return this.http.get(environment.apiUrl + 'sementesPorRegiao', data);
   }
 
-  sementesDistribuidasPorMunicipio(data: any): Observable<any> {
-    return this.http.get(environment.apiUrl + 'sementesPorMunicipio', data);
+  sementesDistribuidasPorMunicipio(): Observable<any> {
+    return this.http.get(environment.apiUrl + 'sementesPorMunicipio');
   }
 
   estatiticaCultivo(data: any): Observable<any> {
@@ -51,5 +51,9 @@ export class StatisticsService {
 
   areaParaCultivar(data: any): Observable<any> {
     return this.http.get(environment.apiUrl + 'totalAreaCultivo', data);
+  }
+
+  dadosMapa(): Observable<any> {
+    return this.http.get(environment.apiUrl + 'mapa');
   }
 }

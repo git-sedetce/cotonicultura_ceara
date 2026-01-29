@@ -304,6 +304,50 @@ class StatisticsController {
         .json({ message: "Erro ao somar área de cultivo por região" });
     }
   }
+
+  static async dadosMapa(req, res) {
+  try {
+    const resultado = await database.produtor_rural.findAll({
+      attributes: [
+        [col("ass_produtor_rural_cidade.nome_municipio"), "nome_municipio"],
+
+        // Soma de sementes distribuídas
+        [
+          fn("COALESCE", fn("SUM", col("sementes_recebidas")), 0),
+          "total_sementes",
+        ],
+
+        // Quantidade de agricultores cadastrados
+        [
+          fn("COUNT", col("produtor_rural.id")),
+          "total_agricultores",
+        ],
+
+        // Soma da área de cultivo de algodão
+        [
+          fn("COALESCE", fn("SUM", col("area_algodao")), 0),
+          "total_area_algodao",
+        ],
+      ],
+      include: [
+        {
+          association: "ass_produtor_rural_cidade",
+          attributes: [],
+        },
+      ],
+      group: ["ass_produtor_rural_cidade.nome_municipio"],
+      order: [[col("ass_produtor_rural_cidade.nome_municipio"), "ASC"]],
+    });
+
+    return res.status(200).json(resultado);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Erro ao buscar dados por município",
+    });
+  }
+}
+
 }
 
 module.exports = StatisticsController;
