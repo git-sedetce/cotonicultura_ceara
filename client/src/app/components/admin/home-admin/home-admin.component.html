@@ -12,17 +12,18 @@
   <div class="dashboard-grid">
 
     <!-- MAPA (ESQUERDA) -->
+    <div class="map-container">
+      <div class="map-wrapper" [class.fullscreen]="mapaFullscreen">
+        <div class="map-header">
+          <h4 class="map-title">Acompanhamento por Município</h4>
 
-    <div class="map-wrapper" [class.fullscreen]="mapaFullscreen">
-      <div class="map-header">
-        <h4 class="map-title">Acompanhamento por Município</h4>
+          <button class="btn-fullscreen" (click)="toggleFullscreen()">
+            {{ mapaFullscreen ? 'Sair da tela cheia' : 'Tela cheia' }}
+          </button>
+        </div>
 
-        <button class="btn-fullscreen" (click)="toggleFullscreen()">
-          {{ mapaFullscreen ? 'Sair da tela cheia' : 'Tela cheia' }}
-        </button>
+        <div id="mapa-ceara" class="mapa"></div>
       </div>
-
-      <div id="mapa-ceara" class="mapa"></div>
     </div>
 
     <!-- GRÁFICOS (DIREITA) -->
