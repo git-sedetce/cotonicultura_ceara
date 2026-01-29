@@ -18,65 +18,90 @@
       <h3 class="text-center text-uppercase m-0">Agricultores Cadastrados</h3>
     </div>
 
-    <form [formGroup]="formFiltro" class="row g-2 align-items-end mb-3">
+    <form [formGroup]="formFiltro" class="mb-3">
+      <div class="row g-2 align-items-end mb-2">
 
-      <div class="col-lg-4 col-md-6 col-sm-12">
-        <input type="text" class="form-control shadow-sm" placeholder="🔍 Pesquisar por Nome ou Email..."
-          formControlName="nome" (keyup)="filtrarUsuarios()" />
-      </div>
-
-      <div class="col-lg-2 col-md-6 col-sm-6">
-        <select class="form-select shadow-sm" formControlName="cidade" (change)="filtrarUsuarios()">
-          <option value="">Cidade</option>
-          <option *ngFor="let c of lista_cidade" [value]="c.nome_municipio">
-            {{ c.nome_municipio }}
-          </option>
-        </select>
-      </div>
-
-      <div class="col-lg-2 col-md-6 col-sm-6">
-        <select class="form-select shadow-sm" formControlName="regiao" (change)="filtrarUsuarios()">
-          <option value="">Região</option>
-          <option *ngFor="let r of lista_regiao" [value]="r.nome">
-            {{ r.nome }}
-          </option>
-        </select>
-      </div>
-
-      <div class="col-lg-2 col-md-6 col-sm-6">
-        <select class="form-select shadow-sm" formControlName="pedidoAtendido" (change)="filtrarUsuarios()">
-          <option value="">Pedido Atendido</option>
-          <option [ngValue]="true">Sim</option>
-          <option [ngValue]="false">Não</option>
-        </select>
-      </div>
-
-      <!-- Botões com mesma altura dos selects -->
-      <div class="col-lg-2 col-md-12 col-sm-12">
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-success btn-form w-100" (click)="limparFiltros()">
-            Exibir todos
-          </button>
-
-          <div class="btn-group w-100">
-            <button type="button" [disabled]="profile_id === 2 || profile_id === 4" class="btn btn-outline-primary btn-form dropdown-toggle" data-bs-toggle="dropdown">
-              Exportar
-            </button>
-            <ul class="dropdown-menu">
-              <li>
-                <button class="dropdown-item" (click)="exportarPlanilha('todos')">
-                  Todos os agricultores
-                </button>
-              </li>
-              <li>
-                <button class="dropdown-item" [disabled]="!filtroFarmers" (click)="exportarPlanilha('filtrados')">
-                  Agricultores filtrados
-                </button>
-              </li>
-            </ul>
-          </div>
-
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <input type="text" class="form-control shadow-sm" placeholder="🔍 Pesquisar por Nome ou Email..."
+            formControlName="nome" (keyup)="filtrarUsuarios()" />
         </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-6">
+          <select class="form-select shadow-sm" formControlName="cidade" (change)="filtrarUsuarios()">
+            <option value="">Cidade</option>
+            <option *ngFor="let c of lista_cidade" [value]="c.nome_municipio">
+              {{ c.nome_municipio }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-6">
+          <select class="form-select shadow-sm" formControlName="regiao" (change)="filtrarUsuarios()">
+            <option value="">Região</option>
+            <option *ngFor="let r of lista_regiao" [value]="r.nome">
+              {{ r.nome }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-6">
+          <select class="form-select shadow-sm" formControlName="pedidoAtendido" (change)="filtrarUsuarios()">
+            <option value="">Pedido Atendido</option>
+            <option [ngValue]="true">Sim</option>
+            <option [ngValue]="false">Não</option>
+          </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-6">
+          <select class="form-select shadow-sm" formControlName="cadastroADAGRI" (change)="filtrarUsuarios()">
+            <option value="">Cadastro ADAGRI</option>
+            <option [ngValue]="true">Sim</option>
+            <option [ngValue]="false">Não</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="row g-2 align-items-end">
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <input type="date" class="form-control shadow-sm" formControlName="dataInicio"
+            title="Data inicial de cadastro" />
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <input type="date" class="form-control shadow-sm" formControlName="dataFim" title="Data final de cadastro" />
+        </div>
+
+        <!-- Botões com mesma altura dos selects -->
+        <div class="col-lg-2 col-md-12 col-sm-12">
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-success btn-form w-100" (click)="limparFiltros()">
+              Exibir todos
+            </button>
+
+            <div class="btn-group w-100">
+              <button type="button" [disabled]="profile_id === 2 || profile_id === 4"
+                class="btn btn-outline-primary btn-form dropdown-toggle" data-bs-toggle="dropdown">
+                Exportar
+              </button>
+              <ul class="dropdown-menu">
+                <li>
+                  <button class="dropdown-item" (click)="exportarPlanilha('todos')">
+                    Todos os agricultores
+                  </button>
+                </li>
+                <li>
+                  <button class="dropdown-item" [disabled]="!filtroFarmers" (click)="exportarPlanilha('filtrados')">
+                    Agricultores filtrados
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+
       </div>
 
     </form>
@@ -90,8 +115,10 @@
             <th class="text-center">Nome Completo</th>
             <th class="text-center">Telefone</th>
             <th class="text-center">Foi Atendido?</th>
+            <th class="text-center">Possui cadastro ADAGRI?</th>
             <th class="text-center">Município</th>
             <th class="text-center">Região</th>
+            <th class="text-center">Data de Cadastro</th>
             <th class="text-center" colspan="4">Ações</th>
           </tr>
         </thead>
@@ -104,8 +131,13 @@
               <i *ngIf="farmer.pedido_atendido" class="bi bi-check-circle-fill text-success fs-5"></i>
               <i *ngIf="!farmer.pedido_atendido" class="bi bi-x-circle-fill text-danger fs-5"></i>
             </td>
+            <td class="text-center">
+              <i *ngIf="farmer.tem_cadastro_adagri" class="bi bi-check-circle-fill text-success fs-5"></i>
+              <i *ngIf="!farmer.tem_cadastro_adagri" class="bi bi-x-circle-fill text-danger fs-5"></i>
+            </td>
             <td class="text-center">{{ farmer.ass_produtor_rural_cidade?.nome_municipio }}</td>
             <td class="text-center">{{ farmer.ass_produtor_rural_cidade?.ass_municipio_regiao?.nome }}</td>
+            <td class="text-center">{{ farmer.createdAt | date :'dd/MM/yyyy'}}</td>
 
             <td class="text-center">
               <button class="btn btn-warning btn-sm" (click)="onEdit(farmer)" data-bs-toggle="modal"
@@ -128,7 +160,7 @@
             </td>
 
             <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 0">
-              <button class="btn btn-primary btn-sm" (click)="getFile(farmer.id, 'comprovante_residencia')"
+              <button class="btn btn-primary btn-sm" (click)="getFile(farmer, 'comprovante_residencia')"
                 data-bs-toggle="modal" data-bs-target="#modalResidencia" title="Comprovante de Residência">
                 <i class="bi bi-file-earmark-pdf-fill"></i>
               </button>
@@ -311,16 +343,21 @@
           <div class="row">
             <div class="col-sm-12 col-12 mb-3">
               <label for="documento" class="form-label">Atualiza CPF/CNPJ</label>
-              <input class="form-control" type="file" id="documento" name="documento" #atualizaDocumento>
+              <input class="form-control" type="file" id="documento" name="documento" #atualizaDocumento accept=".png,.jpg,.jpeg,.webp,.gif,.pdf">
             </div>
           </div>
-          </form>
+        </form>
 
-          <div class="row">
-            <div class="mt-2">
-              <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe>
-            </div>
+        <div class="row">
+          <div class="mt-2">
+            <!-- <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe> -->
+            <iframe *ngIf="isPdf" [src]="arquivoUrl" width="100%" height="1200px" type="application/pdf">
+            </iframe>
+
+            <!-- Imagem -->
+            <img *ngIf="isImagem" [src]="arquivoUrl" class="img-fluid rounded border" alt="Documento do agricultor" />
           </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" id="cancel" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -344,16 +381,21 @@
           <div class="row">
             <div class="col-sm-12 col-12 mb-3">
               <label for="comprovante" class="form-label">Atualiza Comprovante</label>
-              <input class="form-control" type="file" id="comprovante" name="comprovante" required #atualizaComprovante>
+              <input class="form-control" type="file" id="comprovante" name="comprovante" required #atualizaComprovante accept=".png,.jpg,.jpeg,.webp,.gif,.pdf">
             </div>
           </div>
-          </form>
+        </form>
 
-          <div class="row">
-            <div class="mt-2">
-              <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe>
-            </div>
+        <div class="row">
+          <div class="mt-2">
+            <!-- <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe> -->
+            <iframe *ngIf="isPdf" [src]="arquivoUrl" width="100%" height="1200px" type="application/pdf">
+            </iframe>
+
+            <!-- Imagem -->
+            <img *ngIf="isImagem" [src]="arquivoUrl" class="img-fluid rounded border" alt="Comprovante de Residência" />
           </div>
+        </div>
 
 
       </div>

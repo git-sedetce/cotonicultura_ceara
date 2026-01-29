@@ -66,3 +66,19 @@ button.btn-sm {
   justify-content: center;
   white-space: nowrap;
 }
+
+input[type="date"] {
+  min-width: 140px;
+}
+
+.btn-form {
+  height: 38px;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .btn-form {
+    margin-top: 0.5rem;
+  }
+}
+

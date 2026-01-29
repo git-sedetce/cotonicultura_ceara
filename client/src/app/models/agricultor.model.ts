@@ -17,5 +17,9 @@ export class Agricultor {
     public regime_cultivo?: string,
     public cadastro_adagri?: string,
     public confirma_informacao?: boolean,
+    public email_trabalhador?: string,
+    public apelido_trabalhador?: string,
+    public uso_dados: boolean = false,
+    public tem_cadastro_adagri: boolean = false,
   ) {}
 }
