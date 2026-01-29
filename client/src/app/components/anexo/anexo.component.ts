@@ -50,7 +50,7 @@ export class AnexoComponent implements OnInit {
     },
     residencia: {
       label: 'Comprovante de Residência',
-      accept: 'application/pdf',
+      accept: '.png,.jpg,.jpeg,.pdf',
       endpoint: 'anexoResidencia',
       multiple: false,
       file: null,
