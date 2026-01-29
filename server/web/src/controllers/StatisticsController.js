@@ -32,7 +32,9 @@ class StatisticsController {
           },
         ],
         group: ["ass_produtor_rural_cidade.nome_municipio"],
-        order: [[col("ass_produtor_rural_cidade.nome_municipio"), "ASC"]],
+        // order: [[col("ass_produtor_rural_cidade.nome_municipio"), "ASC"]],
+        order: [[col('qtd_agricultores'), 'DESC']],
+        limit: 10,
       });
 
       return res.status(200).json(resultado);
@@ -67,9 +69,11 @@ class StatisticsController {
           },
         ],
         group: ["ass_produtor_rural_cidade.ass_municipio_regiao.nome"],
-        order: [
-          [col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"), "ASC"],
-        ],
+        // order: [
+        //   [col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"), "ASC"],
+        // ],
+        order: [[col('qtd_agricultores'), 'DESC']],
+        limit: 5,
       });
 
       return res.status(200).json(resultado);
@@ -153,7 +157,7 @@ class StatisticsController {
             "nome_regiao",
           ],
           [
-            fn("COALESCE", fn("SUM", col("sementes_recebidas")), 0),
+            fn("SUM", col("sementes_recebidas")),
             "total_sementes",
           ],
         ],
@@ -170,9 +174,11 @@ class StatisticsController {
           },
         ],
         group: ["ass_produtor_rural_cidade.ass_municipio_regiao.nome"],
-        order: [
-          [col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"), "ASC"],
-        ],
+        // order: [
+        //   [col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"), "ASC"],
+        // ],
+        order: [[col('total_sementes'), 'DESC']],
+        limit: 5,
       });
 
       return res.status(200).json(resultado);
@@ -238,7 +244,7 @@ class StatisticsController {
       const resultado = await database.produtor_rural.findAll({
         attributes: [
           [col("ass_produtor_rural_cidade.nome_municipio"), "nome_municipio"],
-          [fn("COALESCE", fn("SUM", col("area_algodao")), 0), "area_algodao"],
+          [fn('SUM', col('area_algodao')), 'area_algodao'],
         ],
         include: [
           {
@@ -247,7 +253,8 @@ class StatisticsController {
           },
         ],
         group: ["ass_produtor_rural_cidade.nome_municipio"],
-        order: [[col("ass_produtor_rural_cidade.nome_municipio"), "ASC"]],
+        order: [[fn('SUM', col('area_algodao')), 'DESC']],
+        limit: 10,
       });
 
       return res.status(200).json(resultado);
@@ -268,7 +275,7 @@ class StatisticsController {
             "nome_regiao",
           ],
           [
-            fn("COALESCE", fn("SUM", col("area_algodao")), 0),
+            fn("SUM", col("area_algodao")),
             "total_area_cultivo",
           ],
         ],
@@ -285,9 +292,8 @@ class StatisticsController {
           },
         ],
         group: ["ass_produtor_rural_cidade.ass_municipio_regiao.nome"],
-        order: [
-          [col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"), "ASC"],
-        ],
+        order: [[col('total_area_cultivo'), 'DESC']],
+        limit: 5,
       });
 
       return res.status(200).json(resultado);
