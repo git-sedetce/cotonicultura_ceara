@@ -53,7 +53,7 @@ class UserController {
       subject: "Cadastro de usuário do Sistema de Cotonicultura da SDE",
       html: `
       <h3>Cadastro realizado com sucesso</h3>
-      <p>${user.nome_completo} realizou o cadastro.</p>
+      <p>${user.nome} realizou o cadastro.</p>
     `,
     });
 
