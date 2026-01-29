@@ -134,6 +134,12 @@ class AgroControllers {
           "regime_cultivo",
           "cadastro_adagri",
           "confirma_informacao",
+          "email_trabalhador",
+          "apelido_trabalhador",
+          "tem_cadastro_adagri",
+          "uso_dados",
+          "createdAt",
+
         ],
         include: [
           {
@@ -183,6 +189,9 @@ class AgroControllers {
           "regime_cultivo",
           "cadastro_adagri",
           "confirma_informacao",
+          "email_trabalhador",
+          "uso_dados",
+          "createdAt",
         ],
         include: [
           {
