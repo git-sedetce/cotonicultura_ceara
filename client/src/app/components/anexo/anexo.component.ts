@@ -208,6 +208,8 @@ export class AnexoComponent implements OnInit {
           item.error = 'Erro ao enviar arquivo.';
         },
       });
+
+      this.saveRegister(this.nomeAgricultor, 'Upload de anexos');
   }
 
   finish(has_farmer: boolean) {
@@ -218,5 +220,16 @@ export class AnexoComponent implements OnInit {
       this.toastr.success('Inscrição finalizada com sucesso!');
       this.router.navigate(['/listfarmers']);
     }
+  }
+
+  saveRegister(name: any, tipo: any): void {
+    this.registro.tipo_acao = tipo;
+    this.registro.acao = `O usuário ${this.user_name} inseriu anexos do agricultor ${name}`;
+    this.auditService.cadastrarRegistros(this.registro).subscribe({
+      next: (res: any) => {
+        // console.log('registro', res)
+      },
+      error: (e) => this.toastr.error(e),
+    });
   }
 }
