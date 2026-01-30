@@ -318,6 +318,8 @@ export class ListFarmersComponent implements OnInit {
         : 'agricultores_filtrados.xlsx';
 
     saveAs(blob, nomeArquivo);
+
+    this.saveAudit('Exportação de planilha');
   }
 
   anexarArquivo(id: number) {
@@ -527,6 +529,17 @@ export class ListFarmersComponent implements OnInit {
   saveRegister(name: any, tipo: any): void {
     this.registro.tipo_acao = tipo;
     this.registro.acao = `O usuário ${this.user_name} alterou os dados do agricultor ${name}`;
+    this.auditService.cadastrarRegistros(this.registro).subscribe({
+      next: (res: any) => {
+        // console.log('registro', res)
+      },
+      error: (e) => this.toastr.error(e),
+    });
+  }
+
+  saveAudit(tipo: any): void {
+    this.registro.tipo_acao = tipo;
+    this.registro.acao = `O usuário ${this.user_name} Exportou uma planilha de agricultores`;
     this.auditService.cadastrarRegistros(this.registro).subscribe({
       next: (res: any) => {
         // console.log('registro', res)

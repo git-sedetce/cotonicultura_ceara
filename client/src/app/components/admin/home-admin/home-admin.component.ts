@@ -151,8 +151,8 @@ export class HomeAdminComponent implements OnInit {
 
   iconeDistribuicao = L.icon({
     iconUrl: 'assets/icons/pin-distribuicao.png', // pode ser o pin padrão também
-    iconSize: [30, 40],
-    iconAnchor: [15, 40],
+    iconSize: [36, 40],
+    iconAnchor: [15, 35],
     popupAnchor: [0, -40],
   });
 
