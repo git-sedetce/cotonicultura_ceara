@@ -205,8 +205,8 @@
         <div class="form-group" *ngIf="agricultor.tem_cadastro_adagri === true">
           <label>Número Cadastro ADAGRI</label>
           <input type="text" id="cadastro_adagri" placeholder="Cadastro ADAGRI" name="cadastro_adagri"
-            [(ngModel)]="agricultor.cadastro_adagri" #cadastro_adagri="ngModel" appTelefoneValido
-            (blur)="consultaADAGRI(agricultor.cadastro_adagri, formAgricultor)">
+            [(ngModel)]="agricultor.cadastro_adagri" #cadastro_adagri="ngModel"
+            (change)="consultaADAGRI(agricultor.cadastro_adagri, formAgricultor)">
           <div *ngIf="cadastro_adagri.touched && cadastro_adagri.invalid" class="alert alert-danger">
 
             <span *ngIf="cadastro_adagri.errors?.['telefoneInvalido']">

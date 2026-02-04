@@ -206,8 +206,28 @@
 
             <div class="form-group col-sm-4 col-12 ">
               <div class="form-floating">
+                <input type="text" id="apelido_trabalhador" name="apelido_trabalhador" placeholder="apelido_trabalhador" required
+                  formControlName="apelido_trabalhador" class="form-control" />
+                <label class="form-label pergunta" for="apelido_trabalhador">Apelido do Trabalhor</label>
+              </div>
+            </div>
+
+            <div class="form-group col-sm-4 col-12 ">
+              <div class="form-floating">
+                <input type="email" id="email_trabalhador" name="email_trabalhador" placeholder="Digite o email do trabalhador" required
+                  formControlName="email_trabalhador" class="form-control" />
+                <label class="form-label pergunta" for="email_trabalhador">Email do trabalhador</label>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="row mt-4 mb-4">
+
+            <div class="form-group col-sm-4 col-12 ">
+              <div class="form-floating">
                 <input type="text" id="telefone" name="telefone" placeholder="Telefone" required
-                  formControlName="telefone" class="form-control" />
+                  formControlName="telefone" class="form-control" mask="(00) 0 0000-0000||(00) 0000-0000"/>
                 <label class="form-label pergunta" for="telefone">Telefone</label>
               </div>
             </div>
@@ -215,13 +235,10 @@
             <div class="form-group col-sm-4 col-12 ">
               <div class="form-floating">
                 <input type="text" id="cpf_cnpj" name="cpf_cnpj" placeholder="Digite o CPF/CNPJ" required
-                  formControlName="cpf_cnpj" class="form-control" />
+                  formControlName="cpf_cnpj" class="form-control"  mask="00.000.000/0000-00||000.000.000-00"/>
                 <label class="form-label pergunta" for="cpf_cnpj">CPF/CNPJ</label>
               </div>
             </div>
-
-          </div>
-          <div class="row mt-4 mb-4">
 
             <div class="form-group col-sm-4 col-12 ">
               <div class="form-floating">
@@ -230,6 +247,10 @@
                 <label class="form-label pergunta" for="rg">Identidade</label>
               </div>
             </div>
+
+          </div>
+
+          <div class="row mt-4 mb-4">
 
             <div class="form-group col-sm-4 col-12 ">
               <div class="form-floating">
@@ -247,9 +268,6 @@
               <label class="form-label pergunta ms-3" for="mes">Cidade</label>
             </div>
 
-          </div>
-          <div class="row mt-4 mb-4">
-
             <div class="form-group col-sm-4 col-12 ">
               <div class="form-floating">
                 <input type="text" id="nome_propriedade" name="nome_propriedade" placeholder="Nome da Propriedade"
@@ -257,6 +275,9 @@
                 <label class="form-label pergunta" for="nome_propriedade">Nome da Propriedade</label>
               </div>
             </div>
+
+          </div>
+          <div class="row mt-4 mb-4">
 
             <div class="form-group col-sm-4 col-12 ">
               <div class="form-floating">
@@ -274,38 +295,11 @@
               </div>
             </div>
 
-            <div class="form-group col-sm-2 col-12 ">
+            <div class="form-group col-sm-3 col-12 ">
               <div class="form-floating">
                 <input type="number" id="area_algodao" name="area_algodao" placeholder="Área de Algodão (ha)" required
                   formControlName="area_algodao" class="form-control" />
                 <label class="form-label pergunta" for="area_algodao">Área de Algodão (ha)</label>
-              </div>
-            </div>
-          </div>
-
-          <div class="row mt-4 mb-4">
-            <div class="form-floating col-sm-3 col-12 mb-2">
-              <select name="regime_cultivo" id="regime_cultivo" class="form-select text-capitalize"
-                formControlName="regime_cultivo" required>
-                <option value='irrigado'> Irrigado </option>
-                <option value='sequeiro'> Sequeiro </option>
-              </select>
-              <label class="form-label pergunta ms-3" for="mes">Regime do Cultivo</label>
-            </div>
-
-            <div class="form-group col-sm-3 col-12 ">
-              <div class="form-floating">
-                <input type="text" id="cadastro_adagri" name="cadastro_adagri" placeholder="Cadastro da ADAGRI" required
-                  formControlName="cadastro_adagri" class="form-control" />
-                <label class="form-label pergunta" for="cadastro_adagri">Cadastro da ADAGRI</label>
-              </div>
-            </div>
-
-            <div class="col-sm-3 col-12 mt-3">
-              <div class="form-check form-switch">
-                <label class="form-check-label" for="pedido_atendido">O Agricultor foi atendido?</label>
-                <input type="checkbox" class="form-check-input" formControlName="pedido_atendido">
-
               </div>
             </div>
 
@@ -317,6 +311,48 @@
                 <label class="form-label pergunta" for="sementes_recebidas">Sementes Recebidas (Kg)</label>
               </div>
             </div>
+          </div>
+
+          <div class="row mt-4 mb-4">
+            <div class="form-floating col-sm-2 col-12 mb-2">
+              <select name="regime_cultivo" id="regime_cultivo" class="form-select text-capitalize"
+                formControlName="regime_cultivo" required>
+                <option value='irrigado'> Irrigado </option>
+                <option value='sequeiro'> Sequeiro </option>
+              </select>
+              <label class="form-label pergunta ms-3" for="mes">Regime do Cultivo</label>
+            </div>
+
+            <div class="col-sm-3 col-12 mt-3">
+              <div class="form-check form-switch">
+                <label class="form-check-label" for="tem_cadastro_adagri">Tem cadastro na ADAGRI?</label>
+                <input type="checkbox" class="form-check-input" formControlName="tem_cadastro_adagri">
+              </div>
+            </div>
+
+            <div class="form-group col-sm-2 col-12 ">
+              <div class="form-floating">
+                <input type="text" id="cadastro_adagri" name="cadastro_adagri" placeholder="Cadastro da ADAGRI" required
+                  formControlName="cadastro_adagri" class="form-control" />
+                <label class="form-label pergunta" for="cadastro_adagri">Número ADAGRI</label>
+              </div>
+            </div>
+
+            <div class="col-sm-3 col-12 mt-3">
+              <div class="form-check form-switch">
+                <label class="form-check-label" for="pedido_atendido">O Agricultor foi atendido?</label>
+                <input type="checkbox" class="form-check-input" formControlName="pedido_atendido">
+              </div>
+            </div>
+
+            <div class="col-sm-2 col-12 mt-3">
+              <div class="form-check form-switch">
+                <label class="form-check-label" for="uso_dados">Uso de dados?</label>
+                <input type="checkbox" class="form-check-input" formControlName="uso_dados">
+              </div>
+            </div>
+
+
           </div>
 
         </form>
