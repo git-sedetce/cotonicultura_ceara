@@ -129,6 +129,31 @@ class StatisticsController {
     }
   }
 
+  static async totalSementesParaDistribuir(req, res) {
+    try {
+      const resultado = await database.produtor_rural.findOne({
+        where: {
+          pedido_atendido: false,
+        },
+        attributes: [
+          [
+            fn("COALESCE", fn("SUM", col("sementes_recebidas")), 0),
+            "total_sementes",
+          ],
+        ],
+      });
+
+      return res.status(200).json({
+        total_sementes_distribuidas: resultado.get("total_sementes"),
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: "Erro ao somar sementes distribuídas",
+      });
+    }
+  }
+
   static async totalAreaCultivo(req, res) {
     try {
       const resultado = await database.produtor_rural.findOne({
