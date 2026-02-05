@@ -104,10 +104,10 @@ export class HomeAdminComponent implements OnInit {
 
     // Sementes por Região
     this.statisticsService
-      .sementesDistribuidasPorRegiao({})
+      .sementesDistribuidasPorRegiao()
       .subscribe((res) => {
         const categorias = res.map((r: any) => r.nome_regiao);
-        const dados = res.map((r: any) => Number(r.total_sementes));
+        const dados = res.map((r: any) => Number(Number(r.total_sementes).toFixed(2)));
 
         this.regiaoSementesChart = {
           ...this.regiaoSementesChart,

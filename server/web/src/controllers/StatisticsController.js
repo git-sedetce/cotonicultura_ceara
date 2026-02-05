@@ -179,6 +179,9 @@ class StatisticsController {
   static async sementesPorRegiao(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({
+        where: {
+          pedido_atendido: true,
+        },
         attributes: [
           [
             col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"),
