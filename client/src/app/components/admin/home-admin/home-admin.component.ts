@@ -15,6 +15,7 @@ export class HomeAdminComponent implements OnInit {
   agricultoresAtendidos = 0;
   totalSementes = 0;
   areaParaCultivo = 0;
+  areaParaCultivoFormatada = '';
 
   municipios: any[] = [];
   regioes: any[] = [];
@@ -33,10 +34,10 @@ export class HomeAdminComponent implements OnInit {
   // ================= INDICADORES =================
   carregarIndicadores() {
     forkJoin({
-      agricultores: this.statisticsService.contarAgricultores({}),
-      atendidos: this.statisticsService.contarAtendidos({}),
-      sementes: this.statisticsService.sementesDistribuidas({}),
-      area: this.statisticsService.areaParaCultivar({}),
+      agricultores: this.statisticsService.contarAgricultores(),
+      atendidos: this.statisticsService.contarAtendidos(),
+      sementes: this.statisticsService.sementesDistribuidas(),
+      area: this.statisticsService.areaParaCultivar(),
     }).subscribe((res) => {
       this.totalAgricultores = Number(res.agricultores.total) || 0;
       this.agricultoresAtendidos =
@@ -44,6 +45,7 @@ export class HomeAdminComponent implements OnInit {
       this.totalSementes =
         Number(res.sementes.total_sementes_distribuidas) || 0;
       this.areaParaCultivo = Number(res.area.total_area_cultivo) || 0;
+      this.areaParaCultivoFormatada = (Number(res.area.total_area_cultivo) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     });
   }
 
@@ -124,7 +126,6 @@ export class HomeAdminComponent implements OnInit {
     // 🔴 IMPORTANTE: sementes por município + mapa
     this.statisticsService.dadosMapa().subscribe((res) => {
       this.municipios = res;
-      console.log('res', res);
       this.initMapa();
     });
   }
