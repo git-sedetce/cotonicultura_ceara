@@ -1,5 +1,5 @@
 const database = require("../models");
-const { Sequelize, QueryTypes, Op, fn, col } = require("sequelize");
+const { Sequelize, QueryTypes, Op, fn, col, where } = require("sequelize");
 const dbConfig = require("../config/config").development;
 
 class StatisticsController {
@@ -107,6 +107,9 @@ class StatisticsController {
   static async totalSementesDistribuidas(req, res) {
     try {
       const resultado = await database.produtor_rural.findOne({
+        where: {
+          pedido_atendido: true,
+        },
         attributes: [
           [
             fn("COALESCE", fn("SUM", col("sementes_recebidas")), 0),

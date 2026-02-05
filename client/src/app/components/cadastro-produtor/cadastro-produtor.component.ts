@@ -67,6 +67,7 @@ export class CadastroProdutorComponent implements OnInit {
   }
 
   cadastrarAgricultor() {
+    this.agricultor.sementes_recebidas = this.agricultor.area_algodao * 10;
 
     if (!this.anexoCPFCNPJ?.nativeElement.files.length) {
     this.arquivoDocumentoInvalido = true;
