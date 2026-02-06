@@ -1,5 +1,5 @@
 const database = require("../models");
-const { Sequelize, QueryTypes, Op, fn, col, where } = require("sequelize");
+const { Sequelize, QueryTypes, Op, fn, col, literal } = require("sequelize");
 const dbConfig = require("../config/config").development;
 
 class StatisticsController {
@@ -342,9 +342,20 @@ class StatisticsController {
       attributes: [
         [col("ass_produtor_rural_cidade.nome_municipio"), "nome_municipio"],
 
-        // Soma de sementes distribuídas
+        // Soma de sementes somente quando pedido_atendido = true
         [
-          fn("COALESCE", fn("SUM", col("sementes_recebidas")), 0),
+          fn(
+            "COALESCE",
+            fn(
+              "SUM",
+              literal(
+                `CASE WHEN produtor_rural.pedido_atendido = true 
+                      THEN produtor_rural.sementes_recebidas 
+                      ELSE 0 END`
+              )
+            ),
+            0
+          ),
           "total_sementes",
         ],
 
@@ -378,6 +389,7 @@ class StatisticsController {
     });
   }
 }
+
 
 }
 

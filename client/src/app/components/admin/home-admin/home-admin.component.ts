@@ -201,7 +201,7 @@ export class HomeAdminComponent implements OnInit {
 
             layer.bindPopup(`
             <strong>${nome}</strong><br>
-            🌱 Sementes distribuídas: <strong>${dados.sementes}</strong><br>
+            🌱 Sementes distribuídas: <strong>${dados.sementes.toFixed(2)} Kg</strong><br>
             👩‍🌾 Agricultores cadastrados: <strong>${dados.agricultores}</strong><br>
             🌾 Área de algodão: <strong>${dados.area.toFixed(2)} ha</strong>
           `);
