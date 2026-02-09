@@ -4,44 +4,6 @@ const fs = require("fs");
 const baseUrl = process.cwd() + "/src"; //__dirname + '.
 
 class AnexoControllers {
-  static async anexoIdentidade(req, res) {
-    const file = req.file;
-    const { id } = req.params;
-    const caminho = file.path.split(process.env.SPLIT)[1];
-    const nome_arquivo = file.filename;
-    const type = file.mimetype;
-    const tipo_anexo = "identidade";
-    const tiposPermitidos = [
-      "application/pdf",
-      "image/jpeg",
-      "image/png",
-      "image/jpg",
-    ];
-    console.log("type", type);
-
-    if (!tiposPermitidos.includes(type)) {
-      return res.status(400).json({
-        message: "Somente arquivo PDF ou imagem (JPG, JPEG, PNG)",
-      });
-    }
-    try {
-      const anexarRG = await database.anexo.create({
-        mimetype: type,
-        filename: nome_arquivo,
-        path: caminho,
-        agricultor_id: id,
-        tipo_anexo: tipo_anexo,
-        raw: true,
-      });
-      // console.log('anexarParceiro', anexarParceiro)
-      return res
-        .status(200)
-        .json({ message: "Identidade anexado com sucesso!" });
-    } catch (error) {
-      return res.status(500).json(error.message);
-    }
-  }
-
   static async anexoResidencia(req, res) {
     try {
       const file = req.file;
@@ -118,6 +80,82 @@ class AnexoControllers {
       });
       // console.log('anexarParceiro', anexarParceiro)
       return res.status(200).json({ message: "CPF/CNPJ anexado com Sucesso!" });
+    } catch (error) {
+      return res.status(500).json(error.message);
+    }
+  }
+
+  static async anexoTermoDoacao(req, res) {
+    const file = req.file;
+    const { id } = req.params;
+    const caminho = file.path.split(process.env.SPLIT)[1];
+    const nome_arquivo = file.filename;
+    const type = file.mimetype;
+    const tipo_anexo = "termo_doacao";
+    const tiposPermitidos = [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+    ];
+    console.log("type", type);
+
+    if (!tiposPermitidos.includes(type)) {
+      return res.status(400).json({
+        message: "Somente arquivo PDF ou imagem (JPG, JPEG, PNG)",
+      });
+    }
+    try {
+      const anexarRG = await database.anexo.create({
+        mimetype: type,
+        filename: nome_arquivo,
+        path: caminho,
+        agricultor_id: id,
+        tipo_anexo: tipo_anexo,
+        raw: true,
+      });
+      // console.log('anexarParceiro', anexarParceiro)
+      return res
+        .status(200)
+        .json({ message: "Identidade anexado com sucesso!" });
+    } catch (error) {
+      return res.status(500).json(error.message);
+    }
+  }
+
+  static async anexoTermoCompromisso(req, res) {
+    const file = req.file;
+    const { id } = req.params;
+    const caminho = file.path.split(process.env.SPLIT)[1];
+    const nome_arquivo = file.filename;
+    const type = file.mimetype;
+    const tipo_anexo = "termo_compromisso";
+    const tiposPermitidos = [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+    ];
+    console.log("type", type);
+
+    if (!tiposPermitidos.includes(type)) {
+      return res.status(400).json({
+        message: "Somente arquivo PDF ou imagem (JPG, JPEG, PNG)",
+      });
+    }
+    try {
+      const anexarRG = await database.anexo.create({
+        mimetype: type,
+        filename: nome_arquivo,
+        path: caminho,
+        agricultor_id: id,
+        tipo_anexo: tipo_anexo,
+        raw: true,
+      });
+      // console.log('anexarParceiro', anexarParceiro)
+      return res
+        .status(200)
+        .json({ message: "Identidade anexado com sucesso!" });
     } catch (error) {
       return res.status(500).json(error.message);
     }
@@ -344,7 +382,7 @@ class AnexoControllers {
       const mostraAnexo = await database.anexo.findAll({
         order: ["id"],
         where: { agricultor_id: Number(id) },
-        attributes: ["tipo_anexo"],
+        attributes: ["id", "tipo_anexo"],
       });
       mostraAnexo.path = __dirname + mostraAnexo.path;
       //console.log('mostraAnexos.path', mostraAnexo.path)

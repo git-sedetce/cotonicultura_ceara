@@ -175,6 +175,16 @@ export class ListFarmersComponent implements OnInit {
     );
   }
 
+  naoPossuiTermos(farmer: any): boolean {
+  const anexos = farmer.ass_agricultor_anexo || [];
+
+  const possuiDoacao = anexos.some((a: any) => a.tipo_anexo === 'termo_doacao');
+  const possuiCompromisso = anexos.some((a: any) => a.tipo_anexo === 'termo_compromisso');
+
+  return !(possuiDoacao && possuiCompromisso);
+}
+
+
   private normalize(value: any): string {
     return (value ?? '')
       .toString()

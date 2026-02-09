@@ -30,16 +30,8 @@ export class AnexoComponent implements OnInit {
   user_name!: any;
 
   anexos: any = {
-    // identidade: {
-    //   label: 'Documento Oficial com Foto',
-    //   accept: '.png,.jpg,.jpeg,.webp,.gif,.pdf',
-    //   endpoint: 'anexoIdentidade',
-    //   multiple: false,
-    //   file: null,
-    //   uploaded: false,
-    //   error: '',
-    // },
     cpf_cnpj: {
+      id: null, // <-- novo
       label: 'CPF/CNPJ',
       accept: '.png,.jpg,.jpeg,.pdf',
       endpoint: 'anexoCPFCNPJ',
@@ -49,6 +41,7 @@ export class AnexoComponent implements OnInit {
       error: '',
     },
     residencia: {
+      id: null, // <-- novo
       label: 'Comprovante de Residência',
       accept: '.png,.jpg,.jpeg,.pdf',
       endpoint: 'anexoResidencia',
@@ -57,24 +50,36 @@ export class AnexoComponent implements OnInit {
       uploaded: false,
       error: '',
     },
-
-    // propriedade: {
-    //   label: 'Comprovante de Propriedade',
-    //   accept: 'application/pdf',
-    //   endpoint: 'anexoPropriedade',
-    //   multiple: false,
-    //   file: null,
-    //   uploaded: false,
-    //   error: '',
-    // },
+    doacao: {
+      id: null, // <-- novo
+      label: 'Termo de Doação',
+      accept: '.png,.jpg,.jpeg,.webp,.gif,.pdf',
+      endpoint: 'termoDoacao',
+      multiple: false,
+      file: null,
+      uploaded: false,
+      error: '',
+    },
+    compromisso: {
+      id: null, // <-- novo
+      label: 'Documento Oficial com Foto',
+      accept: '.png,.jpg,.jpeg,.webp,.gif,.pdf',
+      endpoint: 'termoCompromisso',
+      multiple: false,
+      file: null,
+      uploaded: false,
+      error: '',
+    },
   };
 
   uploadedMap: any = {
-  // identidade: 'identidade',
-  comprovante_cpf_cnpj: 'cpf_cnpj',
-  comprovante_residencia: 'residencia',
-  // comprovante_propriedade: 'propriedade',
-};
+    // identidade: 'identidade',
+    comprovante_cpf_cnpj: 'cpf_cnpj',
+    comprovante_residencia: 'residencia',
+    termo_doacao: 'doacao',
+    termo_compromisso: 'compromisso',
+    // comprovante_propriedade: 'propriedade',
+  };
 
   get anexosList() {
     return Object.keys(this.anexos).map((key) => ({
@@ -84,11 +89,16 @@ export class AnexoComponent implements OnInit {
   }
 
   get todosAnexosEnviados(): boolean {
-  return Object.values(this.anexos).every(
-    (item: any) => item.uploaded === true
-  );
-}
+    const obrigatorios = ['cpf_cnpj', 'residencia'];
 
+    return obrigatorios.every((key) => this.anexos[key]?.uploaded === true);
+  }
+
+  //   get todosAnexosEnviados(): boolean {
+  //   return Object.values(this.anexos).every(
+  //     (item: any) => item.uploaded === true
+  //   );
+  // }
 
   constructor(
     private cadastroAgricultorService: CadastroAgricultorService,
@@ -110,6 +120,7 @@ export class AnexoComponent implements OnInit {
     if (id) {
       this.anexo.agricultor_id = id;
       this.has_farmer = true;
+      this.checkFiles(id);
 
       // limpar para não afetar futuros acessos
       this.cadastroAgricultorService.clear();
@@ -158,6 +169,7 @@ export class AnexoComponent implements OnInit {
 
         if (key && this.anexos[key]) {
           this.anexos[key].uploaded = true;
+          this.anexos[key].id = anexo.id;
         }
       });
     });
@@ -197,8 +209,9 @@ export class AnexoComponent implements OnInit {
     this.http
       .post(environment.apiUrl + item.endpoint + '/' + id, fd)
       .subscribe({
-        next: () => {
+        next: (res: any) => {
           item.uploaded = true;
+          item.id = res.id; // <-- guardar id do banco
           item.error = '';
           this.cadastroAgricultorService.setAgricultor(
             Number(this.anexo.agricultor_id),
@@ -209,7 +222,7 @@ export class AnexoComponent implements OnInit {
         },
       });
 
-      this.saveRegister(this.nomeAgricultor, 'Upload de anexos');
+    this.saveRegister(this.nomeAgricultor, 'Upload de anexos');
   }
 
   finish(has_farmer: boolean) {
@@ -222,9 +235,33 @@ export class AnexoComponent implements OnInit {
     }
   }
 
+  deleteFile(key: string) {
+    const item = this.anexos[key];
+
+    if (!item.id) return;
+
+    this.anexoService.deleteAnexo(item.id).subscribe({
+      next: () => {
+        item.uploaded = false;
+        item.file = null;
+        item.id = null;
+        this.toastr.success('Arquivo removido com sucesso');
+      },
+      error: () => {
+        this.toastr.error('Erro ao remover arquivo');
+      },
+    });
+
+    this.saveRegister(this.nomeAgricultor, 'Remoção de anexos');
+  }
+
   saveRegister(name: any, tipo: any): void {
     this.registro.tipo_acao = tipo;
-    this.registro.acao = `O usuário ${this.user_name} inseriu anexos do agricultor ${name}`;
+    if (tipo === 'Upload de anexos') {
+      this.registro.acao = `O usuário ${this.user_name} inseriu anexos do agricultor ${name}`;
+    } else if (tipo === 'Remoção de anexos') {
+      this.registro.acao = `O usuário ${this.user_name} removeu anexos do agricultor ${name}`;
+    }
     this.auditService.cadastrarRegistros(this.registro).subscribe({
       next: (res: any) => {
         // console.log('registro', res)
