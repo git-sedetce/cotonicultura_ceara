@@ -45,6 +45,7 @@ export class ListFarmersComponent implements OnInit {
   filtroFarmers: boolean = false;
 
   anexo_id!: number;
+  mensagemArquivo: string = '';
   farmer_name!: string;
   use_data!: boolean;
   data_cadastro!: Date;
@@ -176,14 +177,17 @@ export class ListFarmersComponent implements OnInit {
   }
 
   naoPossuiTermos(farmer: any): boolean {
-  const anexos = farmer.ass_agricultor_anexo || [];
+    const anexos = farmer.ass_agricultor_anexo || [];
 
-  const possuiDoacao = anexos.some((a: any) => a.tipo_anexo === 'termo_doacao');
-  const possuiCompromisso = anexos.some((a: any) => a.tipo_anexo === 'termo_compromisso');
+    const possuiDoacao = anexos.some(
+      (a: any) => a.tipo_anexo === 'termo_doacao',
+    );
+    const possuiCompromisso = anexos.some(
+      (a: any) => a.tipo_anexo === 'termo_compromisso',
+    );
 
-  return !(possuiDoacao && possuiCompromisso);
-}
-
+    return !(possuiDoacao && possuiCompromisso);
+  }
 
   private normalize(value: any): string {
     return (value ?? '')
@@ -439,8 +443,15 @@ export class ListFarmersComponent implements OnInit {
 
   getFile(farmer: any, tipo_anexo: string): void {
     this.resetVisualizacao(tipo_anexo);
+    this.mensagemArquivo = '';
+
     this.anexo.pegarArquivos(farmer.id, tipo_anexo).subscribe(
       (data: any) => {
+        if (!data || !data.base64) {
+          this.mensagemArquivo = 'Arquivo não encontrado no servidor.';
+          return;
+        }
+
         this.anexo_id = data.id_anexo;
         this.farmer_name = farmer.nome;
 
@@ -465,6 +476,10 @@ export class ListFarmersComponent implements OnInit {
       },
       (error) => {
         console.error('Erro ao carregar arquivo:', error.error?.message);
+        this.mensagemArquivo = 'Arquivo não encontrado no servidor.';
+        this.isImagem = false;
+        this.isPdf = false;
+        this.arquivoUrl = null;
       },
     );
   }

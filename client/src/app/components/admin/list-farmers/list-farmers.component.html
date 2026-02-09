@@ -408,6 +408,9 @@
 
         <div class="row">
           <div class="mt-2">
+            <div *ngIf="mensagemArquivo" class="alert alert-warning text-center">
+              {{ mensagemArquivo }}
+            </div>
             <!-- <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe> -->
             <iframe *ngIf="isPdf" [src]="arquivoUrl" width="100%" height="1200px" type="application/pdf">
             </iframe>
@@ -447,6 +450,9 @@
 
         <div class="row">
           <div class="mt-2">
+            <div *ngIf="mensagemArquivo" class="alert alert-warning text-center">
+              {{ mensagemArquivo }}
+            </div>
             <!-- <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe> -->
             <iframe *ngIf="isPdf" [src]="arquivoUrl" width="100%" height="1200px" type="application/pdf">
             </iframe>
