@@ -16,6 +16,8 @@ export class HomeAdminComponent implements OnInit {
   totalSementes = 0;
   areaParaCultivo = 0;
   areaParaCultivoFormatada = '';
+  areaMonitorada = '';
+  areaMonitoradaFormatada = '';
 
   municipios: any[] = [];
   regioes: any[] = [];
@@ -38,6 +40,7 @@ export class HomeAdminComponent implements OnInit {
       atendidos: this.statisticsService.contarAtendidos(),
       sementes: this.statisticsService.sementesDistribuidas(),
       area: this.statisticsService.areaParaCultivar(),
+      areaTrabalho: this.statisticsService.areaParaTrabalhar(),
     }).subscribe((res) => {
       this.totalAgricultores = Number(res.agricultores.total) || 0;
       this.agricultoresAtendidos =
@@ -46,6 +49,7 @@ export class HomeAdminComponent implements OnInit {
         Number(res.sementes.total_sementes_distribuidas) || 0;
       this.areaParaCultivo = Number(res.area.total_area_cultivo) || 0;
       this.areaParaCultivoFormatada = (Number(res.area.total_area_cultivo) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      this.areaMonitoradaFormatada = (Number(res.areaTrabalho.total_area_cultivo) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     });
   }
 
@@ -258,7 +262,7 @@ export class HomeAdminComponent implements OnInit {
         ? '#BD0026'
         : qtd > 5
           ? '#E31A1C'
-          : qtd > 1
+          : qtd >= 1
             ? '#FD8D3C'
             : '#FFEDA0';
   }

@@ -53,6 +53,10 @@ export class StatisticsService {
     return this.http.get(environment.apiUrl + 'totalAreaCultivo');
   }
 
+  areaParaTrabalhar(): Observable<any> {
+    return this.http.get(environment.apiUrl + 'totalAreaCultivoTrabalhado');
+  }
+
   dadosMapa(): Observable<any> {
     return this.http.get(environment.apiUrl + 'mapa');
   }

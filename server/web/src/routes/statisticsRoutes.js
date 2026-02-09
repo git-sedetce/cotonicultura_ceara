@@ -11,6 +11,7 @@ router.get('/countAtendidos', auth.authenticatedUser, checkRole.checkRole([1,2,3
 router.get('/totalSementesDistribuidas', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.totalSementesDistribuidas);
 router.get('/sementesParaDistribuir', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.totalSementesParaDistribuir);
 router.get('/totalAreaCultivo', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.totalAreaCultivo);
+router.get('/totalAreaCultivoTrabalhado', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.totalAreaCultivoTrabalhado);
 router.get('/sementesPorRegiao', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.sementesPorRegiao);
 router.get('/sementesPorMunicipio', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.sementesPorMunicipio);
 router.get('/countPorTipoCultivo', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.countPorTipoCultivo);
