@@ -63,8 +63,8 @@
         <div class="form-group">
           <label>CPF / CNPJ</label>
           <input type="text" id="cpf_cnpj" name="cpf_cnpj" [(ngModel)]="agricultor.cpf_cnpj" #cpf_cnpj="ngModel"
-            required placeholder="Digite o CPF ou CNPJ" mask="00.000.000/0000-00||000.000.000-00"
-            (blur)="consultaCPF(agricultor.cpf_cnpj, formAgricultor)">
+            required placeholder="Digite o CPF ou CNPJ" mask="00.000.000/0000-00||000.000.000-00">
+            <!-- (blur)="consultaCPF(agricultor.cpf_cnpj, formAgricultor)" -->
           <div *ngIf="!cpf_cnpj.valid && cpf_cnpj.touched" class="alert alert-danger" role="alert">
             CPF / CNPJ é obrigatório
           </div>
@@ -206,7 +206,7 @@
           <label>Número Cadastro ADAGRI</label>
           <input type="text" id="cadastro_adagri" placeholder="Cadastro ADAGRI" name="cadastro_adagri"
             [(ngModel)]="agricultor.cadastro_adagri" #cadastro_adagri="ngModel"
-            (change)="consultaADAGRI(agricultor.cadastro_adagri, formAgricultor)">
+             ><!--(change)="consultaADAGRI(agricultor.cadastro_adagri, formAgricultor)" -->
           <div *ngIf="cadastro_adagri.touched && cadastro_adagri.invalid" class="alert alert-danger">
 
             <span *ngIf="cadastro_adagri.errors?.['telefoneInvalido']">
