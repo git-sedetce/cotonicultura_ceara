@@ -48,8 +48,18 @@ export class HomeAdminComponent implements OnInit {
       this.totalSementes =
         Number(res.sementes.total_sementes_distribuidas) || 0;
       this.areaParaCultivo = Number(res.area.total_area_cultivo) || 0;
-      this.areaParaCultivoFormatada = (Number(res.area.total_area_cultivo) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      this.areaMonitoradaFormatada = (Number(res.areaTrabalho.total_area_cultivo) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      this.areaParaCultivoFormatada = (
+        Number(res.area.total_area_cultivo) || 0
+      ).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      this.areaMonitoradaFormatada = (
+        Number(res.areaTrabalho.total_area_cultivo) || 0
+      ).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
     });
   }
 
@@ -107,25 +117,25 @@ export class HomeAdminComponent implements OnInit {
     });
 
     // Sementes por Região
-    this.statisticsService
-      .sementesDistribuidasPorRegiao()
-      .subscribe((res) => {
-        const categorias = res.map((r: any) => r.nome_regiao);
-        const dados = res.map((r: any) => Number(Number(r.total_sementes).toFixed(2)));
+    this.statisticsService.sementesDistribuidasPorRegiao().subscribe((res) => {
+      const categorias = res.map((r: any) => r.nome_regiao);
+      const dados = res.map((r: any) =>
+        Number(Number(r.total_sementes).toFixed(2)),
+      );
 
-        this.regiaoSementesChart = {
-          ...this.regiaoSementesChart,
-          series: [
-            {
-              name: 'Sementes',
-              data: dados,
-            },
-          ],
-          xaxis: {
-            categories: categorias,
+      this.regiaoSementesChart = {
+        ...this.regiaoSementesChart,
+        series: [
+          {
+            name: 'Sementes',
+            data: dados,
           },
-        };
-      });
+        ],
+        xaxis: {
+          categories: categorias,
+        },
+      };
+    });
 
     // 🔴 IMPORTANTE: sementes por município + mapa
     this.statisticsService.dadosMapa().subscribe((res) => {
@@ -248,23 +258,35 @@ export class HomeAdminComponent implements OnInit {
   estiloMunicipio(feature: any) {
     const dados = this.getDadosMunicipio(feature.properties.name);
     return {
-      fillColor: this.getCor(dados.agricultores),
+      fillColor: this.getCor(dados.agricultores, this.totalAgricultores),
       weight: 1,
       color: '#555',
       fillOpacity: 0.75,
     };
   }
 
-  getCor(qtd: number): string {
-    return qtd > 20
-      ? '#800026'
-      : qtd > 10
-        ? '#BD0026'
-        : qtd > 5
-          ? '#E31A1C'
-          : qtd >= 1
-            ? '#FD8D3C'
-            : '#FFEDA0';
+  getCor(qtd: number, max: number): string {
+    if (qtd < 1) return '#FFEDA0';
+
+    const escala = [
+      '#FEE5D9',
+      '#FDD0A2',
+      '#FCBBA1',
+      '#FC9272',
+      '#FB6A4A',
+      '#EF3B2C',
+      '#D7301F',
+      '#BD0026',
+      '#A50F15',
+      '#800026',
+    ];
+
+    const indice = Math.min(
+      escala.length - 1,
+      Math.floor((qtd / max) * escala.length),
+    );
+
+    return escala[indice];
   }
 
   // ================= CONFIG CHARTS =================
