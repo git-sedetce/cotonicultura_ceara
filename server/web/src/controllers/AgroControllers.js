@@ -139,7 +139,6 @@ class AgroControllers {
           "tem_cadastro_adagri",
           "uso_dados",
           "createdAt",
-
         ],
         include: [
           {
@@ -214,6 +213,91 @@ class AgroControllers {
     }
   }
 
+  static async pegaCidade(req, res) {
+    const { city } = req.params;
+    try {
+      const getCity = await database.cidades.findOne({
+        where: { nome_municipio: city },
+        attributes: ["id", "nome_municipio", "cod_ibge"],
+        include: [
+          {
+            association: "ass_municipio_regiao",
+            attributes: ["id", "nome"],
+          },
+        ],
+      });
+
+      const getFarmer = await database.produtor_rural.findAll({
+        where: { cidade: getCity.id },
+        attributes: [
+          "pedido",
+          "nome",
+          "cpf_cnpj",
+          "cidade",
+          "nome_propriedade",
+          "area_algodao",
+          "pedido_atendido",
+          "sementes_recebidas",
+          "regime_cultivo",
+        ],
+        include: [
+          {
+            association: "ass_produtor_rural_cidade",
+            attributes: ["id", "nome_municipio"],
+            include: [
+              {
+                association: "ass_municipio_regiao",
+                attributes: ["id", "nome"],
+              },
+            ],
+          },
+        ],
+      });
+
+      return res.status(200).json(getFarmer);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Erro ao pegar informações da Cidade" });
+    }
+  }
+
+  static async pegaFarmersCity(req, res) {
+    const { id } = req.params;
+    try {
+      const getFarmer = await database.produtor_rural.findAll({
+        where: { cidade: Number(id) },
+        attributes: [
+          "pedido",
+          "nome",
+          "cpf_cnpj",
+          "cidade",
+          "nome_propriedade",
+          "area_algodao",
+          "pedido_atendido",
+          "sementes_recebidas",
+          "regime_cultivo",
+        ],
+        include: [
+          {
+            association: "ass_produtor_rural_cidade",
+            attributes: ["id", "nome_municipio"],
+            include: [
+              {
+                association: "ass_municipio_regiao",
+                attributes: ["id", "nome"],
+              },
+            ],
+          },
+        ],
+      });
+
+      return res.status(200).json(getFarmer);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Erro ao buscar agricultores" });
+    }
+  }
+
   static async farmersSemAnexo(req, res) {
     try {
       const getFarmer = await database.produtor_rural.findAll({
@@ -276,7 +360,7 @@ class AgroControllers {
       for (const anexo of produtor.ass_agricultor_anexo) {
         if (anexo.path) {
           const caminhoArquivo = path.resolve(anexo.path);
-          console.log("Caminho do arquivo:", caminhoArquivo);
+          // console.log("Caminho do arquivo:", caminhoArquivo);
 
           if (fs.existsSync(caminhoArquivo)) {
             fs.unlinkSync(caminhoArquivo);

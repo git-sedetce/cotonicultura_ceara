@@ -40,6 +40,14 @@ export class CadastroAgricultorService {
     return this.http.get(environment.apiUrl + 'umAgricultor/' + id)
   }
 
+  pegarCidade(city: any): Observable<any> {
+    return this.http.get(environment.apiUrl + 'takeCity/' + city)
+  }
+
+  farmersByCity(id: number): Observable<any> {
+    return this.http.get(environment.apiUrl + 'agricultorByCity/' + id)
+  }
+
   atualizarAgricultor(data: any, id: number) {
     return this.http
       .put<any>(environment.apiUrl + 'atualizaFarmer/' + id, data)

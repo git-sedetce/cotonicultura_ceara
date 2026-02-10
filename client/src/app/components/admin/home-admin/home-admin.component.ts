@@ -3,6 +3,8 @@ import { StatisticsService } from '../../../services/statistics.service';
 import * as L from 'leaflet';
 import { ApexOptions } from 'ngx-apexcharts';
 import { forkJoin } from 'rxjs';
+import { CadastroAgricultorService } from '../../../services/cadastro-agricultor.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-home-admin',
@@ -18,6 +20,7 @@ export class HomeAdminComponent implements OnInit {
   areaParaCultivoFormatada = '';
   areaMonitorada = '';
   areaMonitoradaFormatada = '';
+  listaAgricultoresMunicipio: any[] = [];
 
   municipios: any[] = [];
   regioes: any[] = [];
@@ -25,12 +28,44 @@ export class HomeAdminComponent implements OnInit {
 
   private map!: L.Map;
   mapaFullscreen = false;
+  modalAgricultores = false;
+  loadingAgricultores = false;
 
-  constructor(private statisticsService: StatisticsService) {}
+  page: number = 1; // Página atual
+  itemsPerPage: number = 10; // Itens por página
+
+  constructor(
+    private statisticsService: StatisticsService,
+    private cadastroAgricultorService: CadastroAgricultorService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.carregarIndicadores();
     this.carregarGraficos();
+  }
+
+  carregarAgricultoresMunicipio(nomeMunicipio: string) {
+    this.modalAgricultores = true; // abre instantaneamente
+    this.loadingAgricultores = true;
+    this.listaAgricultoresMunicipio = [];
+
+    this.cdr.detectChanges(); // força atualização para mostrar o modal antes de carregar os dados
+
+    setTimeout(() => {
+      this.cadastroAgricultorService
+        .pegarCidade(nomeMunicipio)
+        .subscribe((res) => {
+          this.listaAgricultoresMunicipio = res;
+          this.loadingAgricultores = false;
+          this.cdr.detectChanges();
+        });
+    }, 50);
+  }
+
+  fecharModal() {
+    this.modalAgricultores = false;
+    this.cdr.detectChanges();
   }
 
   // ================= INDICADORES =================
@@ -306,7 +341,19 @@ export class HomeAdminComponent implements OnInit {
 
   farmersMunicipioChart: ApexOptions = {
     series: [],
-    chart: { type: 'donut', height: 240 },
+    chart: {
+      type: 'donut',
+      height: 240,
+      events: {
+        dataPointSelection: (event, chartContext, config) => {
+          const index = config.dataPointIndex;
+
+          const municipio = this.farmersMunicipioChart.labels![index];
+
+          this.carregarAgricultoresMunicipio(municipio);
+        },
+      },
+    },
     title: {
       text: 'Agricultores cadastrados',
       align: 'center',

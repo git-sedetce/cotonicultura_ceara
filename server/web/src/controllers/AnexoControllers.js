@@ -98,7 +98,6 @@ class AnexoControllers {
       "image/png",
       "image/jpg",
     ];
-    console.log("type", type);
 
     if (!tiposPermitidos.includes(type)) {
       return res.status(400).json({
@@ -136,7 +135,6 @@ class AnexoControllers {
       "image/png",
       "image/jpg",
     ];
-    console.log("type", type);
 
     if (!tiposPermitidos.includes(type)) {
       return res.status(400).json({
@@ -266,8 +264,6 @@ class AnexoControllers {
         },
         attributes: ["id", "tipo_anexo", "path", "mimetype", "filename"],
       });
-
-      console.log('anexo', anexo)
 
       if (!anexo) {
         return res.status(404).json({ message: "Arquivo não encontrado" });
