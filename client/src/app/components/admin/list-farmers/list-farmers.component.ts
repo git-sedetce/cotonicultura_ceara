@@ -66,6 +66,7 @@ export class ListFarmersComponent implements OnInit {
   resAnexoId!: number;
   isImagem = false;
   isPdf = false;
+  loadingArquivo: boolean = false;
 
   page: number = 1; // Página atual
   itemsPerPage: number = 10; // Itens por página
@@ -444,9 +445,12 @@ export class ListFarmersComponent implements OnInit {
   getFile(farmer: any, tipo_anexo: string): void {
     this.resetVisualizacao(tipo_anexo);
     this.mensagemArquivo = '';
+    this.loadingArquivo = true; // inicia spinner
 
     this.anexo.pegarArquivos(farmer.id, tipo_anexo).subscribe(
       (data: any) => {
+        this.loadingArquivo = false; // para spinner
+
         if (!data || !data.base64) {
           this.mensagemArquivo = 'Arquivo não encontrado no servidor.';
           return;
@@ -463,18 +467,17 @@ export class ListFarmersComponent implements OnInit {
         }
 
         const byteArray = new Uint8Array(byteNumbers);
-
         const blob = new Blob([byteArray], { type: data.mimetype });
         const fileURL = URL.createObjectURL(blob);
 
         this.arquivoUrl =
           this.sanitizer.bypassSecurityTrustResourceUrl(fileURL);
 
-        // Flag para controle no HTML
         this.isImagem = data.mimetype.startsWith('image/');
         this.isPdf = data.mimetype === 'application/pdf';
       },
       (error) => {
+        this.loadingArquivo = false; // para spinner
         console.error('Erro ao carregar arquivo:', error.error?.message);
         this.mensagemArquivo = 'Arquivo não encontrado no servidor.';
         this.isImagem = false;

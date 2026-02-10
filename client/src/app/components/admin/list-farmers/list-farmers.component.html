@@ -174,14 +174,14 @@
 
             <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 2 ">
               <button class="btn btn-dark btn-sm" (click)="getFile(farmer, 'termo_doacao')" data-bs-toggle="modal"
-                data-bs-target="#modalDocumento" title="Termo de Doação">
+                data-bs-target="#modalTermoDoacao" title="Termo de Doação">
                 <i class="bi bi-file-pdf-fill"></i>
               </button>
             </td>
 
             <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 2 ">
               <button class="btn btn-secondary btn-sm" (click)="getFile(farmer, 'termo_compromisso')"
-                data-bs-toggle="modal" data-bs-target="#modalResidencia" title="Termo de Compromisso">
+                data-bs-toggle="modal" data-bs-target="#modalTermoCompromisso" title="Termo de Compromisso">
                 <i class="bi bi-file-pdf-fill"></i>
               </button>
             </td>
@@ -407,6 +407,11 @@
         </form>
 
         <div class="row">
+          <div class="mt-2 text-center" *ngIf="loadingArquivo">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Carregando...</span>
+            </div>
+          </div>
           <div class="mt-2">
             <div *ngIf="mensagemArquivo" class="alert alert-warning text-center">
               {{ mensagemArquivo }}
@@ -449,7 +454,12 @@
         </form>
 
         <div class="row">
-          <div class="mt-2">
+          <div class="mt-2 text-center" *ngIf="loadingArquivo">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Carregando...</span>
+            </div>
+          </div>
+          <div class="mt-2" *ngIf="!loadingArquivo">
             <div *ngIf="mensagemArquivo" class="alert alert-warning text-center">
               {{ mensagemArquivo }}
             </div>
@@ -472,12 +482,12 @@
   </div>
 </div>
 
-<!--Modal editar documento-->
-<div class="modal fade" id="modalDocumento" tabindex="-1" aria-labelledby="modalDocumentoLabel" aria-hidden="true">
+<!--Modal editar Termo de Doação-->
+<div class="modal fade" id="modalTermoDoacao" tabindex="-1" aria-labelledby="modalTermoDoacaoLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable mt-5">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="modalDocumentoLabel">AtualizarTermo de Doação</h1>
+        <h1 class="modal-title fs-5" id="modalTermoDoacaoLabel">Atualizar Termo de Doação</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -492,6 +502,11 @@
         </form>
 
         <div class="row">
+          <div class="mt-2 text-center" *ngIf="loadingArquivo">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Carregando...</span>
+            </div>
+          </div>
           <div class="mt-2">
             <!-- <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe> -->
             <iframe *ngIf="isPdf" [src]="arquivoUrl" width="100%" height="1200px" type="application/pdf">
@@ -510,12 +525,12 @@
   </div>
 </div>
 
-<!--Modal editar documento-->
-<div class="modal fade" id="modalDocumento" tabindex="-1" aria-labelledby="modalDocumentoLabel" aria-hidden="true">
+<!--Modal editar Termo de Compromisso-->
+<div class="modal fade" id="modalTermoCompromisso" tabindex="-1" aria-labelledby="modalTermoCompromissoLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable mt-5">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="modalDocumentoLabel">Atualizar Termo de Compromisso</h1>
+        <h1 class="modal-title fs-5" id="modalTermoCompromissoLabel">Atualizar Termo de Compromisso</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -530,6 +545,11 @@
         </form>
 
         <div class="row">
+          <div class="mt-2 text-center" *ngIf="loadingArquivo">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Carregando...</span>
+            </div>
+          </div>
           <div class="mt-2">
             <!-- <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe> -->
             <iframe *ngIf="isPdf" [src]="arquivoUrl" width="100%" height="1200px" type="application/pdf">
