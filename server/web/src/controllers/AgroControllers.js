@@ -247,13 +247,11 @@ class AgroControllers {
         include: [
           {
             association: "ass_produtor_rural_cidade",
-            attributes: ["id", "nome_municipio"],
-            include: [
-              {
-                association: "ass_municipio_regiao",
-                attributes: ["id", "nome"],
-              },
-            ],
+            attributes: ["id", "nome_municipio"],            
+          },
+          {
+            association: "ass_agricultor_anexo",
+            attributes: ["tipo_anexo"],
           },
         ],
       });

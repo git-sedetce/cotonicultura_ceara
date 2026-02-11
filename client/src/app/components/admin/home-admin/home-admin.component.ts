@@ -14,6 +14,8 @@ import { ChangeDetectorRef } from '@angular/core';
 })
 export class HomeAdminComponent implements OnInit {
   totalAgricultores = 0;
+  totalAgricultoresMunicipio = 0;
+  municipioSelecionado = '';
   agricultoresAtendidos = 0;
   totalSementes = 0;
   areaParaCultivo = 0;
@@ -46,21 +48,40 @@ export class HomeAdminComponent implements OnInit {
   }
 
   carregarAgricultoresMunicipio(nomeMunicipio: string) {
-    this.modalAgricultores = true; // abre instantaneamente
+    this.modalAgricultores = true;
     this.loadingAgricultores = true;
     this.listaAgricultoresMunicipio = [];
+    this.municipioSelecionado = nomeMunicipio;
 
-    this.cdr.detectChanges(); // força atualização para mostrar o modal antes de carregar os dados
+    // força o Angular a renderizar o modal imediatamente
+    this.cdr.detectChanges();
 
-    setTimeout(() => {
-      this.cadastroAgricultorService
-        .pegarCidade(nomeMunicipio)
-        .subscribe((res) => {
-          this.listaAgricultoresMunicipio = res;
-          this.loadingAgricultores = false;
-          this.cdr.detectChanges();
-        });
-    }, 50);
+    // agora chama a API
+    this.cadastroAgricultorService
+      .pegarCidade(nomeMunicipio)
+      .subscribe((res) => {
+        this.listaAgricultoresMunicipio = res;
+        this.loadingAgricultores = false;
+        this.totalAgricultoresMunicipio = res.length;
+
+        // opcional — garante atualização da tabela + paginação
+        this.cdr.detectChanges();
+      });
+  }
+
+  statusDocumentos(farmer: any): string {
+    const anexos = farmer.ass_agricultor_anexo || [];
+
+    const temCpf = anexos.some((a: any) => a.tipo_anexo === 'comprovante_cpf_cnpj');
+    const temResid = anexos.some(
+      (a: any) => a.tipo_anexo === 'comprovante_residencia',
+    );
+
+    if (temCpf && temResid) return 'completo';
+    if (!temCpf && !temResid) return 'nenhum';
+    if (!temCpf) return 'faltando_cpf';
+    if (!temResid) return 'faltando_resid';
+    return '';
   }
 
   fecharModal() {
