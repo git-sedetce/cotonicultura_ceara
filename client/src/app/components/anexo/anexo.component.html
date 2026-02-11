@@ -67,7 +67,7 @@
                   </label>
                 </div>
 
-                <button class="btn btn-primary w-100 mt-2" [disabled]="item.uploaded || !item.file"
+                <button class="btn btn-success w-100 mt-2" [disabled]="item.uploaded || !item.file"
                   (click)="uploadFile(item.key)">
                   Enviar
                 </button>
@@ -90,8 +90,8 @@
           </div>
 
           <button type="button" class="btn btn-success w-100 mt-4 text-uppercase" [disabled]="!todosAnexosEnviados"
-            (click)="finish(has_farmer)">
-            Finalizar
+            (click)="finish()">
+            Ver lista de Agricultores
           </button>
         </fieldset>
       </form>

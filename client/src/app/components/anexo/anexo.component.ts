@@ -62,7 +62,7 @@ export class AnexoComponent implements OnInit {
     },
     compromisso: {
       id: null, // <-- novo
-      label: 'Documento Oficial com Foto',
+      label: 'Termo de Compromisso',
       accept: '.png,.jpg,.jpeg,.webp,.gif,.pdf',
       endpoint: 'termoCompromisso',
       multiple: false,
@@ -225,14 +225,8 @@ export class AnexoComponent implements OnInit {
     this.saveRegister(this.nomeAgricultor, 'Upload de anexos');
   }
 
-  finish(has_farmer: boolean) {
-    if (!has_farmer) {
-      this.toastr.success('Inscrição finalizada com sucesso!');
-      this.router.navigate(['/home']);
-    } else {
-      this.toastr.success('Inscrição finalizada com sucesso!');
+  finish() {
       this.router.navigate(['/listfarmers']);
-    }
   }
 
   deleteFile(key: string) {
