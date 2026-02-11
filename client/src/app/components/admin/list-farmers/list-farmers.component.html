@@ -79,6 +79,10 @@
               Exibir todos
             </button>
 
+            <button type="button" class="btn btn-danger btn-form w-100" (click)="verDesistentes()">
+              Desistentes
+            </button>
+
             <div class="btn-group w-100">
               <button type="button" [disabled]="profile_id === 2 || profile_id === 4"
                 class="btn btn-outline-primary btn-form dropdown-toggle" data-bs-toggle="dropdown">
@@ -142,54 +146,61 @@
             <td class="text-center">
               <button class="btn btn-warning btn-sm" (click)="onEdit(farmer)" data-bs-toggle="modal"
                 data-bs-target="#modalEdit">
-                <i class="bi bi-pencil-square"></i>
+                <i class="fa-solid fa-pen-to-square"></i>
               </button>
             </td>
 
             <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length == 0">
               <button class="btn btn-info btn-sm" (click)="anexarArquivo(farmer.id)" title="Anexar Documentos">
-                <i class="bi bi-file-earmark-excel-fill"></i>
+                <i class="fa-solid fa-file-lines"></i>
               </button>
             </td>
 
             <td class="text-center" *ngIf="naoPossuiTermos(farmer)">
               <button class="btn btn-light btn-sm" (click)="anexarArquivo(farmer.id)" title="Anexar Termos">
-                <i class="bi bi-file-earmark-arrow-up"></i>
+                <i class="fa-solid fa-file-signature"></i>
               </button>
             </td>
 
             <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 0">
               <button class="btn btn-success btn-sm" (click)="getFile(farmer, 'comprovante_cpf_cnpj')"
                 data-bs-toggle="modal" data-bs-target="#modalDocumento" title="CPF/CNPJ">
-                <i class="bi bi-file-earmark-person-fill"></i>
+                <i class="fa-solid fa-id-badge"></i>
               </button>
             </td>
 
             <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 0">
               <button class="btn btn-primary btn-sm" (click)="getFile(farmer, 'comprovante_residencia')"
                 data-bs-toggle="modal" data-bs-target="#modalResidencia" title="Comprovante de Residência">
-                <i class="bi bi-file-earmark-pdf-fill"></i>
+                <i class="fa-solid fa-house-circle-check"></i>
               </button>
             </td>
 
             <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 2 ">
               <button class="btn btn-dark btn-sm" (click)="getFile(farmer, 'termo_doacao')" data-bs-toggle="modal"
                 data-bs-target="#modalTermoDoacao" title="Termo de Doação">
-                <i class="bi bi-file-pdf-fill"></i>
+                <i class="fa-solid fa-file-contract"></i>
               </button>
             </td>
 
             <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 2 ">
               <button class="btn btn-secondary btn-sm" (click)="getFile(farmer, 'termo_compromisso')"
                 data-bs-toggle="modal" data-bs-target="#modalTermoCompromisso" title="Termo de Compromisso">
-                <i class="bi bi-file-pdf-fill"></i>
+                <i class="fa-solid fa-file-invoice"></i>
               </button>
             </td>
 
-            <td class="text-center">
-              <button class="btn btn-danger btn-sm" [disabled]="profile_id !== 1 && profile_id !== 3"
+            <!-- <td class="text-center" *ngIf="!farmer.status_farmer">
+              <button class="btn btn-danger btn-sm" title="Deletar Agricultor" [disabled]="profile_id !== 1 && profile_id !== 3"
                 (click)="deletaFarmer(farmer)">
                 <i class="bi bi-trash-fill"></i>
+              </button>
+            </td> -->
+
+            <td class="text-center">
+              <button class="btn btn-danger btn-sm" title="Desistência" [disabled]="profile_id !== 1 && profile_id !== 3"
+                (click)="desistirPrograma(farmer)">
+                <i class="fa-solid fa-person-walking-luggage"></i>
               </button>
             </td>
 

@@ -1,5 +1,5 @@
 const database = require("../models");
-const { Op, Sequelize } = require("sequelize");
+const { Op, Sequelize, where } = require("sequelize");
 const fs = require("fs");
 const path = require("path");
 
@@ -113,8 +113,11 @@ class AgroControllers {
   }
 
   static async pegaFarmers(req, res) {
+    const { status } = req.query;
+    console.log('status_farmer', status)
     try {
       const getFarmer = await database.produtor_rural.findAll({
+        where: { status_farmer: status },
         order: [["nome", "ASC"]],
         attributes: [
           "id",
@@ -138,6 +141,7 @@ class AgroControllers {
           "apelido_trabalhador",
           "tem_cadastro_adagri",
           "uso_dados",
+          "status_farmer",
           "createdAt",
         ],
         include: [
@@ -257,7 +261,9 @@ class AgroControllers {
       return res.status(200).json(getFarmer);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: "Erro ao pegar informações da Cidade" });
+      return res
+        .status(500)
+        .json({ message: "Erro ao pegar informações da Cidade" });
     }
   }
 
@@ -331,6 +337,26 @@ class AgroControllers {
         where: { id: Number(id) },
       });
       return res.status(200).json(updateFarmer);
+    } catch (error) {
+      return res.status(500).json(error.message);
+    }
+  }
+
+  static async desisitirPrograma(req, res) {
+    const { id } = req.params;
+    const produtor = req.body;
+    console.log("produtor", produtor);
+    try {
+      await database.produtor_rural.update(produtor, {
+        where: { id: Number(id) },
+      });
+      const updateFarmer = await database.produtor_rural.findOne({
+        where: { id: Number(id) },
+      });
+      return res.status(200).json({
+        mensagem: "Desistência registrada com sucesso",
+        data: updateFarmer,
+      });
     } catch (error) {
       return res.status(500).json(error.message);
     }

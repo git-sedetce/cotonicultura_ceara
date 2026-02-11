@@ -16,7 +16,7 @@ var corsOptions = {
     'https://cotonicultura.sde.ce.gov.br'
   ],
   credentials: true,
-  methods: ['GET', 'PUT', 'POST', 'DELETE'],
+  methods: ['GET', 'PUT', 'POST','PATCH', 'DELETE'],
   allowedHeaders: ["Content-Type", "Authorization"],
   };
   

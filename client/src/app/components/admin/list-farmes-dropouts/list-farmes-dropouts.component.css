@@ -1,0 +1,84 @@
+.user-section {
+  margin: 1rem;
+}
+
+.cabecalho {
+  background-color: #0d6efd;
+  border-radius: 8px;
+}
+
+.cabecalho h3 {
+  font-family: 'Kanit', 'Arial', sans-serif;
+  font-weight: bold;
+  font-size: clamp(1.8rem, 1.2rem + 1vw, 2.6rem);
+  letter-spacing: 0.1em;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.table th {
+  white-space: nowrap;
+}
+
+input.form-control,
+select.form-select {
+  border-radius: 8px;
+}
+
+button.btn-sm {
+  padding: 5px 10px;
+}
+
+.empty-card {
+  background: #fff;
+  padding: 3.6rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  max-width: 500px;
+  margin: 10rem auto;
+}
+
+.empty-icon {
+  width: 80px;
+  height: auto;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+.empty-state h3 {
+  color: #009688;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  color: #666;
+  font-size: 1rem;
+}
+
+.btn-form {
+  height: 38px;            /* mesma altura do form-control */
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+input[type="date"] {
+  min-width: 140px;
+}
+
+.btn-form {
+  height: 38px;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .btn-form {
+    margin-top: 0.5rem;
+  }
+}
+

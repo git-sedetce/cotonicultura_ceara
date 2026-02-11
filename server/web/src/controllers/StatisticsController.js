@@ -5,7 +5,9 @@ const dbConfig = require("../config/config").development;
 class StatisticsController {
   static async countProdutores(req, res) {
     try {
-      const totalAgricultores = await database.produtor_rural.count();
+      const totalAgricultores = await database.produtor_rural.count({
+        where: { status_farmer: true },
+      });
 
       return res.status(200).json({
         total: totalAgricultores,
@@ -21,6 +23,7 @@ class StatisticsController {
   static async countPorMunicipio(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({
+        where: { status_farmer: true },
         attributes: [
           [col("ass_produtor_rural_cidade.nome_municipio"), "nome_municipio"],
           [fn("COUNT", col("produtor_rural.id")), "qtd_agricultores"],
@@ -49,6 +52,7 @@ class StatisticsController {
   static async countPorRegiao(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({
+        where: { status_farmer: true },
         attributes: [
           [
             col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"),
@@ -90,6 +94,7 @@ class StatisticsController {
       const total = await database.produtor_rural.count({
         where: {
           pedido_atendido: true,
+          status_farmer: true
         },
       });
 
@@ -109,6 +114,7 @@ class StatisticsController {
       const resultado = await database.produtor_rural.findOne({
         where: {
           pedido_atendido: true,
+          status_farmer: true
         },
         attributes: [
           [
@@ -134,6 +140,7 @@ class StatisticsController {
       const resultado = await database.produtor_rural.findOne({
         where: {
           pedido_atendido: false,
+          status_farmer: true
         },
         attributes: [
           [
@@ -157,6 +164,7 @@ class StatisticsController {
   static async totalAreaCultivo(req, res) {
     try {
       const resultado = await database.produtor_rural.findOne({
+        where: { status_farmer: true },
         attributes: [
           [
             fn("COALESCE", fn("SUM", col("area_algodao")), 0),
@@ -181,6 +189,7 @@ class StatisticsController {
       const resultado = await database.produtor_rural.findOne({
         where: {
           pedido_atendido: true,
+          status_farmer: true
         },
         attributes: [
           [
@@ -206,6 +215,7 @@ class StatisticsController {
       const resultado = await database.produtor_rural.findAll({
         where: {
           pedido_atendido: true,
+          status_farmer: true
         },
         attributes: [
           [
@@ -249,6 +259,7 @@ class StatisticsController {
   static async sementesPorMunicipio(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({
+        where: { status_farmer: true },
         attributes: [
           [col("ass_produtor_rural_cidade.nome_municipio"), "nome_municipio"],
           [
@@ -278,6 +289,7 @@ class StatisticsController {
   static async countPorTipoCultivo(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({
+        where: { status_farmer: true },
         attributes: [
           ["regime_cultivo", "tipo_cultivo"],
           [fn("COUNT", col("id")), "qtd_agricultores"],
@@ -298,6 +310,7 @@ class StatisticsController {
   static async sumAreaCultivo(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({
+        where: { status_farmer: true },
         attributes: [
           [col("ass_produtor_rural_cidade.nome_municipio"), "nome_municipio"],
           [fn('SUM', col('area_algodao')), 'area_algodao'],
@@ -325,6 +338,7 @@ class StatisticsController {
   static async sumAreaCultivoRegiao(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({
+        where: { status_farmer: true },
         attributes: [
           [
             col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"),
@@ -364,6 +378,7 @@ class StatisticsController {
   static async dadosMapa(req, res) {
   try {
     const resultado = await database.produtor_rural.findAll({
+      where: { status_farmer: true },
       attributes: [
         [col("ass_produtor_rural_cidade.nome_municipio"), "nome_municipio"],
 

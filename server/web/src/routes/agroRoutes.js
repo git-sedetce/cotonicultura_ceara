@@ -15,6 +15,7 @@ router.get('/checkcpf/:cpf', AgroController.consultarCPF)
 router.get('/checkcadastro/:adagri', AgroController.consultarADAGRI)
 router.get('/allFarmers', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), AgroController.pegaFarmers)
 router.put('/atualizaFarmer/:id', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), AgroController.atualizaFarmer)
+router.patch('/desistir/:id', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), AgroController.desisitirPrograma)
 router.delete('/farmer/:id', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), AgroController.deletaFarmer)
 
 

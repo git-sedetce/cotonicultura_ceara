@@ -35,7 +35,8 @@ module.exports = (sequelize, DataTypes) => {
     email_trabalhador: DataTypes.STRING,
     apelido_trabalhador: DataTypes.STRING,
     tem_cadastro_adagri: DataTypes.BOOLEAN,
-    uso_dados: DataTypes.BOOLEAN
+    uso_dados: DataTypes.BOOLEAN,
+    status_farmer: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'produtor_rural',
