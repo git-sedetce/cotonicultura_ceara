@@ -171,27 +171,48 @@ export class ListFarmersComponent implements OnInit {
       (usr: any[]) => {
         this.lista_farmers = usr;
         this.lista_filtrada = usr; // inicia filtrada
-        // console.log('lista_users', this.lista_farmers)
+        console.log('lista_users', this.lista_farmers);
       },
       (erro: any) => console.error(erro),
     );
   }
 
   verDesistentes() {
-      this.router.navigate(['/desistentes']);
-    }
+    this.router.navigate(['/desistentes']);
+  }
 
-  naoPossuiTermos(farmer: any): boolean {
-    const anexos = farmer.ass_agricultor_anexo || [];
+  possuiCpf(farmer: any): boolean {
+    return (farmer.ass_agricultor_anexo || []).some(
+      (a: any) => a.tipo_anexo === 'comprovante_cpf_cnpj',
+    );
+  }
 
-    const possuiDoacao = anexos.some(
+  possuiResid(farmer: any): boolean {
+    return (farmer.ass_agricultor_anexo || []).some(
+      (a: any) => a.tipo_anexo === 'comprovante_residencia',
+    );
+  }
+
+  possuiTermoDoacao(farmer: any): boolean {
+    return (farmer.ass_agricultor_anexo || []).some(
       (a: any) => a.tipo_anexo === 'termo_doacao',
     );
-    const possuiCompromisso = anexos.some(
+  }
+
+  possuiTermoCompromisso(farmer: any): boolean {
+    return (farmer.ass_agricultor_anexo || []).some(
       (a: any) => a.tipo_anexo === 'termo_compromisso',
     );
+  }
 
-    return !(possuiDoacao && possuiCompromisso);
+  faltandoDocumentosBasicos(farmer: any): boolean {
+    return !(this.possuiCpf(farmer) && this.possuiResid(farmer));
+  }
+
+  faltandoAlgumTermo(farmer: any): boolean {
+    return !(
+      this.possuiTermoDoacao(farmer) && this.possuiTermoCompromisso(farmer)
+    );
   }
 
   private normalize(value: any): string {
