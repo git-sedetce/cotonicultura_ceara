@@ -33,8 +33,8 @@ const router = Router()
 
 router.post('/termoDoacao/:id', upload.single('file'), auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.anexoTermoDoacao)
 router.post('/termoCompromisso/:id', upload.single('file'), auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.anexoTermoCompromisso)
-router.post('/anexoResidencia/:id', upload.single('file'), auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.anexoResidencia)
-router.post('/anexoCPFCNPJ/:id', upload.single('file'), auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.anexoCPFCNPJ)
+router.post('/anexoResidencia/:id', upload.single('file'), AnexoController.anexoResidencia)
+router.post('/anexoCPFCNPJ/:id', upload.single('file'), AnexoController.anexoCPFCNPJ)
 router.post('/anexoPropriedade/:id', upload.single('file'), auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.anexoPropriedade)
 router.put('/updateFile/:id', upload.single('file'), auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.atualizarAnexo)
 

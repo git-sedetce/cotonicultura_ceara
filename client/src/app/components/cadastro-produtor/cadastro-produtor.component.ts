@@ -90,7 +90,7 @@ export class CadastroProdutorComponent implements OnInit {
           this.formAgricultor.reset();
           this.router.navigate(['/home']);
         },
-        error: (e) => console.error('erro', e), //(this.toastr.error(e.message))
+        error: (e) => this.toastr.error(e.error.message), //(console.error('erro', e))
       });
     // this.saveRegister();
   }
