@@ -72,7 +72,9 @@ export class HomeAdminComponent implements OnInit {
   statusDocumentos(farmer: any): string {
     const anexos = farmer.ass_agricultor_anexo || [];
 
-    const temCpf = anexos.some((a: any) => a.tipo_anexo === 'comprovante_cpf_cnpj');
+    const temCpf = anexos.some(
+      (a: any) => a.tipo_anexo === 'comprovante_cpf_cnpj',
+    );
     const temResid = anexos.some(
       (a: any) => a.tipo_anexo === 'comprovante_residencia',
     );
@@ -120,37 +122,91 @@ export class HomeAdminComponent implements OnInit {
   }
 
   // ================= GRÁFICOS =================
+  //CORES DOS MUNICÍPIOS NO DONOUT
+
+  municipioColorMap: Record<string, string> = {};
+
+  municipioPalette = [
+    '#1565C0',
+    '#AD1457',
+    '#2E7D32',
+    '#EF6C00',
+    '#6A1B9A',
+    '#00838F',
+    '#FF8F00',
+    '#283593',
+    '#4E342E',
+    '#9E9D24',
+  ];
+
+  paletteIndex = 0;
+
+  getColorFromMunicipio(nome: string): string {
+    if (!this.municipioColorMap[nome]) {
+      this.municipioColorMap[nome] =
+        this.municipioPalette[this.paletteIndex % this.municipioPalette.length];
+
+      this.paletteIndex++;
+    }
+
+    return this.municipioColorMap[nome];
+  }
+
   carregarGraficos() {
     // Cultivo (Donut)
     this.statisticsService.estatiticaCultivo({}).subscribe((res) => {
-      this.cultivoChart.series = res.map((c: any) =>
-        Number(c.qtd_agricultores),
-      );
-      this.cultivoChart.labels = res.map((c: any) => c.tipo_cultivo);
+      const labels = res.map((c: any) => c.tipo_cultivo);
+      const series = res.map((c: any) => Number(c.qtd_agricultores));
+      const colors = labels.map((l: any) => this.getColorFromMunicipio(l));
+
+      this.cultivoChart = {
+        ...this.cultivoChart,
+        labels,
+        series,
+        colors,
+      };
     });
 
     // Agricultores por Município (Donut)
     this.statisticsService.contarMunicipio({}).subscribe((res) => {
-      this.farmersMunicipioChart.series = res.map((c: any) =>
-        Number(c.qtd_agricultores),
-      );
-      this.farmersMunicipioChart.labels = res.map((c: any) => c.nome_municipio);
+      const labels = res.map((c: any) => c.nome_municipio);
+      const series = res.map((c: any) => Number(c.qtd_agricultores));
+      const colors = labels.map((l: any) => this.getColorFromMunicipio(l));
+
+      this.farmersMunicipioChart = {
+        ...this.farmersMunicipioChart,
+        labels,
+        series,
+        colors,
+      };
     });
 
     // Agricultores por Município (Donut)
     this.statisticsService.somaAreaCultivoMunicipio({}).subscribe((res) => {
-      this.cultivoMunicipioChart.series = res.map((c: any) =>
-        Number(c.area_algodao),
-      );
-      this.cultivoMunicipioChart.labels = res.map((c: any) => c.nome_municipio);
+      const labels = res.map((c: any) => c.nome_municipio);
+      const series = res.map((c: any) => Number(c.area_algodao));
+      const colors = labels.map((l: any) => this.getColorFromMunicipio(l));
+
+      this.cultivoMunicipioChart = {
+        ...this.cultivoMunicipioChart,
+        labels,
+        series,
+        colors,
+      };
     });
 
     // Agricultores por Município (Donut)
     this.statisticsService.somaAreaCultivoRegiao({}).subscribe((res) => {
-      this.cultivoRegiaoChart.series = res.map((c: any) =>
-        Number(c.total_area_cultivo),
-      );
-      this.cultivoRegiaoChart.labels = res.map((c: any) => c.nome_regiao);
+      const labels = res.map((c: any) => c.nome_regiao);
+      const series = res.map((c: any) => Number(c.total_area_cultivo));
+      const colors = labels.map((l: any) => this.getColorFromMunicipio(l));
+
+      this.cultivoRegiaoChart = {
+        ...this.cultivoRegiaoChart,
+        labels,
+        series,
+        colors,
+      };
     });
 
     // Agricultores por Região
@@ -358,6 +414,7 @@ export class HomeAdminComponent implements OnInit {
       },
     },
     labels: [],
+    colors: [] as string[],
   };
 
   farmersMunicipioChart: ApexOptions = {
@@ -384,6 +441,7 @@ export class HomeAdminComponent implements OnInit {
       },
     },
     labels: [],
+    colors: [] as string[],
   };
 
   cultivoMunicipioChart: ApexOptions = {
@@ -398,6 +456,7 @@ export class HomeAdminComponent implements OnInit {
       },
     },
     labels: [],
+    colors: [] as string[],
   };
 
   cultivoRegiaoChart: ApexOptions = {
@@ -412,6 +471,7 @@ export class HomeAdminComponent implements OnInit {
       },
     },
     labels: [],
+    colors: [] as string[],
   };
 
   regiaoChart: ApexOptions = {

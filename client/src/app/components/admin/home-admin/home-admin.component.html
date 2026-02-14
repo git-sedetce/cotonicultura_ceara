@@ -31,20 +31,20 @@
 
     <div class="chart-card">
       <apx-chart [series]="cultivoChart.series!" [chart]="cultivoChart.chart!" [labels]="cultivoChart.labels!"
-        [title]="cultivoChart.title!" [responsive]="cultivoChart.responsive!">
+        [title]="cultivoChart.title!" [responsive]="cultivoChart.responsive!" [colors]="farmersMunicipioChart.colors || []">
       </apx-chart>
     </div>
 
     <div class="chart-card">
       <apx-chart [series]="farmersMunicipioChart.series!" [chart]="farmersMunicipioChart.chart!"
         [labels]="farmersMunicipioChart.labels!" [title]="farmersMunicipioChart.title!"
-        [responsive]="farmersMunicipioChart.responsive!">
+        [responsive]="farmersMunicipioChart.responsive!" [colors]="farmersMunicipioChart.colors || []">
       </apx-chart>
     </div>
 
     <div class="chart-card">
       <apx-chart [series]="cultivoMunicipioChart.series!" [chart]="cultivoMunicipioChart.chart!"
-        [labels]="cultivoMunicipioChart.labels!" [title]="cultivoMunicipioChart.title!"
+        [labels]="cultivoMunicipioChart.labels!" [colors]="cultivoMunicipioChart.colors || []" [title]="cultivoMunicipioChart.title!"
         [responsive]="cultivoMunicipioChart.responsive!">
       </apx-chart>
     </div>
@@ -52,7 +52,7 @@
     <div class="chart-card">
       <apx-chart [series]="cultivoRegiaoChart.series!" [chart]="cultivoRegiaoChart.chart!"
         [labels]="cultivoRegiaoChart.labels!" [title]="cultivoRegiaoChart.title!"
-        [responsive]="cultivoRegiaoChart.responsive!">
+        [responsive]="cultivoRegiaoChart.responsive!" [colors]="farmersMunicipioChart.colors || []">
       </apx-chart>
     </div>
 
