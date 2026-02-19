@@ -1,0 +1,50 @@
+<div class="faq-wrapper">
+
+  <!-- Header -->
+  <div class="faq-header">
+    <h2>Dúvidas Frequentes</h2>
+    <p>Programa Algodão do Ceará</p>
+  </div>
+
+  <!-- Controles -->
+  <div class="faq-controls">
+
+    <input
+      class="form-control"
+      placeholder="Pesquisar dúvida..."
+      [(ngModel)]="busca"
+      (input)="filtrar()"
+    >
+
+    <div class="actions">
+      <button class="btn btn-success btn-sm" (click)="abrirTodos()">Abrir todas</button>
+      <button class="btn btn-secondary btn-sm" (click)="fecharTodos()">Fechar todas</button>
+      <span class="contador">Abertas: {{ abertas }}</span>
+    </div>
+
+  </div>
+
+  <!-- FAQ -->
+  <div *ngFor="let cat of categorias">
+
+    <h4 class="categoria">{{ cat }}</h4>
+
+    <div *ngFor="let item of porCategoria(cat)" class="faq-item">
+
+      <div class="faq-question" (click)="toggle(item)">
+        <span>{{ item.pergunta }}</span>
+        <i class="bi" [ngClass]="item.open ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+      </div>
+
+      <div class="faq-answer" *ngIf="item.open">
+        {{ item.resposta }}
+      </div>
+
+    </div>
+
+  </div>
+  <div class="footer-info">
+      Em caso de dúvidas adicionais, procure a Secretaria de Agricultura do seu município ou órgãos parceiros do programa.
+    </div>
+
+</div>

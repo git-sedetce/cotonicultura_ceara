@@ -11,6 +11,7 @@ import { ListFarmersComponent } from './components/admin/list-farmers/list-farme
 import { HomeAdminComponent } from './components/admin/home-admin/home-admin.component';
 import { AnexoComponent } from './components/anexo/anexo.component';
 import { ListFarmesDropoutsComponent } from './components/admin/list-farmes-dropouts/list-farmes-dropouts.component';
+import { DuvidasComponent } from './components/duvidas/duvidas.component';
 
 const routes: Routes = [
 
@@ -25,7 +26,9 @@ const routes: Routes = [
   { path: 'listfarmers', component: ListFarmersComponent },
   { path: 'admin', component: HomeAdminComponent },
   { path: 'anexo', component: AnexoComponent},
-  { path: 'desistentes', component: ListFarmesDropoutsComponent}
+  { path: 'desistentes', component: ListFarmesDropoutsComponent},
+  // { path: 'whats', component: WhoAreComponent},
+  { path: 'questions', component: DuvidasComponent},
 
 ];
 
