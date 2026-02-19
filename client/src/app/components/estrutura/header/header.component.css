@@ -1,12 +1,35 @@
 header {
   margin: -1px;
 }
-.cabecalho img {
-  width: 50%;
+
+/* tamanho logo */
+.logo-header {
+  height: 50px;
+  width: auto;
 }
 
-.cabecalho ul li a:hover {
-  /*padding: 5px 0;*/
-  background-color:#ffc107;
+/* hover menu */
+.navbar-nav .nav-link {
+  color:aliceblue;
+}
+
+/* hover menu */
+.navbar-nav .nav-link:hover {
+  background-color: #ffc107;
   font-weight: bold;
+  border-radius: 6px;
+}
+
+/* tablet */
+@media (max-width: 992px) {
+  .logo-header {
+    height: 42px;
+  }
+}
+
+/* mobile */
+@media (max-width: 576px) {
+  .logo-header {
+    height: 36px;
+  }
 }
