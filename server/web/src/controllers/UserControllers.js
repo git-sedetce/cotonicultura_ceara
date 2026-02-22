@@ -7,10 +7,22 @@ class UserController {
   static async cadastraUser(req, res) {
     try {
       const novoUser = req.body;
+      console.log("novoUser", novoUser);
 
       if (!novoUser.user_password || !novoUser.user_email) {
         return res.status(400).json({ message: "Dados obrigatórios ausentes" });
       }
+
+      if(novoUser.user_email.split('@')[1] !== 'sde.ce.gov.br') {
+        return res.status(400).json({ message: "Email inválido para cadastro!" });
+      }
+
+      const emailExistente = await database.user.findOne({
+        where: { user_email: novoUser.user_email },
+      });
+      if (emailExistente) {
+        return res.status(400).json({ message: "Email já cadastrado!" });
+      }      
 
       const salt = await bcrypt.genSalt(10);
       novoUser.user_password = await bcrypt.hash(novoUser.user_password, salt);
