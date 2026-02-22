@@ -6,6 +6,7 @@ import { CadastroAgricultorService } from '../../services/cadastro-agricultor.se
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-cadastro-produtor',
@@ -66,101 +67,45 @@ export class CadastroProdutorComponent implements OnInit {
       });
   }
 
+  onCPFCNPJSelected() {
+    this.arquivoDocumentoInvalido = false;
+  }
+
+  onComprovanteSelected() {
+    this.arquivoResidenciaInvalido = false;
+  }
+
   cadastrarAgricultor() {
     this.agricultor.sementes_recebidas = this.agricultor.area_algodao * 10;
 
-    if (!this.anexoCPFCNPJ?.nativeElement.files.length) {
-    this.arquivoDocumentoInvalido = true;
-    return;
-  }
+    const cpfFile = this.anexoCPFCNPJ.nativeElement.files[0];
+    const resFile = this.anexoResidencia.nativeElement.files[0];
 
-  if (!this.anexoResidencia?.nativeElement.files.length) {
-    this.arquivoResidenciaInvalido = true;
-    return;
-  }
-    this.cadastroAgricultorService
-      .cadastrarAgricultor(this.agricultor)
-      .subscribe({
-        next: (res: any) => {
-          // console.log('res', res)
-          this.onDocumentoUpload(res.id);
-          this.onComprovanteUpload(res.id);
-          this.toastr.success('Cadastro realizado com sucesso!');
-          // this.cadastroAgricultorService.setAgricultor(Number(res.id));
-          this.formAgricultor.reset();
-          this.router.navigate(['/home']);
-        },
-        error: (e) => this.toastr.error(e.error.message), //(console.error('erro', e))
-      });
-    // this.saveRegister();
-  }
-
-  onCPFCNPJSelected(event: any): void {
-    const input = event.target as HTMLInputElement;
-
-    if (!input.files || input.files.length === 0) {
+    if (!cpfFile) {
       this.arquivoDocumentoInvalido = true;
       return;
     }
 
-    this.arquivoDocumentoInvalido = false;
-
-    const arquivo = input.files[0];
-  }
-
-  //anexar arquivos
-  onDocumentoUpload(id: any) {
-    const imageDoc = this.anexoCPFCNPJ.nativeElement.files[0];
-    if (!imageDoc) return;
-    const file = new FormData();
-    file.append('file', imageDoc);
-    file.append('id', id);
-    //console.log('formData', file)
-    //console.log('id', user_id)
-
-    this.http
-      .post(environment.apiUrl + 'anexoCPFCNPJ' + '/' + id, file)
-      .subscribe({
-        next: (response: any) => {
-          this.toastr.success('Comprovante de CPF/CNPJ anexado com sucesso!');
-        },
-        error: (e) => {
-          this.toastr.error(e.error.message);
-        },
-      });
-  }
-
-  onComprovanteSelected(event: any): void {
-    const input = event.target as HTMLInputElement;
-
-    if (!input.files || input.files.length === 0) {
+    if (!resFile) {
       this.arquivoResidenciaInvalido = true;
       return;
     }
 
-    this.arquivoResidenciaInvalido = false;
+    const formData = new FormData();
 
-    const arquivo = input.files[0];
-  }
-
-  onComprovanteUpload(id: any) {
-    const imageRes = this.anexoResidencia.nativeElement.files[0];
-    if (!imageRes) return;
-    const file = new FormData();
-    file.append('file', imageRes);
-    file.append('id', id);
-    //console.log('formData', file)
-    //console.log('id', user_id)
+    formData.append('dados', JSON.stringify(this.agricultor));
+    formData.append('cpf', cpfFile);
+    formData.append('residencia', resFile);
 
     this.http
-      .post(environment.apiUrl + 'anexoResidencia' + '/' + id, file)
+      .post(environment.apiUrl + 'registerCompleto', formData)
       .subscribe({
-        next: (response: any) => {
-          this.toastr.success('Comprovante de Residência anexado com sucesso!');
+        next: () => {
+          this.toastr.success('Cadastro realizado com sucesso!');
+          this.formAgricultor.reset();
+          this.router.navigate(['/home']);
         },
-        error: (e) => {
-          this.toastr.error(e.error.message);
-        },
+        error: (e) => this.toastr.error(e.error.message),
       });
   }
 }

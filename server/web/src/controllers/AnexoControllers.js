@@ -54,7 +54,6 @@ class AnexoControllers {
     const nome_arquivo = file.filename;
     const type = file.mimetype;
     const tipo_anexo = "comprovante_cpf_cnpj";
-    console.log("type", type);
 
     const tiposPermitidos = [
       "application/pdf",

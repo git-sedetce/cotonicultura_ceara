@@ -63,8 +63,9 @@
         <div class="form-group">
           <label>CPF / CNPJ</label>
           <input type="text" id="cpf_cnpj" name="cpf_cnpj" [(ngModel)]="agricultor.cpf_cnpj" #cpf_cnpj="ngModel"
-            required placeholder="Digite o CPF ou CNPJ" mask="00.000.000/0000-00||000.000.000-00" (blur)="consultaCPF(agricultor.cpf_cnpj, formAgricultor)">
-            <!--  -->
+            required placeholder="Digite o CPF ou CNPJ" mask="00.000.000/0000-00||000.000.000-00"
+            (blur)="consultaCPF(agricultor.cpf_cnpj, formAgricultor)">
+          <!--  -->
           <div *ngIf="!cpf_cnpj.valid && cpf_cnpj.touched" class="alert alert-danger" role="alert">
             CPF / CNPJ é obrigatório
           </div>
@@ -164,7 +165,7 @@
         <div class="form-group">
           <label for="fileDocument">Comprovante de CPF/CNPJ</label>
           <input #anexoCPFCNPJ class="form-control" type="file" id="fileDocument"
-            accept=".png,.jpg,.jpeg,.webp,.gif,.pdf" required (change)="onCPFCNPJSelected($event)">
+            accept=".png,.jpg,.jpeg,.webp,.gif,.pdf" required (change)="onCPFCNPJSelected()">
           <div *ngIf="arquivoDocumentoInvalido" class="alert alert-danger">
             Insira um arquivo
           </div>
@@ -173,7 +174,7 @@
         <div class="form-group">
           <label for="fileResidencia">Comprovante de Residência</label>
           <input #anexoResidencia class="form-control" type="file" id="fileResidencia"
-            accept=".png,.jpg,.jpeg,.webp,.gif,.pdf" required (change)="onComprovanteSelected($event)">
+            accept=".png,.jpg,.jpeg,.webp,.gif,.pdf" required (change)="onComprovanteSelected()">
           <div *ngIf="arquivoResidenciaInvalido" class="alert alert-danger">
             Insira um arquivo
           </div>
@@ -205,8 +206,8 @@
         <div class="form-group" *ngIf="agricultor.tem_cadastro_adagri === true">
           <label>Número Cadastro ADAGRI</label>
           <input type="text" id="cadastro_adagri" placeholder="Cadastro ADAGRI" name="cadastro_adagri"
-            [(ngModel)]="agricultor.cadastro_adagri" #cadastro_adagri="ngModel"(change)="consultaADAGRI(agricultor.cadastro_adagri, formAgricultor)"
-             ><!-- -->
+            [(ngModel)]="agricultor.cadastro_adagri" #cadastro_adagri="ngModel"
+            (change)="consultaADAGRI(agricultor.cadastro_adagri, formAgricultor)"><!-- -->
           <div *ngIf="cadastro_adagri.touched && cadastro_adagri.invalid" class="alert alert-danger">
 
             <!-- <span *ngIf="cadastro_adagri.errors?.['telefoneInvalido']">
@@ -237,10 +238,14 @@
 
 
 
-      <button type="submit" [disabled]="formAgricultor.invalid" (click)="cadastrarAgricultor()">
+      <!-- <button type="submit" [disabled]="formAgricultor.invalid || arquivoDocumentoInvalido || arquivoResidenciaInvalido" (click)="cadastrarAgricultor()">
+        Enviar Cadastro
+      </button> -->
+
+      <button type="submit" [disabled]="formAgricultor.invalid || arquivoDocumentoInvalido || arquivoResidenciaInvalido"
+        (click)="cadastrarAgricultor()">
         Enviar Cadastro
       </button>
-
     </form>
   </div>
 </section>

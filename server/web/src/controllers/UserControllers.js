@@ -7,7 +7,6 @@ class UserController {
   static async cadastraUser(req, res) {
     try {
       const novoUser = req.body;
-      console.log("novoUser", novoUser);
 
       if (!novoUser.user_password || !novoUser.user_email) {
         return res.status(400).json({ message: "Dados obrigatórios ausentes" });

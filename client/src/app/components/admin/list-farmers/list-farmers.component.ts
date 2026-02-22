@@ -171,7 +171,6 @@ export class ListFarmersComponent implements OnInit {
       (usr: any[]) => {
         this.lista_farmers = usr;
         this.lista_filtrada = usr; // inicia filtrada
-        console.log('lista_users', this.lista_farmers);
       },
       (erro: any) => console.error(erro),
     );
