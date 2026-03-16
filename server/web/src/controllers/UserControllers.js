@@ -12,6 +12,17 @@ class UserController {
         return res.status(400).json({ message: "Dados obrigatórios ausentes" });
       }
 
+      if(novoUser.user_email.split('@')[1] !== 'sde.ce.gov.br') {
+        return res.status(400).json({ message: "Email inválido para cadastro!" });
+      }
+
+      const emailExistente = await database.user.findOne({
+        where: { user_email: novoUser.user_email },
+      });
+      if (emailExistente) {
+        return res.status(400).json({ message: "Email já cadastrado!" });
+      }      
+
       const salt = await bcrypt.genSalt(10);
       novoUser.user_password = await bcrypt.hash(novoUser.user_password, salt);
       novoUser.user_pin = Math.floor(1000 + Math.random() * 9000);
@@ -53,7 +64,7 @@ class UserController {
       subject: "Cadastro de usuário do Sistema de Cotonicultura da SDE",
       html: `
       <h3>Cadastro realizado com sucesso</h3>
-      <p>${user.nome_completo} realizou o cadastro.</p>
+      <p>${user.nome} realizou o cadastro.</p>
     `,
     });
 

@@ -1,0 +1,168 @@
+<section class="user-section">
+
+  <div class="container empty-state text-center" *ngIf="lista_farmers.length === 0">
+    <div class="empty-card">
+      <img src="assets/icons/farm.png" alt="Sem dados" class="empty-icon">
+      <h3>Sem lista de Agricultores desistentes</h3>
+      <p>Atualmente não há registros de Agricultores desistentes do programa.</p>
+      <!-- <button class="btn btn-primary mt-3" (click)="retorno()">
+        Voltar
+      </button> -->
+    </div>
+  </div>
+
+  <div class="container" *ngIf="lista_farmers.length > 0">
+
+    <!-- Cabeçalho -->
+    <div class="cabecalho text-white py-3 mb-4 rounded shadow-sm">
+      <h3 class="text-center text-uppercase m-0">Agricultores Cadastrados</h3>
+    </div>
+
+    <form [formGroup]="formFiltro" class="mb-3">
+      <div class="row g-2 align-items-end mb-2">
+
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <input type="text" class="form-control shadow-sm" placeholder="🔍 Pesquisar por Nome ou Email..."
+            formControlName="nome" (keyup)="filtrarUsuarios()" />
+        </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-6">
+          <select class="form-select shadow-sm" formControlName="cidade" (change)="filtrarUsuarios()">
+            <option value="">Cidade</option>
+            <option *ngFor="let c of lista_cidade" [value]="c.nome_municipio">
+              {{ c.nome_municipio }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-6">
+          <select class="form-select shadow-sm" formControlName="regiao" (change)="filtrarUsuarios()">
+            <option value="">Região</option>
+            <option *ngFor="let r of lista_regiao" [value]="r.nome">
+              {{ r.nome }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-6">
+          <select class="form-select shadow-sm" formControlName="pedidoAtendido" (change)="filtrarUsuarios()">
+            <option value="">Pedido Atendido</option>
+            <option [ngValue]="true">Sim</option>
+            <option [ngValue]="false">Não</option>
+          </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-6">
+          <select class="form-select shadow-sm" formControlName="cadastroADAGRI" (change)="filtrarUsuarios()">
+            <option value="">Cadastro ADAGRI</option>
+            <option [ngValue]="true">Sim</option>
+            <option [ngValue]="false">Não</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="row g-2 align-items-end">
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <input type="date" class="form-control shadow-sm" formControlName="dataInicio"
+            title="Data inicial de cadastro" />
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <input type="date" class="form-control shadow-sm" formControlName="dataFim" title="Data final de cadastro" />
+        </div>
+
+        <!-- Botões com mesma altura dos selects -->
+        <div class="col-lg-2 col-md-12 col-sm-12">
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-success btn-form w-100" (click)="limparFiltros()">
+              Exibir todos
+            </button>
+
+            <button type="button" class="btn btn-primary btn-form w-100" (click)="verAgricultores()">
+              Ver Agricultores
+            </button>
+
+            <div class="btn-group w-100">
+              <button type="button" [disabled]="profile_id === 2 || profile_id === 4"
+                class="btn btn-outline-primary btn-form dropdown-toggle" data-bs-toggle="dropdown">
+                Exportar
+              </button>
+              <ul class="dropdown-menu">
+                <li>
+                  <button class="dropdown-item" (click)="exportarPlanilha('todos')">
+                    Todos os agricultores
+                  </button>
+                </li>
+                <li>
+                  <button class="dropdown-item" [disabled]="!filtroFarmers" (click)="exportarPlanilha('filtrados')">
+                    Agricultores filtrados
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+
+      </div>
+
+    </form>
+
+
+    <!-- Tabela -->
+    <div class="table-responsive shadow-sm rounded">
+      <table class="table table-striped table-hover align-middle">
+        <thead class="table-primary">
+          <tr>
+            <th class="text-center">Nome Completo</th>
+            <th class="text-center">Telefone</th>
+            <th class="text-center">Foi Atendido?</th>
+            <th class="text-center">Possui cadastro ADAGRI?</th>
+            <th class="text-center">Município</th>
+            <th class="text-center">Região</th>
+            <th class="text-center">Data de Cadastro</th>
+            <th class="text-center" colspan="2">Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let farmer of lista_filtrada | paginate: { itemsPerPage: itemsPerPage, currentPage: page }">
+            <td>{{ farmer.nome }}</td>
+            <td class="text-center">{{ farmer.telefone }}</td>
+            <td class="text-center">
+              <i *ngIf="farmer.pedido_atendido" class="bi bi-check-circle-fill text-success fs-5"></i>
+              <i *ngIf="!farmer.pedido_atendido" class="bi bi-x-circle-fill text-danger fs-5"></i>
+            </td>
+            <td class="text-center">
+              <i *ngIf="farmer.tem_cadastro_adagri" class="bi bi-check-circle-fill text-success fs-5"></i>
+              <i *ngIf="!farmer.tem_cadastro_adagri" class="bi bi-x-circle-fill text-danger fs-5"></i>
+            </td>
+            <td class="text-center">{{ farmer.ass_produtor_rural_cidade?.nome_municipio }}</td>
+            <td class="text-center">{{ farmer.ass_produtor_rural_cidade?.ass_municipio_regiao?.nome }}</td>
+            <td class="text-center">{{ farmer.createdAt | date :'dd/MM/yyyy'}}</td>
+
+            <td class="text-center">
+              <button class="btn btn-primary btn-sm" title="Desistência" [disabled]="profile_id !== 1 && profile_id !== 3"
+                (click)="retornarPrograma(farmer)">
+                <i class="fa-solid fa-arrow-rotate-left"></i>
+              </button>
+            </td>
+
+            <td class="text-center">
+              <button class="btn btn-danger btn-sm" title="Deletar Agricultor" [disabled]="profile_id !== 1 && profile_id !== 3"
+                (click)="deletaFarmer(farmer)">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginação -->
+    <pagination-controls class="text-center mt-3" (pageChange)="page = $event"></pagination-controls>
+  </div>
+</section>

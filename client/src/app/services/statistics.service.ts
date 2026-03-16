@@ -9,8 +9,8 @@ import { environment } from '../../environments/environment';
 export class StatisticsService {
   constructor(private http: HttpClient) {}
 
-  contarAgricultores(data: any): Observable<any> {
-    return this.http.get(environment.apiUrl + 'totalAgricultores', data);
+  contarAgricultores(): Observable<any> {
+    return this.http.get(environment.apiUrl + 'totalAgricultores');
   }
 
   contarMunicipio(data: any): Observable<any> {
@@ -21,20 +21,20 @@ export class StatisticsService {
     return this.http.get(environment.apiUrl + 'countPorRegiao', data);
   }
 
-  contarAtendidos(data: any): Observable<any> {
-    return this.http.get(environment.apiUrl + 'countAtendidos', data);
+  contarAtendidos(): Observable<any> {
+    return this.http.get(environment.apiUrl + 'countAtendidos');
   }
 
-  sementesDistribuidas(data: any): Observable<any> {
-    return this.http.get(environment.apiUrl + 'totalSementesDistribuidas', data);
+  sementesDistribuidas(): Observable<any> {
+    return this.http.get(environment.apiUrl + 'totalSementesDistribuidas');
   }
 
-  sementesDistribuidasPorRegiao(data: any): Observable<any> {
-    return this.http.get(environment.apiUrl + 'sementesPorRegiao', data);
+  sementesDistribuidasPorRegiao(): Observable<any> {
+    return this.http.get(environment.apiUrl + 'sementesPorRegiao');
   }
 
-  sementesDistribuidasPorMunicipio(data: any): Observable<any> {
-    return this.http.get(environment.apiUrl + 'sementesPorMunicipio', data);
+  sementesDistribuidasPorMunicipio(): Observable<any> {
+    return this.http.get(environment.apiUrl + 'sementesPorMunicipio');
   }
 
   estatiticaCultivo(data: any): Observable<any> {
@@ -49,7 +49,15 @@ export class StatisticsService {
     return this.http.get(environment.apiUrl + 'hectareRegiao', data);
   }
 
-  areaParaCultivar(data: any): Observable<any> {
-    return this.http.get(environment.apiUrl + 'totalAreaCultivo', data);
+  areaParaCultivar(): Observable<any> {
+    return this.http.get(environment.apiUrl + 'totalAreaCultivo');
+  }
+
+  areaParaTrabalhar(): Observable<any> {
+    return this.http.get(environment.apiUrl + 'totalAreaCultivoTrabalhado');
+  }
+
+  dadosMapa(): Observable<any> {
+    return this.http.get(environment.apiUrl + 'mapa');
   }
 }

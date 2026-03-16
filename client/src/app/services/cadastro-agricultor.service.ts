@@ -32,12 +32,24 @@ export class CadastroAgricultorService {
     return this.http.get(environment.apiUrl + 'checkcadastro/' + adagri);
   }
 
-  agricultorRural(metodo: string): Observable<any> {
-    return this.http.get(environment.apiUrl + metodo);
+  agricultorRural(data: any): Observable<any> {
+    return this.http.get(environment.apiUrl + 'allFarmers', { params: { status: data } });
   }
 
   agricultorById(id: number): Observable<any> {
     return this.http.get(environment.apiUrl + 'umAgricultor/' + id)
+  }
+
+  pegarCidade(city: any): Observable<any> {
+    return this.http.get(environment.apiUrl + 'takeCity/' + city)
+  }
+
+  farmersByCity(id: number): Observable<any> {
+    return this.http.get(environment.apiUrl + 'agricultorByCity/' + id)
+  }
+
+  desistirPrograma(data: any, id: number): Observable<any> {
+    return this.http.patch(environment.apiUrl + 'desistir/' + id, data)
   }
 
   atualizarAgricultor(data: any, id: number) {

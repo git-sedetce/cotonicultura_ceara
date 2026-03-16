@@ -4,67 +4,46 @@ const fs = require("fs");
 const baseUrl = process.cwd() + "/src"; //__dirname + '.
 
 class AnexoControllers {
-  static async anexoIdentidade(req, res) {
-    const file = req.file;
-    const { id } = req.params;
-    const caminho = file.path.split(process.env.SPLIT)[1];
-    const nome_arquivo = file.filename;
-    const type = file.mimetype;
-    const tipo_anexo = "identidade";
-
-    if (type == "application/pdf") {
-      try {
-        const anexarRG = await database.anexo.create({
-          mimetype: type,
-          filename: nome_arquivo,
-          path: caminho,
-          agricultor_id: id,
-          tipo_anexo: tipo_anexo,
-          raw: true,
-        });
-        // console.log('anexarParceiro', anexarParceiro)
-        return res
-          .status(200)
-          .json({ message: "Identidade anexado com sucesso!" });
-      } catch (error) {
-        return res.status(500).json(error.message);
-      }
-    } else {
-      return res.status(500).json({
-        message: "Somente arquivo .pdf",
-      });
-    }
-  }
-
   static async anexoResidencia(req, res) {
-    const file = req.file;
-    const { id } = req.params;
-    const caminho = file.path.split(process.env.SPLIT)[1];
-    const nome_arquivo = file.filename;
-    const type = file.mimetype;
-    const tipo_anexo = "comprovante_residencia";
+    try {
+      const file = req.file;
+      const { id } = req.params;
 
-    if (type == "application/pdf") {
-      try {
-        const anexarFoto = await database.anexo.create({
-          mimetype: type,
-          filename: nome_arquivo,
-          path: caminho,
-          agricultor_id: id,
-          tipo_anexo: tipo_anexo,
-          raw: true,
-        });
-        // console.log('anexarParceiro', anexarParceiro)
-        return res
-          .status(200)
-          .json({ message: "Comprovante de residência anexado com sucesso!" });
-      } catch (error) {
-        return res.status(500).json(error.message);
+      if (!file) {
+        return res.status(400).json({ message: "Arquivo não enviado" });
       }
-    } else {
-      return res.status(500).json({
-        message: "Somente arquivo .pdf",
+
+      const caminho = file.path.split(process.env.SPLIT)[1];
+      const nome_arquivo = file.filename;
+      const type = file.mimetype;
+      const tipo_anexo = "comprovante_residencia";
+
+      const tiposPermitidos = [
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+      ];
+
+      if (!tiposPermitidos.includes(type)) {
+        return res.status(400).json({
+          message: "Somente arquivo PDF ou imagem (JPG, JPEG, PNG)",
+        });
+      }
+
+      await database.anexo.create({
+        mimetype: type,
+        filename: nome_arquivo,
+        path: caminho,
+        agricultor_id: id,
+        tipo_anexo,
       });
+
+      return res.status(200).json({
+        message: "Comprovante de residência anexado com sucesso!",
+      });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
     }
   }
 
@@ -76,27 +55,106 @@ class AnexoControllers {
     const type = file.mimetype;
     const tipo_anexo = "comprovante_cpf_cnpj";
 
-    if (type == "application/pdf") {
-      try {
-        const anexarFoto = await database.anexo.create({
-          mimetype: type,
-          filename: nome_arquivo,
-          path: caminho,
-          agricultor_id: id,
-          tipo_anexo: tipo_anexo,
-          raw: true,
-        });
-        // console.log('anexarParceiro', anexarParceiro)
-        return res
-          .status(200)
-          .json({ message: "CPF/CNPJ anexado com Sucesso!" });
-      } catch (error) {
-        return res.status(500).json(error.message);
-      }
-    } else {
-      return res.status(500).json({
-        message: "Somente arquivo .pdf",
+    const tiposPermitidos = [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+    ];
+
+    if (!tiposPermitidos.includes(type)) {
+      return res.status(400).json({
+        message: "Somente arquivo PDF ou imagem (JPG, JPEG, PNG)",
       });
+    }
+
+    try {
+      const anexarFoto = await database.anexo.create({
+        mimetype: type,
+        filename: nome_arquivo,
+        path: caminho,
+        agricultor_id: id,
+        tipo_anexo: tipo_anexo,
+        raw: true,
+      });
+      // console.log('anexarParceiro', anexarParceiro)
+      return res.status(200).json({ message: "CPF/CNPJ anexado com Sucesso!" });
+    } catch (error) {
+      return res.status(500).json(error.message);
+    }
+  }
+
+  static async anexoTermoDoacao(req, res) {
+    const file = req.file;
+    const { id } = req.params;
+    const caminho = file.path.split(process.env.SPLIT)[1];
+    const nome_arquivo = file.filename;
+    const type = file.mimetype;
+    const tipo_anexo = "termo_doacao";
+    const tiposPermitidos = [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+    ];
+
+    if (!tiposPermitidos.includes(type)) {
+      return res.status(400).json({
+        message: "Somente arquivo PDF ou imagem (JPG, JPEG, PNG)",
+      });
+    }
+    try {
+      const anexarRG = await database.anexo.create({
+        mimetype: type,
+        filename: nome_arquivo,
+        path: caminho,
+        agricultor_id: id,
+        tipo_anexo: tipo_anexo,
+        raw: true,
+      });
+      // console.log('anexarParceiro', anexarParceiro)
+      return res
+        .status(200)
+        .json({ message: "Identidade anexado com sucesso!" });
+    } catch (error) {
+      return res.status(500).json(error.message);
+    }
+  }
+
+  static async anexoTermoCompromisso(req, res) {
+    const file = req.file;
+    const { id } = req.params;
+    const caminho = file.path.split(process.env.SPLIT)[1];
+    const nome_arquivo = file.filename;
+    const type = file.mimetype;
+    const tipo_anexo = "termo_compromisso";
+    const tiposPermitidos = [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+    ];
+
+    if (!tiposPermitidos.includes(type)) {
+      return res.status(400).json({
+        message: "Somente arquivo PDF ou imagem (JPG, JPEG, PNG)",
+      });
+    }
+    try {
+      const anexarRG = await database.anexo.create({
+        mimetype: type,
+        filename: nome_arquivo,
+        path: caminho,
+        agricultor_id: id,
+        tipo_anexo: tipo_anexo,
+        raw: true,
+      });
+      // console.log('anexarParceiro', anexarParceiro)
+      return res
+        .status(200)
+        .json({ message: "Identidade anexado com sucesso!" });
+    } catch (error) {
+      return res.status(500).json(error.message);
     }
   }
 
@@ -198,16 +256,19 @@ class AnexoControllers {
     const { tipo_anexo } = req.query;
 
     try {
-      const mostraAnexo = await database.anexo.findOne({
-        where: { agricultor_id: Number(id), tipo_anexo: tipo_anexo },
+      const anexo = await database.anexo.findOne({
+        where: {
+          agricultor_id: Number(id),
+          tipo_anexo,
+        },
         attributes: ["id", "tipo_anexo", "path", "mimetype", "filename"],
       });
 
-      if (!mostraAnexo) {
+      if (!anexo) {
         return res.status(404).json({ message: "Arquivo não encontrado" });
       }
 
-      const filePath = path.join(baseUrl, mostraAnexo.path);
+      const filePath = path.join(baseUrl, anexo.path);
 
       if (!fs.existsSync(filePath)) {
         return res
@@ -215,33 +276,34 @@ class AnexoControllers {
           .json({ message: "Arquivo não existe no servidor" });
       }
 
-      // Decide o MIME type:
-      let mimetype = mostraAnexo.mimetype;
+      // Tipos permitidos
+      const tiposPermitidos = [
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+      ];
 
-      // Caso você queira forçar pelo tipo_anexo:
-      if (!mimetype) {
-        if (mostraAnexo.tipo_anexo === "foto") mimetype = "image/jpeg";
-        else if (mostraAnexo.tipo_anexo === "titulo_eleitor")
-          mimetype = "image/jpeg";
-        else mimetype = "application/pdf"; // padrão
+      if (!tiposPermitidos.includes(anexo.mimetype)) {
+        return res.status(415).json({
+          message: "Tipo de arquivo não suportado",
+        });
       }
 
-      fs.readFile(filePath, { encoding: "base64" }, (err, base64Data) => {
-        if (err)
-          return res.status(500).json({ message: "Erro ao ler arquivo" });
+      const base64 = await fs.promises.readFile(filePath, "base64");
 
-        return res.status(200).json({
-          base64: base64Data,
-          mimetype: mimetype,
-          filename: mostraAnexo.filename,
-          tipo_anexo: mostraAnexo.tipo_anexo,
-          id_anexo: mostraAnexo.id,
-        });
+      return res.status(200).json({
+        id_anexo: anexo.id,
+        tipo_anexo: anexo.tipo_anexo,
+        filename: anexo.filename,
+        mimetype: anexo.mimetype,
+        base64,
       });
     } catch (error) {
-      return res
-        .status(500)
-        .json({ message: "Erro no servidor", error: error.message });
+      return res.status(500).json({
+        message: "Erro ao recuperar arquivo",
+        error: error.message,
+      });
     }
   }
 
@@ -315,7 +377,7 @@ class AnexoControllers {
       const mostraAnexo = await database.anexo.findAll({
         order: ["id"],
         where: { agricultor_id: Number(id) },
-        attributes: ["tipo_anexo"],
+        attributes: ["id", "tipo_anexo"],
       });
       mostraAnexo.path = __dirname + mostraAnexo.path;
       //console.log('mostraAnexos.path', mostraAnexo.path)

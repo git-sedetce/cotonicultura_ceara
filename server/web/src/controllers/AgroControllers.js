@@ -1,5 +1,5 @@
 const database = require("../models");
-const { Op, Sequelize } = require("sequelize");
+const { Op, Sequelize, where } = require("sequelize");
 const fs = require("fs");
 const path = require("path");
 
@@ -16,6 +16,76 @@ class AgroControllers {
       return res.status(200).json(novoProdutor);
     } catch (error) {
       return res.status(500).json(error.message);
+    }
+  }
+
+  static async registerAgroCompleto(req, res) {
+    const t = await database.sequelize.transaction();
+
+    try {
+      // ===== 1. VALIDAR ARQUIVOS =====
+      if (!req.files?.cpf || !req.files?.residencia) {
+        return res.status(400).json({
+          message: "CPF/CNPJ e comprovante de residência são obrigatórios",
+        });
+      }
+
+      // ===== 2. DADOS =====
+      const dados = JSON.parse(req.body.dados);
+
+      // ===== 3. CRIAR AGRICULTOR =====
+      const novoProdutor = await database.produtor_rural.create(dados, {
+        transaction: t,
+      });
+
+      const numeroPedido = `PED-${String(novoProdutor.id).padStart(6, "0")}`;
+      await novoProdutor.update({ pedido: numeroPedido }, { transaction: t });
+
+      // ===== 4. PROCESSAR ARQUIVOS =====
+      const arquivos = [
+        {
+          file: req.files.cpf[0],
+          tipo_anexo: "comprovante_cpf_cnpj",
+        },
+        {
+          file: req.files.residencia[0],
+          tipo_anexo: "comprovante_residencia",
+        },
+      ];
+
+      const tiposPermitidos = [
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+      ];
+
+      for (const item of arquivos) {
+        if (!tiposPermitidos.includes(item.file.mimetype)) {
+          throw new Error("Tipo de arquivo não permitido");
+        }
+
+        const caminho = item.file.path.split(process.env.SPLIT)[1];
+
+        await database.anexo.create(
+          {
+            mimetype: item.file.mimetype,
+            filename: item.file.filename,
+            path: caminho,
+            agricultor_id: novoProdutor.id,
+            tipo_anexo: item.tipo_anexo,
+          },
+          { transaction: t },
+        );
+      }
+
+      // ===== 5. COMMIT =====
+      await t.commit();
+
+      return res.status(200).json(novoProdutor);
+    } catch (error) {
+      await t.rollback();
+      return res.status(500).json({ message: error.message });
     }
   }
 
@@ -113,8 +183,10 @@ class AgroControllers {
   }
 
   static async pegaFarmers(req, res) {
+    const { status } = req.query;
     try {
       const getFarmer = await database.produtor_rural.findAll({
+        where: { status_farmer: status },
         order: [["nome", "ASC"]],
         attributes: [
           "id",
@@ -134,6 +206,12 @@ class AgroControllers {
           "regime_cultivo",
           "cadastro_adagri",
           "confirma_informacao",
+          "email_trabalhador",
+          "apelido_trabalhador",
+          "tem_cadastro_adagri",
+          "uso_dados",
+          "status_farmer",
+          "createdAt",
         ],
         include: [
           {
@@ -183,6 +261,9 @@ class AgroControllers {
           "regime_cultivo",
           "cadastro_adagri",
           "confirma_informacao",
+          "email_trabalhador",
+          "uso_dados",
+          "createdAt",
         ],
         include: [
           {
@@ -202,6 +283,91 @@ class AgroControllers {
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Erro ao buscar agricultor" });
+    }
+  }
+
+  static async pegaCidade(req, res) {
+    const { city } = req.params;
+    try {
+      const getCity = await database.cidades.findOne({
+        where: { nome_municipio: city },
+        attributes: ["id", "nome_municipio", "cod_ibge"],
+        include: [
+          {
+            association: "ass_municipio_regiao",
+            attributes: ["id", "nome"],
+          },
+        ],
+      });
+
+      const getFarmer = await database.produtor_rural.findAll({
+        where: { cidade: getCity.id },
+        attributes: [
+          "pedido",
+          "nome",
+          "cpf_cnpj",
+          "cidade",
+          "nome_propriedade",
+          "area_algodao",
+          "pedido_atendido",
+          "sementes_recebidas",
+          "regime_cultivo",
+        ],
+        include: [
+          {
+            association: "ass_produtor_rural_cidade",
+            attributes: ["id", "nome_municipio"],
+          },
+          {
+            association: "ass_agricultor_anexo",
+            attributes: ["tipo_anexo"],
+          },
+        ],
+      });
+
+      return res.status(200).json(getFarmer);
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(500)
+        .json({ message: "Erro ao pegar informações da Cidade" });
+    }
+  }
+
+  static async pegaFarmersCity(req, res) {
+    const { id } = req.params;
+    try {
+      const getFarmer = await database.produtor_rural.findAll({
+        where: { cidade: Number(id) },
+        attributes: [
+          "pedido",
+          "nome",
+          "cpf_cnpj",
+          "cidade",
+          "nome_propriedade",
+          "area_algodao",
+          "pedido_atendido",
+          "sementes_recebidas",
+          "regime_cultivo",
+        ],
+        include: [
+          {
+            association: "ass_produtor_rural_cidade",
+            attributes: ["id", "nome_municipio"],
+            include: [
+              {
+                association: "ass_municipio_regiao",
+                attributes: ["id", "nome"],
+              },
+            ],
+          },
+        ],
+      });
+
+      return res.status(200).json(getFarmer);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Erro ao buscar agricultores" });
     }
   }
 
@@ -243,6 +409,25 @@ class AgroControllers {
     }
   }
 
+  static async desisitirPrograma(req, res) {
+    const { id } = req.params;
+    const produtor = req.body;
+    try {
+      await database.produtor_rural.update(produtor, {
+        where: { id: Number(id) },
+      });
+      const updateFarmer = await database.produtor_rural.findOne({
+        where: { id: Number(id) },
+      });
+      return res.status(200).json({
+        mensagem: "Desistência registrada com sucesso",
+        data: updateFarmer,
+      });
+    } catch (error) {
+      return res.status(500).json(error.message);
+    }
+  }
+
   static async deletaFarmer(req, res) {
     const { id } = req.params;
 
@@ -267,7 +452,7 @@ class AgroControllers {
       for (const anexo of produtor.ass_agricultor_anexo) {
         if (anexo.path) {
           const caminhoArquivo = path.resolve(anexo.path);
-          console.log("Caminho do arquivo:", caminhoArquivo);
+          // console.log("Caminho do arquivo:", caminhoArquivo);
 
           if (fs.existsSync(caminhoArquivo)) {
             fs.unlinkSync(caminhoArquivo);

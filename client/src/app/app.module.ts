@@ -25,6 +25,8 @@ import { HomeAdminComponent } from './components/admin/home-admin/home-admin.com
 import { NgxApexchartsModule } from 'ngx-apexcharts';
 import { AnexoComponent } from './components/anexo/anexo.component';
 import { TelefoneValidoDirective } from './services/diretiva/telefone-valido.directive';
+import { ListFarmesDropoutsComponent } from './components/admin/list-farmes-dropouts/list-farmes-dropouts.component';
+import { DuvidasComponent } from './components/duvidas/duvidas.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +43,9 @@ import { TelefoneValidoDirective } from './services/diretiva/telefone-valido.dir
     WhoAreComponent,
     HomeAdminComponent,
     AnexoComponent,
-    TelefoneValidoDirective
+    TelefoneValidoDirective,
+    ListFarmesDropoutsComponent,
+    DuvidasComponent
   ],
   imports: [
     BrowserModule,

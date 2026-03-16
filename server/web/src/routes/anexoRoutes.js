@@ -3,6 +3,8 @@ const multer = require('multer')
 const fs = require('fs');
 const path = require('path');
 const AnexoController = require('../controllers/AnexoControllers')
+var auth = require('../service/AutenticaService');
+var checkRole = require('../service/checkRole');
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb){
@@ -29,18 +31,19 @@ const upload = multer({ storage})
 
 const router = Router()
 
-router.post('/anexoIdentidade/:id', upload.single('file'), AnexoController.anexoIdentidade)
+router.post('/termoDoacao/:id', upload.single('file'), auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.anexoTermoDoacao)
+router.post('/termoCompromisso/:id', upload.single('file'), auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.anexoTermoCompromisso)
 router.post('/anexoResidencia/:id', upload.single('file'), AnexoController.anexoResidencia)
 router.post('/anexoCPFCNPJ/:id', upload.single('file'), AnexoController.anexoCPFCNPJ)
-router.post('/anexoPropriedade/:id', upload.single('file'), AnexoController.anexoPropriedade)
-router.put('/updateFile/:id', upload.single('file'), AnexoController.atualizarAnexo)
+router.post('/anexoPropriedade/:id', upload.single('file'), auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.anexoPropriedade)
+router.put('/updateFile/:id', upload.single('file'), auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.atualizarAnexo)
 
-router.get('/anexo', AnexoController.pegaAnexo)
-router.get('/anexoByTipo/:tipo', AnexoController.pegaAnexoByType)
-router.get('/anexoFarm/:id', AnexoController.pegaAnexoByFarmId)
-router.get('/checkAnexoById/:id', AnexoController.checkFileById)
-router.get('/getFile/:id', AnexoController.pegarArquivoById)
+router.get('/anexo', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.pegaAnexo)
+router.get('/anexoByTipo/:tipo', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.pegaAnexoByType)
+router.get('/anexoFarm/:id', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.pegaAnexoByFarmId)
+router.get('/checkAnexoById/:id', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.checkFileById)
+router.get('/getFile/:id', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.pegarArquivoById)
 
-router.delete('/deleteAnexo/:id', AnexoController.deletarAnexo)
+router.delete('/deleteAnexo/:id', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]),AnexoController.deletarAnexo)
 
 module.exports = router

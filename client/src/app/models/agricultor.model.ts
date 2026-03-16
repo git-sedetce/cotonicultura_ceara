@@ -10,12 +10,16 @@ export class Agricultor {
     public ponto_referencia?: string,
     public cidade?: number,
     public nome_propriedade?: string,
-    public area_total?: number,
-    public area_algodao?: number,
+    public area_total: number = 0,
+    public area_algodao: number = 0,
     public pedido_atendido: boolean = false,
     public sementes_recebidas?: number,
     public regime_cultivo?: string,
     public cadastro_adagri?: string,
     public confirma_informacao?: boolean,
+    public email_trabalhador?: string,
+    public apelido_trabalhador?: string,
+    public uso_dados: boolean = false,
+    public tem_cadastro_adagri: boolean = false,
   ) {}
 }

@@ -1,58 +1,82 @@
 <header>
-  <div class="px-3 py-2 text-bg-success border-bottom">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-success border-bottom">
     <div class="container">
-      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start cabecalho">
-        <a routerLink="/home" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
-          <img src="assets/imgs/logos/Brasao-100x121.png" alt="Brasão do Governo do Estado do Ceará">
-        </a>
 
-        <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
-          <li>
-            <a routerLink="/home" class="nav-link text-white">
-              <i class="ms-2 bi bi-house-door"></i> Home
+      <!-- Logo -->
+      <a class="navbar-brand d-flex align-items-center" routerLink="/home">
+        <img src="assets/imgs/logos/Brasao-100x121.png" alt="Brasão do Governo do Estado do Ceará" class="logo-header">
+      </a>
+
+      <!-- Botão mobile -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuHeader">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Conteúdo colapsável -->
+      <div class="collapse navbar-collapse" id="menuHeader">
+
+        <!-- Menu principal -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+          <li class="nav-item">
+            <a routerLink="/home" class="nav-link">
+              <i class="fa-regular fa-house me-1"></i> Home
             </a>
           </li>
 
-          <li *ngIf="authenticated">
-            <a routerLink="/listfarmers" class="nav-link text-white">
-              <i class="ms-2 bi bi-signpost-split"></i> Agricultores Cadastrados
+          <li class="nav-item">
+            <a routerLink="/quemsomos" class="nav-link">
+              <i class="fa-regular fa-newspaper me-1"></i> O que é?
             </a>
           </li>
 
-          <li *ngIf="authenticated">
-            <a routerLink="/admin" class="nav-link text-white">
-              <i class="ms-2 bi bi-kanban-fill"></i> Admin
+          <li class="nav-item">
+            <a routerLink="/questions" class="nav-link">
+              <i class="fa-solid fa-circle-question me-1"></i> Dúvidas?
             </a>
           </li>
 
-          <li *ngIf="profile === 1">
-            <a routerLink="/cadastro" class="nav-link text-white">
-              <i class="ms-2 bi bi-person-add"></i> Adicionar Usuário
+          <li class="nav-item" *ngIf="authenticated">
+            <a routerLink="/listfarmers" class="nav-link">
+              <i class="fa-solid fa-seedling me-1"></i> Agricultores
             </a>
           </li>
 
-          <li *ngIf="profile === 1">
-            <a routerLink="/listusers" class="nav-link text-white">
-              <i class="ms-2 me-2 bi bi-people-fill"></i> Usuários
+          <li class="nav-item" *ngIf="authenticated">
+            <a routerLink="/admin" class="nav-link">
+              <i class="fa-solid fa-chart-pie me-1"></i> Admin
             </a>
           </li>
 
-          <li *ngIf="!authenticated">
-            <button type="button" routerLink="/login" class="btn btn-light text-dark ms-2 me-2">Login</button>
+          <li class="nav-item" *ngIf="profile === 1">
+            <a routerLink="/cadastro" class="nav-link">
+              <i class="fa-solid fa-user-plus me-1"></i> Adicionar Usuário
+            </a>
           </li>
-          <li *ngIf="!authenticated">
-            <button type="button" routerLink="/cadastro" class="btn btn-primary">Cadastre-se</button>
-          </li>
-          <li *ngIf="authenticated">
-            <div class="p-2 mb-1 bg-success fw-bold text-white">Olá {{ user_name }}</div>
-          </li>
-          <li *ngIf="authenticated">
-            <button type="button" routerLink="/login" class="btn btn-danger text-dark fw-bold text-white ms-3 me-2"
-              (click)="logout()">Sair</button>
-            <!--<a routerLink="/login" class="nav-link" (click)="logout()">Logout</a>-->
+
+          <li class="nav-item" *ngIf="profile === 1">
+            <a routerLink="/listusers" class="nav-link">
+              <i class="fa-solid fa-users me-1"></i> Usuários
+            </a>
           </li>
         </ul>
+
+        <!-- Área direita -->
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+
+          <ng-container *ngIf="!authenticated">
+            <button routerLink="/login" class="btn btn-light">Login</button>
+            <button routerLink="/cadastro" class="btn btn-primary">Cadastre-se</button>
+          </ng-container>
+
+          <ng-container *ngIf="authenticated">
+            <span class="fw-bold text-white">Olá {{ user_name }}</span>
+            <button routerLink="/login" class="btn btn-danger" (click)="logout()">Sair</button>
+          </ng-container>
+
+        </div>
+
       </div>
     </div>
-  </div>
+  </nav>
 </header>

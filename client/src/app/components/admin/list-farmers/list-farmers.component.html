@@ -18,65 +18,94 @@
       <h3 class="text-center text-uppercase m-0">Agricultores Cadastrados</h3>
     </div>
 
-    <form [formGroup]="formFiltro" class="row g-2 align-items-end mb-3">
+    <form [formGroup]="formFiltro" class="mb-3">
+      <div class="row g-2 align-items-end mb-2">
 
-      <div class="col-lg-4 col-md-6 col-sm-12">
-        <input type="text" class="form-control shadow-sm" placeholder="🔍 Pesquisar por Nome ou Email..."
-          formControlName="nome" (keyup)="filtrarUsuarios()" />
-      </div>
-
-      <div class="col-lg-2 col-md-6 col-sm-6">
-        <select class="form-select shadow-sm" formControlName="cidade" (change)="filtrarUsuarios()">
-          <option value="">Cidade</option>
-          <option *ngFor="let c of lista_cidade" [value]="c.nome_municipio">
-            {{ c.nome_municipio }}
-          </option>
-        </select>
-      </div>
-
-      <div class="col-lg-2 col-md-6 col-sm-6">
-        <select class="form-select shadow-sm" formControlName="regiao" (change)="filtrarUsuarios()">
-          <option value="">Região</option>
-          <option *ngFor="let r of lista_regiao" [value]="r.nome">
-            {{ r.nome }}
-          </option>
-        </select>
-      </div>
-
-      <div class="col-lg-2 col-md-6 col-sm-6">
-        <select class="form-select shadow-sm" formControlName="pedidoAtendido" (change)="filtrarUsuarios()">
-          <option value="">Pedido Atendido</option>
-          <option [ngValue]="true">Sim</option>
-          <option [ngValue]="false">Não</option>
-        </select>
-      </div>
-
-      <!-- Botões com mesma altura dos selects -->
-      <div class="col-lg-2 col-md-12 col-sm-12">
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-success btn-form w-100" (click)="limparFiltros()">
-            Exibir todos
-          </button>
-
-          <div class="btn-group w-100">
-            <button type="button" [disabled]="profile_id === 2 || profile_id === 4" class="btn btn-outline-primary btn-form dropdown-toggle" data-bs-toggle="dropdown">
-              Exportar
-            </button>
-            <ul class="dropdown-menu">
-              <li>
-                <button class="dropdown-item" (click)="exportarPlanilha('todos')">
-                  Todos os agricultores
-                </button>
-              </li>
-              <li>
-                <button class="dropdown-item" [disabled]="!filtroFarmers" (click)="exportarPlanilha('filtrados')">
-                  Agricultores filtrados
-                </button>
-              </li>
-            </ul>
-          </div>
-
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <input type="text" class="form-control shadow-sm" placeholder="🔍 Pesquisar por Nome ou Email..."
+            formControlName="nome" (keyup)="filtrarUsuarios()" />
         </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-6">
+          <select class="form-select shadow-sm" formControlName="cidade" (change)="filtrarUsuarios()">
+            <option value="">Cidade</option>
+            <option *ngFor="let c of lista_cidade" [value]="c.nome_municipio">
+              {{ c.nome_municipio }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-6">
+          <select class="form-select shadow-sm" formControlName="regiao" (change)="filtrarUsuarios()">
+            <option value="">Região</option>
+            <option *ngFor="let r of lista_regiao" [value]="r.nome">
+              {{ r.nome }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-6">
+          <select class="form-select shadow-sm" formControlName="pedidoAtendido" (change)="filtrarUsuarios()">
+            <option value="">Pedido Atendido</option>
+            <option [ngValue]="true">Sim</option>
+            <option [ngValue]="false">Não</option>
+          </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6 col-sm-6">
+          <select class="form-select shadow-sm" formControlName="cadastroADAGRI" (change)="filtrarUsuarios()">
+            <option value="">Cadastro ADAGRI</option>
+            <option [ngValue]="true">Sim</option>
+            <option [ngValue]="false">Não</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="row g-2 align-items-end">
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <input type="date" class="form-control shadow-sm" formControlName="dataInicio"
+            title="Data inicial de cadastro" />
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <input type="date" class="form-control shadow-sm" formControlName="dataFim" title="Data final de cadastro" />
+        </div>
+
+        <!-- Botões com mesma altura dos selects -->
+        <div class="col-lg-2 col-md-12 col-sm-12">
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-success btn-form w-100" (click)="limparFiltros()">
+              Exibir todos
+            </button>
+
+            <button type="button" class="btn btn-danger btn-form w-100" (click)="verDesistentes()">
+              Desistentes
+            </button>
+
+            <div class="btn-group w-100">
+              <button type="button" [disabled]="profile_id === 2 || profile_id === 4"
+                class="btn btn-outline-primary btn-form dropdown-toggle" data-bs-toggle="dropdown">
+                Exportar
+              </button>
+              <ul class="dropdown-menu">
+                <li>
+                  <button class="dropdown-item" (click)="exportarPlanilha('todos')">
+                    Todos os agricultores
+                  </button>
+                </li>
+                <li>
+                  <button class="dropdown-item" [disabled]="!filtroFarmers" (click)="exportarPlanilha('filtrados')">
+                    Agricultores filtrados
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+
       </div>
 
     </form>
@@ -90,9 +119,11 @@
             <th class="text-center">Nome Completo</th>
             <th class="text-center">Telefone</th>
             <th class="text-center">Foi Atendido?</th>
+            <th class="text-center">Possui cadastro ADAGRI?</th>
             <th class="text-center">Município</th>
             <th class="text-center">Região</th>
-            <th class="text-center" colspan="4">Ações</th>
+            <th class="text-center">Data de Cadastro</th>
+            <th class="text-center" colspan="6">Ações</th>
           </tr>
         </thead>
 
@@ -104,40 +135,75 @@
               <i *ngIf="farmer.pedido_atendido" class="bi bi-check-circle-fill text-success fs-5"></i>
               <i *ngIf="!farmer.pedido_atendido" class="bi bi-x-circle-fill text-danger fs-5"></i>
             </td>
+            <td class="text-center">
+              <i *ngIf="farmer.tem_cadastro_adagri" class="bi bi-check-circle-fill text-success fs-5"></i>
+              <i *ngIf="!farmer.tem_cadastro_adagri" class="bi bi-x-circle-fill text-danger fs-5"></i>
+            </td>
             <td class="text-center">{{ farmer.ass_produtor_rural_cidade?.nome_municipio }}</td>
             <td class="text-center">{{ farmer.ass_produtor_rural_cidade?.ass_municipio_regiao?.nome }}</td>
+            <td class="text-center">{{ farmer.createdAt | date :'dd/MM/yyyy'}}</td>
 
             <td class="text-center">
               <button class="btn btn-warning btn-sm" (click)="onEdit(farmer)" data-bs-toggle="modal"
                 data-bs-target="#modalEdit">
-                <i class="bi bi-pencil-square"></i>
+                <i class="fa-solid fa-pen-to-square"></i>
               </button>
             </td>
 
-            <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length <= 0">
-              <button class="btn btn-info btn-sm" (click)="anexarArquivo(farmer.id)" title="Anexar Documentos">
-                <i class="bi bi-file-earmark-excel-fill"></i>
+            <td class="text-center" *ngIf="faltandoDocumentosBasicos(farmer)">
+              <button class="btn btn-warning btn-sm" (click)="anexarArquivo(farmer.id)" title="Anexar Documentos">
+                <i class="fa-solid fa-file-lines"></i>
               </button>
             </td>
 
-            <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 0">
+
+            <td class="text-center" *ngIf="!faltandoDocumentosBasicos(farmer) && faltandoAlgumTermo(farmer)">
+              <button class="btn btn-warning btn-sm" (click)="anexarArquivo(farmer.id)" title="Anexar Termos">
+                <i class="fa-solid fa-file-signature"></i>
+              </button>
+            </td>
+
+
+            <td class="text-center" *ngIf="possuiCpf(farmer)">
               <button class="btn btn-success btn-sm" (click)="getFile(farmer, 'comprovante_cpf_cnpj')"
-                data-bs-toggle="modal" data-bs-target="#modalDocumento" title="CPF/CNPJ">
-                <i class="bi bi-file-earmark-person-fill"></i>
+                data-bs-toggle="modal" data-bs-target="#modalDocumento">
+                <i class="fa-solid fa-id-badge"></i>
               </button>
             </td>
 
-            <td class="text-center" *ngIf="farmer.ass_agricultor_anexo.length > 0">
-              <button class="btn btn-primary btn-sm" (click)="getFile(farmer.id, 'comprovante_residencia')"
-                data-bs-toggle="modal" data-bs-target="#modalResidencia" title="Comprovante de Residência">
-                <i class="bi bi-file-earmark-pdf-fill"></i>
+
+            <td class="text-center" *ngIf="possuiResid(farmer)">
+              <button class="btn btn-success btn-sm" (click)="getFile(farmer, 'comprovante_residencia')"
+                data-bs-toggle="modal" data-bs-target="#modalResidencia">
+                <i class="fa-solid fa-house-circle-check"></i>
               </button>
             </td>
 
-            <td class="text-center">
-              <button class="btn btn-danger btn-sm" [disabled]="profile_id !== 1 && profile_id !== 3"
+            <td class="text-center" *ngIf="possuiTermoDoacao(farmer)">
+              <button class="btn btn-success btn-sm" (click)="getFile(farmer, 'termo_doacao')" data-bs-toggle="modal"
+                data-bs-target="#modalTermoDoacao">
+                <i class="fa-solid fa-file-contract"></i>
+              </button>
+            </td>
+
+            <td class="text-center" *ngIf="possuiTermoCompromisso(farmer)">
+              <button class="btn btn-success btn-sm" (click)="getFile(farmer, 'termo_compromisso')"
+                data-bs-toggle="modal" data-bs-target="#modalTermoCompromisso">
+                <i class="fa-solid fa-file-invoice"></i>
+              </button>
+            </td>
+
+            <!-- <td class="text-center" *ngIf="!farmer.status_farmer">
+              <button class="btn btn-danger btn-sm" title="Deletar Agricultor" [disabled]="profile_id !== 1 && profile_id !== 3"
                 (click)="deletaFarmer(farmer)">
                 <i class="bi bi-trash-fill"></i>
+              </button>
+            </td> -->
+
+            <td class="text-center">
+              <button class="btn btn-danger btn-sm" title="Desistência"
+                [disabled]="profile_id !== 1 && profile_id !== 3" (click)="desistirPrograma(farmer)">
+                <i class="fa-solid fa-person-walking-luggage"></i>
               </button>
             </td>
 
@@ -174,8 +240,29 @@
 
             <div class="form-group col-sm-4 col-12 ">
               <div class="form-floating">
+                <input type="text" id="apelido_trabalhador" name="apelido_trabalhador" placeholder="apelido_trabalhador"
+                  required formControlName="apelido_trabalhador" class="form-control" />
+                <label class="form-label pergunta" for="apelido_trabalhador">Apelido do Trabalhor</label>
+              </div>
+            </div>
+
+            <div class="form-group col-sm-4 col-12 ">
+              <div class="form-floating">
+                <input type="email" id="email_trabalhador" name="email_trabalhador"
+                  placeholder="Digite o email do trabalhador" required formControlName="email_trabalhador"
+                  class="form-control" />
+                <label class="form-label pergunta" for="email_trabalhador">Email do trabalhador</label>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="row mt-4 mb-4">
+
+            <div class="form-group col-sm-4 col-12 ">
+              <div class="form-floating">
                 <input type="text" id="telefone" name="telefone" placeholder="Telefone" required
-                  formControlName="telefone" class="form-control" />
+                  formControlName="telefone" class="form-control" mask="(00) 0 0000-0000||(00) 0000-0000" />
                 <label class="form-label pergunta" for="telefone">Telefone</label>
               </div>
             </div>
@@ -183,13 +270,10 @@
             <div class="form-group col-sm-4 col-12 ">
               <div class="form-floating">
                 <input type="text" id="cpf_cnpj" name="cpf_cnpj" placeholder="Digite o CPF/CNPJ" required
-                  formControlName="cpf_cnpj" class="form-control" />
+                  formControlName="cpf_cnpj" class="form-control" mask="00.000.000/0000-00||000.000.000-00" />
                 <label class="form-label pergunta" for="cpf_cnpj">CPF/CNPJ</label>
               </div>
             </div>
-
-          </div>
-          <div class="row mt-4 mb-4">
 
             <div class="form-group col-sm-4 col-12 ">
               <div class="form-floating">
@@ -198,6 +282,10 @@
                 <label class="form-label pergunta" for="rg">Identidade</label>
               </div>
             </div>
+
+          </div>
+
+          <div class="row mt-4 mb-4">
 
             <div class="form-group col-sm-4 col-12 ">
               <div class="form-floating">
@@ -215,9 +303,6 @@
               <label class="form-label pergunta ms-3" for="mes">Cidade</label>
             </div>
 
-          </div>
-          <div class="row mt-4 mb-4">
-
             <div class="form-group col-sm-4 col-12 ">
               <div class="form-floating">
                 <input type="text" id="nome_propriedade" name="nome_propriedade" placeholder="Nome da Propriedade"
@@ -225,6 +310,9 @@
                 <label class="form-label pergunta" for="nome_propriedade">Nome da Propriedade</label>
               </div>
             </div>
+
+          </div>
+          <div class="row mt-4 mb-4">
 
             <div class="form-group col-sm-4 col-12 ">
               <div class="form-floating">
@@ -242,38 +330,11 @@
               </div>
             </div>
 
-            <div class="form-group col-sm-2 col-12 ">
+            <div class="form-group col-sm-3 col-12 ">
               <div class="form-floating">
                 <input type="number" id="area_algodao" name="area_algodao" placeholder="Área de Algodão (ha)" required
                   formControlName="area_algodao" class="form-control" />
                 <label class="form-label pergunta" for="area_algodao">Área de Algodão (ha)</label>
-              </div>
-            </div>
-          </div>
-
-          <div class="row mt-4 mb-4">
-            <div class="form-floating col-sm-3 col-12 mb-2">
-              <select name="regime_cultivo" id="regime_cultivo" class="form-select text-capitalize"
-                formControlName="regime_cultivo" required>
-                <option value='irrigado'> Irrigado </option>
-                <option value='sequeiro'> Sequeiro </option>
-              </select>
-              <label class="form-label pergunta ms-3" for="mes">Regime do Cultivo</label>
-            </div>
-
-            <div class="form-group col-sm-3 col-12 ">
-              <div class="form-floating">
-                <input type="text" id="cadastro_adagri" name="cadastro_adagri" placeholder="Cadastro da ADAGRI" required
-                  formControlName="cadastro_adagri" class="form-control" />
-                <label class="form-label pergunta" for="cadastro_adagri">Cadastro da ADAGRI</label>
-              </div>
-            </div>
-
-            <div class="col-sm-3 col-12 mt-3">
-              <div class="form-check form-switch">
-                <label class="form-check-label" for="pedido_atendido">O Agricultor foi atendido?</label>
-                <input type="checkbox" class="form-check-input" formControlName="pedido_atendido">
-
               </div>
             </div>
 
@@ -285,6 +346,48 @@
                 <label class="form-label pergunta" for="sementes_recebidas">Sementes Recebidas (Kg)</label>
               </div>
             </div>
+          </div>
+
+          <div class="row mt-4 mb-4">
+            <div class="form-floating col-sm-2 col-12 mb-2">
+              <select name="regime_cultivo" id="regime_cultivo" class="form-select text-capitalize"
+                formControlName="regime_cultivo" required>
+                <option value='irrigado'> Irrigado </option>
+                <option value='sequeiro'> Sequeiro </option>
+              </select>
+              <label class="form-label pergunta ms-3" for="mes">Regime do Cultivo</label>
+            </div>
+
+            <div class="col-sm-3 col-12 mt-3">
+              <div class="form-check form-switch">
+                <label class="form-check-label" for="tem_cadastro_adagri">Tem cadastro na ADAGRI?</label>
+                <input type="checkbox" class="form-check-input" formControlName="tem_cadastro_adagri">
+              </div>
+            </div>
+
+            <div class="form-group col-sm-2 col-12 ">
+              <div class="form-floating">
+                <input type="text" id="cadastro_adagri" name="cadastro_adagri" placeholder="Cadastro da ADAGRI" required
+                  formControlName="cadastro_adagri" class="form-control" />
+                <label class="form-label pergunta" for="cadastro_adagri">Número ADAGRI</label>
+              </div>
+            </div>
+
+            <div class="col-sm-3 col-12 mt-3">
+              <div class="form-check form-switch">
+                <label class="form-check-label" for="pedido_atendido">O Agricultor foi atendido?</label>
+                <input type="checkbox" class="form-check-input" formControlName="pedido_atendido">
+              </div>
+            </div>
+
+            <div class="col-sm-2 col-12 mt-3">
+              <div class="form-check form-switch">
+                <label class="form-check-label" for="uso_dados">Uso de dados?</label>
+                <input type="checkbox" class="form-check-input" formControlName="uso_dados">
+              </div>
+            </div>
+
+
           </div>
 
         </form>
@@ -311,16 +414,30 @@
           <div class="row">
             <div class="col-sm-12 col-12 mb-3">
               <label for="documento" class="form-label">Atualiza CPF/CNPJ</label>
-              <input class="form-control" type="file" id="documento" name="documento" #atualizaDocumento>
+              <input class="form-control" type="file" id="documento" name="documento" #atualizaDocumento
+                accept=".png,.jpg,.jpeg,.webp,.gif,.pdf">
             </div>
           </div>
-          </form>
+        </form>
 
-          <div class="row">
-            <div class="mt-2">
-              <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe>
+        <div class="row">
+          <div class="mt-2 text-center" *ngIf="loadingArquivo">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Carregando...</span>
             </div>
           </div>
+          <div class="mt-2">
+            <div *ngIf="mensagemArquivo" class="alert alert-warning text-center">
+              {{ mensagemArquivo }}
+            </div>
+            <!-- <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe> -->
+            <iframe *ngIf="isPdf" [src]="arquivoUrl" width="100%" height="1200px" type="application/pdf">
+            </iframe>
+
+            <!-- Imagem -->
+            <img *ngIf="isImagem" [src]="arquivoUrl" class="img-fluid rounded border" alt="Documento do agricultor" />
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" id="cancel" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -344,22 +461,123 @@
           <div class="row">
             <div class="col-sm-12 col-12 mb-3">
               <label for="comprovante" class="form-label">Atualiza Comprovante</label>
-              <input class="form-control" type="file" id="comprovante" name="comprovante" required #atualizaComprovante>
+              <input class="form-control" type="file" id="comprovante" name="comprovante" required #atualizaComprovante
+                accept=".png,.jpg,.jpeg,.webp,.gif,.pdf">
             </div>
           </div>
-          </form>
+        </form>
 
-          <div class="row">
-            <div class="mt-2">
-              <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe>
+        <div class="row">
+          <div class="mt-2 text-center" *ngIf="loadingArquivo">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Carregando...</span>
             </div>
           </div>
+          <div class="mt-2" *ngIf="!loadingArquivo">
+            <div *ngIf="mensagemArquivo" class="alert alert-warning text-center">
+              {{ mensagemArquivo }}
+            </div>
+            <!-- <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe> -->
+            <iframe *ngIf="isPdf" [src]="arquivoUrl" width="100%" height="1200px" type="application/pdf">
+            </iframe>
+
+            <!-- Imagem -->
+            <img *ngIf="isImagem" [src]="arquivoUrl" class="img-fluid rounded border" alt="Comprovante de Residência" />
+          </div>
+        </div>
 
 
       </div>
       <div class="modal-footer">
         <button type="button" id="cancel" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <button type="button" (click)="updateComprovante()" class="btn btn-warning">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--Modal editar Termo de Doação-->
+<div class="modal fade" id="modalTermoDoacao" tabindex="-1" aria-labelledby="modalTermoDoacaoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable mt-5">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalTermoDoacaoLabel">Atualizar Termo de Doação</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="formAnexo">
+          <div class="row">
+            <div class="col-sm-12 col-12 mb-3">
+              <label for="documento" class="form-label">Termo de Doação</label>
+              <input class="form-control" type="file" id="documento" name="documento" #atualizaDocumento
+                accept=".png,.jpg,.jpeg,.webp,.gif,.pdf">
+            </div>
+          </div>
+        </form>
+
+        <div class="row">
+          <div class="mt-2 text-center" *ngIf="loadingArquivo">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Carregando...</span>
+            </div>
+          </div>
+          <div class="mt-2">
+            <!-- <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe> -->
+            <iframe *ngIf="isPdf" [src]="arquivoUrl" width="100%" height="1200px" type="application/pdf">
+            </iframe>
+
+            <!-- Imagem -->
+            <img *ngIf="isImagem" [src]="arquivoUrl" class="img-fluid rounded border" alt="Documento do agricultor" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancel" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" (click)="updateDocumento()" class="btn btn-warning">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--Modal editar Termo de Compromisso-->
+<div class="modal fade" id="modalTermoCompromisso" tabindex="-1" aria-labelledby="modalTermoCompromissoLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable mt-5">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalTermoCompromissoLabel">Atualizar Termo de Compromisso</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="formAnexo">
+          <div class="row">
+            <div class="col-sm-12 col-12 mb-3">
+              <label for="documento" class="form-label">Termo de Compromisso</label>
+              <input class="form-control" type="file" id="documento" name="documento" #atualizaDocumento
+                accept=".png,.jpg,.jpeg,.webp,.gif,.pdf">
+            </div>
+          </div>
+        </form>
+
+        <div class="row">
+          <div class="mt-2 text-center" *ngIf="loadingArquivo">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Carregando...</span>
+            </div>
+          </div>
+          <div class="mt-2">
+            <!-- <iframe class="mt-2" [src]="arquivoUrl" type="application/pdf" width="100%" height="1200px"></iframe> -->
+            <iframe *ngIf="isPdf" [src]="arquivoUrl" width="100%" height="1200px" type="application/pdf">
+            </iframe>
+
+            <!-- Imagem -->
+            <img *ngIf="isImagem" [src]="arquivoUrl" class="img-fluid rounded border" alt="Documento do agricultor" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancel" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" (click)="updateDocumento()" class="btn btn-warning">Update</button>
       </div>
     </div>
   </div>

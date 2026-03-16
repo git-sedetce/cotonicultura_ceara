@@ -31,7 +31,12 @@ module.exports = (sequelize, DataTypes) => {
     sementes_recebidas: DataTypes.DOUBLE,
     regime_cultivo: DataTypes.STRING,
     cadastro_adagri: DataTypes.STRING,
-    confirma_informacao: DataTypes.BOOLEAN
+    confirma_informacao: DataTypes.BOOLEAN,
+    email_trabalhador: DataTypes.STRING,
+    apelido_trabalhador: DataTypes.STRING,
+    tem_cadastro_adagri: DataTypes.BOOLEAN,
+    uso_dados: DataTypes.BOOLEAN,
+    status_farmer: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'produtor_rural',

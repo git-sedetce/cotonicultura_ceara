@@ -18,6 +18,13 @@
         </div>
 
         <div class="form-group">
+          <label>Apelido</label>
+          <input type="text" id="apelido_trabalhador" name="apelido_trabalhador"
+            [(ngModel)]="agricultor.apelido_trabalhador" #apelido_trabalhador="ngModel"
+            placeholder="Digite o Apelido do trabalhador, caso tenha.">
+        </div>
+
+        <div class="form-group">
           <label>Telefone</label>
           <input type="tel" id="telefone" name="telefone" [(ngModel)]="agricultor.telefone" #telefone="ngModel" required
             appTelefoneValido mask="(00) 0 0000-0000||(00) 0000-0000" [dropSpecialCharacters]="true"
@@ -35,10 +42,30 @@
         </div>
 
         <div class="form-group">
+          <label>Email do Produtor</label>
+
+          <input type="email" id="email_trabalhador" name="email_trabalhador" [(ngModel)]="agricultor.email_trabalhador"
+            #email_trabalhador="ngModel" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+            placeholder="Digite o email do produtor" />
+
+          <div *ngIf="email_trabalhador.touched && email_trabalhador.invalid" class="alert alert-danger">
+            <!-- <span *ngIf="email_trabalhador.errors?.['required']">
+              Email é obrigatório
+            </span> -->
+
+            <span *ngIf="email_trabalhador.errors?.['pattern']">
+              Formato de email inválido
+            </span>
+          </div>
+        </div>
+
+
+        <div class="form-group">
           <label>CPF / CNPJ</label>
           <input type="text" id="cpf_cnpj" name="cpf_cnpj" [(ngModel)]="agricultor.cpf_cnpj" #cpf_cnpj="ngModel"
             required placeholder="Digite o CPF ou CNPJ" mask="00.000.000/0000-00||000.000.000-00"
             (blur)="consultaCPF(agricultor.cpf_cnpj, formAgricultor)">
+          <!--  -->
           <div *ngIf="!cpf_cnpj.valid && cpf_cnpj.touched" class="alert alert-danger" role="alert">
             CPF / CNPJ é obrigatório
           </div>
@@ -67,6 +94,12 @@
           </div>
         </div>
 
+        <div class="form-group full">
+          <label>Nome da Propriedade</label>
+          <input type="text" id="nome_propriedade" name="nome_propriedade" [(ngModel)]="agricultor.nome_propriedade"
+            #nome_propriedade="ngModel" placeholder="Nome da propriedade">
+        </div>
+
         <div class="form-group">
           <label for="city_id">Cidade</label>
           <select name="city_id" id="city_id" [(ngModel)]="agricultor.cidade" #cidade="ngModel" required>
@@ -76,28 +109,48 @@
         </div>
 
         <div class="form-group">
-          <label>Nome da Propriedade</label>
-          <input type="text" id="nome_propriedade" name="nome_propriedade" [(ngModel)]="agricultor.nome_propriedade"
-            #nome_propriedade="ngModel" placeholder="Nome da propriedade">
-        </div>
-
-        <div class="form-group">
           <label>Área Total (ha)</label>
           <input type="number" id="area_total" name="area_total" [(ngModel)]="agricultor.area_total"
-            #area_total="ngModel" required>
+            #area_total="ngModel" min="0" required>
           <div *ngIf="!area_total.valid && area_total.touched" class="alert alert-danger" role="alert">
             Informar a área total é obrigatório
+          </div>
+          <div *ngIf="area_total.invalid && area_total.touched" class="alert alert-danger">
+
+            <span *ngIf="area_total.errors?.['required']">
+              Informar a área de plantio é obrigatório
+            </span>
+
+            <span *ngIf="area_total.errors?.['min']">
+              Área de plantio não pode ser menor que zero
+            </span>
+
           </div>
         </div>
 
         <div class="form-group">
           <label>Área de Algodão (ha)</label>
+
           <input type="number" id="area_algodao" name="area_algodao" [(ngModel)]="agricultor.area_algodao"
-            #area_algodao="ngModel" required>
-          <div *ngIf="!area_algodao.valid && area_algodao.touched" class="alert alert-danger" role="alert">
-            Informar a área de plantio é obrigatório
+            #area_algodao="ngModel" required min="0" [max]="agricultor.area_total">
+
+          <div *ngIf="area_algodao.invalid && area_algodao.touched" class="alert alert-danger">
+
+            <span *ngIf="area_algodao.errors?.['required']">
+              Informar a área de plantio é obrigatório
+            </span>
+
+            <span *ngIf="area_algodao.errors?.['min']">
+              Área de plantio não pode ser menor que zero
+            </span>
+
+            <span *ngIf="area_algodao.errors?.['max']">
+              Área de plantio não pode ser maior que a área total
+            </span>
+
           </div>
         </div>
+
 
         <div class="form-group">
           <label>Regime de Cultivo</label>
@@ -110,28 +163,89 @@
         </div>
 
         <div class="form-group">
-          <label>Cadastro ADAGRI</label>
+          <label for="fileDocument">Comprovante de CPF/CNPJ</label>
+          <input #anexoCPFCNPJ class="form-control" type="file" id="fileDocument"
+            accept=".png,.jpg,.jpeg,.webp,.gif,.pdf" required (change)="onCPFCNPJSelected()">
+          <div *ngIf="arquivoDocumentoInvalido" class="alert alert-danger">
+            Insira um arquivo
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="fileResidencia">Comprovante de Residência</label>
+          <input #anexoResidencia class="form-control" type="file" id="fileResidencia"
+            accept=".png,.jpg,.jpeg,.webp,.gif,.pdf" required (change)="onComprovanteSelected()">
+          <div *ngIf="arquivoResidenciaInvalido" class="alert alert-danger">
+            Insira um arquivo
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Possui cadastro na ADAGRI?</label>
+
+          <div class="radio-group">
+            <label class="ms-3">
+              <input type="radio" name="tem_cadastro_adagri" [value]="true" [(ngModel)]="agricultor.tem_cadastro_adagri"
+                #possuiAdagri="ngModel" required />
+              Sim
+            </label>
+
+            <label class="ms-5">
+              <input type="radio" name="tem_cadastro_adagri" [value]="false"
+                [(ngModel)]="agricultor.tem_cadastro_adagri" required />
+              Não
+            </label>
+          </div>
+
+          <div *ngIf="possuiAdagri.touched && possuiAdagri.invalid" class="alert alert-danger">
+            Informe se possui cadastro na ADAGRI
+          </div>
+        </div>
+
+
+        <div class="form-group" *ngIf="agricultor.tem_cadastro_adagri === true">
+          <label>Número Cadastro ADAGRI</label>
           <input type="text" id="cadastro_adagri" placeholder="Cadastro ADAGRI" name="cadastro_adagri"
-            [(ngModel)]="agricultor.cadastro_adagri" #cadastro_adagri="ngModel" required
-            (blur)="consultaADAGRI(agricultor.cadastro_adagri, formAgricultor)">
-          <div *ngIf="!cadastro_adagri.valid && cadastro_adagri.touched" class="alert alert-danger" role="alert">
-            Cadastro da ADAGRI é obrigatório
+            [(ngModel)]="agricultor.cadastro_adagri" #cadastro_adagri="ngModel"
+            (change)="consultaADAGRI(agricultor.cadastro_adagri, formAgricultor)"><!-- -->
+          <div *ngIf="cadastro_adagri.touched && cadastro_adagri.invalid" class="alert alert-danger">
+
+            <!-- <span *ngIf="cadastro_adagri.errors?.['telefoneInvalido']">
+              Número inválido
+            </span> -->
           </div>
         </div>
       </div>
 
-      <div class="checkbox-group">
-        <input type="checkbox" id="confirma" name="confirma_informacao" [(ngModel)]="agricultor.confirma_informacao"
-          #confirma_informacao="ngModel" required>
-        <label for="confirma">
-          Confirmo que as informações prestadas são verdadeiras
-        </label>
+      <div class="checkbox-container">
+        <div class="checkbox-item">
+          <input type="checkbox" id="confirma" name="confirma_informacao" [(ngModel)]="agricultor.confirma_informacao"
+            #confirma_informacao="ngModel" required />
+          <label for="confirma">
+            Confirmo que as informações prestadas são verdadeiras
+          </label>
+        </div>
+
+        <div class="checkbox-item">
+          <input type="checkbox" id="dados" name="uso_dados" [(ngModel)]="agricultor.uso_dados" #uso_dados="ngModel" />
+          <label for="dados">
+            Autorizo o tratamento dos meus dados pessoais para fins de gestão, execução, monitoramento, avaliação do
+            Programa e prestação de contas, nos termos da <strong> Lei nº 13.709/2018</strong> (<strong><i>Lei Geral de
+                Proteção de Dados Pessoais – LGPD</i></strong>).
+          </label>
+        </div>
       </div>
 
-      <button type="submit" [disabled]="formAgricultor.invalid" (click)="cadastrarAgricultor()">
+
+
+      <!-- <button type="submit" [disabled]="formAgricultor.invalid || arquivoDocumentoInvalido || arquivoResidenciaInvalido" (click)="cadastrarAgricultor()">
+        Enviar Cadastro
+      </button> -->
+
+      <button type="submit" [disabled]="formAgricultor.invalid || arquivoDocumentoInvalido || arquivoResidenciaInvalido"
+        (click)="cadastrarAgricultor()">
         Enviar Cadastro
       </button>
-
     </form>
   </div>
 </section>

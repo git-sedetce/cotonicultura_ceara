@@ -1,11 +1,13 @@
 const database = require("../models");
-const { Sequelize, QueryTypes, Op, fn, col } = require("sequelize");
+const { Sequelize, QueryTypes, Op, fn, col, literal } = require("sequelize");
 const dbConfig = require("../config/config").development;
 
 class StatisticsController {
   static async countProdutores(req, res) {
     try {
-      const totalAgricultores = await database.produtor_rural.count();
+      const totalAgricultores = await database.produtor_rural.count({
+        where: { status_farmer: true },
+      });
 
       return res.status(200).json({
         total: totalAgricultores,
@@ -21,6 +23,7 @@ class StatisticsController {
   static async countPorMunicipio(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({
+        where: { status_farmer: true },
         attributes: [
           [col("ass_produtor_rural_cidade.nome_municipio"), "nome_municipio"],
           [fn("COUNT", col("produtor_rural.id")), "qtd_agricultores"],
@@ -32,7 +35,9 @@ class StatisticsController {
           },
         ],
         group: ["ass_produtor_rural_cidade.nome_municipio"],
-        order: [[col("ass_produtor_rural_cidade.nome_municipio"), "ASC"]],
+        // order: [[col("ass_produtor_rural_cidade.nome_municipio"), "ASC"]],
+        order: [[col('qtd_agricultores'), 'DESC']],
+        limit: 10,
       });
 
       return res.status(200).json(resultado);
@@ -47,6 +52,7 @@ class StatisticsController {
   static async countPorRegiao(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({
+        where: { status_farmer: true },
         attributes: [
           [
             col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"),
@@ -67,9 +73,11 @@ class StatisticsController {
           },
         ],
         group: ["ass_produtor_rural_cidade.ass_municipio_regiao.nome"],
-        order: [
-          [col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"), "ASC"],
-        ],
+        // order: [
+        //   [col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"), "ASC"],
+        // ],
+        order: [[col('qtd_agricultores'), 'DESC']],
+        limit: 5,
       });
 
       return res.status(200).json(resultado);
@@ -86,6 +94,7 @@ class StatisticsController {
       const total = await database.produtor_rural.count({
         where: {
           pedido_atendido: true,
+          status_farmer: true
         },
       });
 
@@ -103,6 +112,36 @@ class StatisticsController {
   static async totalSementesDistribuidas(req, res) {
     try {
       const resultado = await database.produtor_rural.findOne({
+        where: {
+          pedido_atendido: true,
+          status_farmer: true
+        },
+        attributes: [
+          [
+            fn("COALESCE", fn("SUM", col("sementes_recebidas")), 0),
+            "total_sementes",
+          ],
+        ],
+      });
+
+      return res.status(200).json({
+        total_sementes_distribuidas: resultado.get("total_sementes"),
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: "Erro ao somar sementes distribuídas",
+      });
+    }
+  }
+
+  static async totalSementesParaDistribuir(req, res) {
+    try {
+      const resultado = await database.produtor_rural.findOne({
+        where: {
+          pedido_atendido: false,
+          status_farmer: true
+        },
         attributes: [
           [
             fn("COALESCE", fn("SUM", col("sementes_recebidas")), 0),
@@ -125,6 +164,33 @@ class StatisticsController {
   static async totalAreaCultivo(req, res) {
     try {
       const resultado = await database.produtor_rural.findOne({
+        where: { status_farmer: true },
+        attributes: [
+          [
+            fn("COALESCE", fn("SUM", col("area_algodao")), 0),
+            "area_algodao",
+          ],
+        ],
+      });
+
+      return res.status(200).json({
+        total_area_cultivo: resultado.get("area_algodao"),
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: "Erro ao somar área de cultivo",
+      });
+    }
+  }
+
+  static async totalAreaCultivoTrabalhado(req, res) {    
+    try {
+      const resultado = await database.produtor_rural.findOne({
+        where: {
+          pedido_atendido: true,
+          status_farmer: true
+        },
         attributes: [
           [
             fn("COALESCE", fn("SUM", col("area_algodao")), 0),
@@ -147,13 +213,17 @@ class StatisticsController {
   static async sementesPorRegiao(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({
+        where: {
+          pedido_atendido: true,
+          status_farmer: true
+        },
         attributes: [
           [
             col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"),
             "nome_regiao",
           ],
           [
-            fn("COALESCE", fn("SUM", col("sementes_recebidas")), 0),
+            fn("SUM", col("sementes_recebidas")),
             "total_sementes",
           ],
         ],
@@ -170,9 +240,11 @@ class StatisticsController {
           },
         ],
         group: ["ass_produtor_rural_cidade.ass_municipio_regiao.nome"],
-        order: [
-          [col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"), "ASC"],
-        ],
+        // order: [
+        //   [col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"), "ASC"],
+        // ],
+        order: [[col('total_sementes'), 'DESC']],
+        limit: 5,
       });
 
       return res.status(200).json(resultado);
@@ -187,6 +259,7 @@ class StatisticsController {
   static async sementesPorMunicipio(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({
+        where: { status_farmer: true },
         attributes: [
           [col("ass_produtor_rural_cidade.nome_municipio"), "nome_municipio"],
           [
@@ -216,6 +289,7 @@ class StatisticsController {
   static async countPorTipoCultivo(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({
+        where: { status_farmer: true },
         attributes: [
           ["regime_cultivo", "tipo_cultivo"],
           [fn("COUNT", col("id")), "qtd_agricultores"],
@@ -236,9 +310,10 @@ class StatisticsController {
   static async sumAreaCultivo(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({
+        where: { status_farmer: true },
         attributes: [
           [col("ass_produtor_rural_cidade.nome_municipio"), "nome_municipio"],
-          [fn("COALESCE", fn("SUM", col("area_algodao")), 0), "area_algodao"],
+          [fn('SUM', col('area_algodao')), 'area_algodao'],
         ],
         include: [
           {
@@ -247,7 +322,8 @@ class StatisticsController {
           },
         ],
         group: ["ass_produtor_rural_cidade.nome_municipio"],
-        order: [[col("ass_produtor_rural_cidade.nome_municipio"), "ASC"]],
+        order: [[fn('SUM', col('area_algodao')), 'DESC']],
+        limit: 10,
       });
 
       return res.status(200).json(resultado);
@@ -262,13 +338,14 @@ class StatisticsController {
   static async sumAreaCultivoRegiao(req, res) {
     try {
       const resultado = await database.produtor_rural.findAll({
+        where: { status_farmer: true },
         attributes: [
           [
             col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"),
             "nome_regiao",
           ],
           [
-            fn("COALESCE", fn("SUM", col("area_algodao")), 0),
+            fn("SUM", col("area_algodao")),
             "total_area_cultivo",
           ],
         ],
@@ -285,9 +362,8 @@ class StatisticsController {
           },
         ],
         group: ["ass_produtor_rural_cidade.ass_municipio_regiao.nome"],
-        order: [
-          [col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"), "ASC"],
-        ],
+        order: [[col('total_area_cultivo'), 'DESC']],
+        limit: 5,
       });
 
       return res.status(200).json(resultado);
@@ -298,6 +374,63 @@ class StatisticsController {
         .json({ message: "Erro ao somar área de cultivo por região" });
     }
   }
+
+  static async dadosMapa(req, res) {
+  try {
+    const resultado = await database.produtor_rural.findAll({
+      where: { status_farmer: true },
+      attributes: [
+        [col("ass_produtor_rural_cidade.nome_municipio"), "nome_municipio"],
+
+        // Soma de sementes somente quando pedido_atendido = true
+        [
+          fn(
+            "COALESCE",
+            fn(
+              "SUM",
+              literal(
+                `CASE WHEN produtor_rural.pedido_atendido = true 
+                      THEN produtor_rural.sementes_recebidas 
+                      ELSE 0 END`
+              )
+            ),
+            0
+          ),
+          "total_sementes",
+        ],
+
+        // Quantidade de agricultores cadastrados
+        [
+          fn("COUNT", col("produtor_rural.id")),
+          "total_agricultores",
+        ],
+
+        // Soma da área de cultivo de algodão
+        [
+          fn("COALESCE", fn("SUM", col("area_algodao")), 0),
+          "total_area_algodao",
+        ],
+      ],
+      include: [
+        {
+          association: "ass_produtor_rural_cidade",
+          attributes: [],
+        },
+      ],
+      group: ["ass_produtor_rural_cidade.nome_municipio"],
+      order: [[col("ass_produtor_rural_cidade.nome_municipio"), "ASC"]],
+    });
+
+    return res.status(200).json(resultado);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Erro ao buscar dados por município",
+    });
+  }
+}
+
+
 }
 
 module.exports = StatisticsController;

@@ -16,7 +16,7 @@
               <div class="col-md-4 col-colaborador">
                 <label class="form-label">Agricultor:</label>
                 <select class="form-select" required [(ngModel)]="anexo.agricultor_id" id="agricultor_id"
-                  name="agricultor_id" #colab="ngModel" (change)="showInputs(); checkFiles(colab.value)">
+                  name="agricultor_id" #agricultor="ngModel" (change)="showInputs()">
                   <option [ngValue]="null" disabled selected>
                     Selecione o agricultor
                   </option>
@@ -26,7 +26,7 @@
                   </option>
                 </select>
 
-                <div *ngIf="colab.invalid && colab.touched" class="text-danger small">
+                <div *ngIf="agricultor.invalid && agricultor  .touched" class="text-danger small">
                   Informe o colaborador.
                 </div>
               </div>
@@ -67,9 +67,13 @@
                   </label>
                 </div>
 
-                <button class="btn btn-primary w-100 mt-2" [disabled]="item.uploaded || !item.file"
+                <button class="btn btn-success w-100 mt-2" [disabled]="item.uploaded || !item.file"
                   (click)="uploadFile(item.key)">
                   Enviar
+                </button>
+                <button class="btn btn-danger w-100 mt-2" [disabled]="!item.uploaded || item.file"
+                  (click)="deleteFile(item.key)">
+                  Remover
                 </button>
 
                 <span class="file-info">{{ item.label }}</span>
@@ -86,8 +90,8 @@
           </div>
 
           <button type="button" class="btn btn-success w-100 mt-4 text-uppercase" [disabled]="!todosAnexosEnviados"
-            (click)="finish(has_farmer)">
-            Finalizar
+            (click)="finish()">
+            Ver lista de Agricultores
           </button>
         </fieldset>
       </form>

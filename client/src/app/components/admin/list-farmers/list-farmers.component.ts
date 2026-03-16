@@ -23,7 +23,7 @@ declare var bootstrap: any;
 })
 export class ListFarmersComponent implements OnInit {
   @ViewChild('atualizaDocumento') atualizaDocumento!: ElementRef;
-  @ViewChild('atualizaComprovante') atualizaComprovante!:ElementRef
+  @ViewChild('atualizaComprovante') atualizaComprovante!: ElementRef;
   anexoObj: Anexo = new Anexo();
 
   lista_regiao!: any[];
@@ -36,6 +36,7 @@ export class ListFarmersComponent implements OnInit {
   searchCidade: string = '';
   searchRegiao: string = '';
   searchPedidoAtendido: boolean | '' = '';
+  searchAdagri: boolean | '' = '';
   numeroPedido: number | '' = '';
 
   registro!: Audit;
@@ -44,12 +45,28 @@ export class ListFarmersComponent implements OnInit {
   filtroFarmers: boolean = false;
 
   anexo_id!: number;
+  mensagemArquivo: string = '';
   farmer_name!: string;
+  use_data!: boolean;
+  data_cadastro!: Date;
 
   formAnexo!: FormGroup;
   formFiltro!: FormGroup;
   formFarmer!: FormGroup;
   arquivoUrl: SafeResourceUrl | null = null;
+  arquivoCpfUrl: SafeResourceUrl | null = null;
+  arquivoResidenciaUrl: SafeResourceUrl | null = null;
+  cpfIsImagem = false;
+  cpfIsPdf = false;
+
+  resIsImagem = false;
+  resIsPdf = false;
+
+  cpfAnexoId!: number;
+  resAnexoId!: number;
+  isImagem = false;
+  isPdf = false;
+  loadingArquivo: boolean = false;
 
   page: number = 1; // Página atual
   itemsPerPage: number = 10; // Itens por página
@@ -83,6 +100,10 @@ export class ListFarmersComponent implements OnInit {
       regime_cultivo: [''],
       cadastro_adagri: [''],
       confirma_informacao: [''],
+      email_trabalhador: [''],
+      apelido_trabalhador: [''],
+      tem_cadastro_adagri: [''],
+      uso_dados: [''],
     });
 
     this.formFiltro = this.formBuilder.group({
@@ -90,6 +111,9 @@ export class ListFarmersComponent implements OnInit {
       cidade: [''],
       regiao: [''],
       pedidoAtendido: [''],
+      cadastroADAGRI: [''],
+      dataInicio: [''],
+      dataFim: [''],
     });
 
     this.formAnexo = this.formBuilder.group({
@@ -143,13 +167,50 @@ export class ListFarmersComponent implements OnInit {
   }
 
   getFarmers() {
-    this.cadastroAgricultorService.agricultorRural('allFarmers').subscribe(
+    this.cadastroAgricultorService.agricultorRural(true).subscribe(
       (usr: any[]) => {
         this.lista_farmers = usr;
         this.lista_filtrada = usr; // inicia filtrada
-        // console.log('lista_users', this.lista_farmers)
       },
       (erro: any) => console.error(erro),
+    );
+  }
+
+  verDesistentes() {
+    this.router.navigate(['/desistentes']);
+  }
+
+  possuiCpf(farmer: any): boolean {
+    return (farmer.ass_agricultor_anexo || []).some(
+      (a: any) => a.tipo_anexo === 'comprovante_cpf_cnpj',
+    );
+  }
+
+  possuiResid(farmer: any): boolean {
+    return (farmer.ass_agricultor_anexo || []).some(
+      (a: any) => a.tipo_anexo === 'comprovante_residencia',
+    );
+  }
+
+  possuiTermoDoacao(farmer: any): boolean {
+    return (farmer.ass_agricultor_anexo || []).some(
+      (a: any) => a.tipo_anexo === 'termo_doacao',
+    );
+  }
+
+  possuiTermoCompromisso(farmer: any): boolean {
+    return (farmer.ass_agricultor_anexo || []).some(
+      (a: any) => a.tipo_anexo === 'termo_compromisso',
+    );
+  }
+
+  faltandoDocumentosBasicos(farmer: any): boolean {
+    return !(this.possuiCpf(farmer) && this.possuiResid(farmer));
+  }
+
+  faltandoAlgumTermo(farmer: any): boolean {
+    return !(
+      this.possuiTermoDoacao(farmer) && this.possuiTermoCompromisso(farmer)
     );
   }
 
@@ -162,7 +223,15 @@ export class ListFarmersComponent implements OnInit {
   }
 
   filtrarUsuarios(): void {
-    const { nome, cidade, regiao, pedidoAtendido } = this.formFiltro.value;
+    const {
+      nome,
+      cidade,
+      regiao,
+      pedidoAtendido,
+      cadastroADAGRI,
+      dataInicio,
+      dataFim,
+    } = this.formFiltro.value;
 
     const termo = this.normalize(nome);
 
@@ -180,9 +249,29 @@ export class ListFarmersComponent implements OnInit {
       const matchPedido =
         pedidoAtendido === '' || farmer?.pedido_atendido === pedidoAtendido;
 
+      const matchADAGRI =
+        cadastroADAGRI === '' || farmer?.tem_cadastro_adagri === cadastroADAGRI;
+
+      /* 📅 FILTRO POR DATA DE CADASTRO */
+      const dataCadastro = new Date(farmer.createdAt);
+
+      const matchDataInicio =
+        !dataInicio || dataCadastro >= new Date(dataInicio);
+
+      const matchDataFim =
+        !dataFim || dataCadastro <= new Date(`${dataFim}T23:59:59`);
+
       this.filtroFarmers = true;
 
-      return matchNome && matchCidade && matchRegiao && matchPedido;
+      return (
+        matchNome &&
+        matchCidade &&
+        matchRegiao &&
+        matchPedido &&
+        matchADAGRI &&
+        matchDataInicio &&
+        matchDataFim
+      );
     });
 
     this.page = 1;
@@ -194,8 +283,13 @@ export class ListFarmersComponent implements OnInit {
       cidade: '',
       regiao: '',
       pedidoAtendido: '',
+      cadastroADAGRI: '',
+      dataInicio: '',
+      dataFim: '',
     });
+    this.lista_filtrada = [...this.lista_farmers];
     this.filtroFarmers = false;
+    this.page = 1;
   }
 
   exibirTodos(): void {
@@ -203,6 +297,7 @@ export class ListFarmersComponent implements OnInit {
     this.searchCidade = '';
     this.searchRegiao = '';
     this.searchPedidoAtendido = '';
+    this.searchAdagri = '';
 
     this.lista_filtrada = [...this.lista_farmers];
     this.page = 1;
@@ -234,6 +329,11 @@ export class ListFarmersComponent implements OnInit {
       Sementes_Recebidas: farmer.sementes_recebidas,
       Regime_Cultivo: farmer.regime_cultivo,
       Cadastro_adagri: farmer.cadastro_adagri,
+      Email: farmer.email_trabalhador,
+      Uso_de_dados: farmer.uso_dados,
+      Apelido: farmer.apelido_trabalhador,
+      Tem_Cadastro_Adagri: farmer.tem_cadastro_adagri,
+      Data_Cadastro: farmer.createdAt,
     }));
 
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(planilha);
@@ -257,6 +357,8 @@ export class ListFarmersComponent implements OnInit {
         : 'agricultores_filtrados.xlsx';
 
     saveAs(blob, nomeArquivo);
+
+    this.saveAudit('Exportação de planilha');
   }
 
   anexarArquivo(id: number) {
@@ -268,6 +370,12 @@ export class ListFarmersComponent implements OnInit {
     this.farmerObj.id = farmer.id;
     this.numeroPedido = farmer.pedido;
     this.formFarmer.controls['nome'].setValue(farmer.nome);
+    this.formFarmer.controls['apelido_trabalhador'].setValue(
+      farmer.apelido_trabalhador,
+    );
+    this.formFarmer.controls['email_trabalhador'].setValue(
+      farmer.email_trabalhador,
+    );
     this.formFarmer.controls['telefone'].setValue(farmer.telefone);
     this.formFarmer.controls['cpf_cnpj'].setValue(farmer.cpf_cnpj);
     this.formFarmer.controls['rg'].setValue(farmer.rg);
@@ -294,9 +402,16 @@ export class ListFarmersComponent implements OnInit {
     this.formFarmer.controls['pedido_atendido'].setValue(
       farmer.pedido_atendido,
     );
+    this.formFarmer.controls['uso_dados'].setValue(farmer.uso_dados);
+    this.formFarmer.controls['tem_cadastro_adagri'].setValue(
+      farmer.tem_cadastro_adagri,
+    );
   }
   updateFarmer() {
     this.farmerObj.nome = this.formFarmer.value.nome;
+    this.farmerObj.apelido_trabalhador =
+      this.formFarmer.value.apelido_trabalhador;
+    this.farmerObj.email_trabalhador = this.formFarmer.value.email_trabalhador;
     this.farmerObj.telefone = this.formFarmer.value.telefone;
     this.farmerObj.cpf_cnpj = this.formFarmer.value.cpf_cnpj;
     this.farmerObj.rg = this.formFarmer.value.rg;
@@ -313,6 +428,9 @@ export class ListFarmersComponent implements OnInit {
     this.farmerObj.sementes_recebidas =
       this.formFarmer.value.sementes_recebidas;
     this.farmerObj.pedido_atendido = this.formFarmer.value.pedido_atendido;
+    this.farmerObj.uso_dados = this.formFarmer.value.uso_dados;
+    this.farmerObj.tem_cadastro_adagri =
+      this.formFarmer.value.tem_cadastro_adagri;
 
     this.cadastroAgricultorService
       .atualizarAgricultor(this.farmerObj, Number(this.farmerObj.id))
@@ -334,37 +452,75 @@ export class ListFarmersComponent implements OnInit {
     this.saveRegister(this.farmerObj.nome, 'Alteração de dados do agricultor');
   }
 
-  getFile(farmer: any, tipo_anexo: any): void {
+  resetVisualizacao(tipo: string) {
+    if (tipo === 'comprovante_cpf_cnpj') {
+      this.arquivoCpfUrl = null;
+      this.cpfIsImagem = false;
+      this.cpfIsPdf = false;
+    }
+
+    if (tipo === 'comprovante_residencia') {
+      this.arquivoResidenciaUrl = null;
+      this.resIsImagem = false;
+      this.resIsPdf = false;
+    }
+  }
+
+  getFile(farmer: any, tipo_anexo: string): void {
+    this.resetVisualizacao(tipo_anexo);
+    this.mensagemArquivo = '';
+    this.loadingArquivo = true; // inicia spinner
+
     this.anexo.pegarArquivos(farmer.id, tipo_anexo).subscribe(
       (data: any) => {
+        this.loadingArquivo = false; // para spinner
+
+        if (!data || !data.base64) {
+          this.mensagemArquivo = 'Arquivo não encontrado no servidor.';
+          return;
+        }
+
         this.anexo_id = data.id_anexo;
         this.farmer_name = farmer.nome;
-        const byteArray = new Uint8Array(
-          atob(data.base64)
-            .split('')
-            .map((char) => char.charCodeAt(0)),
-        );
-        const file = new Blob([byteArray], { type: 'application/pdf' });
-        const fileURL = URL.createObjectURL(file);
+
+        const byteCharacters = atob(data.base64);
+        const byteNumbers = new Array(byteCharacters.length);
+
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: data.mimetype });
+        const fileURL = URL.createObjectURL(blob);
+
         this.arquivoUrl =
           this.sanitizer.bypassSecurityTrustResourceUrl(fileURL);
+
+        this.isImagem = data.mimetype.startsWith('image/');
+        this.isPdf = data.mimetype === 'application/pdf';
       },
       (error) => {
-        console.error('Erro ao carregar o PDF:', error.error.message);
+        this.loadingArquivo = false; // para spinner
+        console.error('Erro ao carregar arquivo:', error.error?.message);
+        this.mensagemArquivo = 'Arquivo não encontrado no servidor.';
+        this.isImagem = false;
+        this.isPdf = false;
+        this.arquivoUrl = null;
       },
     );
   }
 
   updateDocumento() {
-    const newRegister = this.atualizaDocumento.nativeElement.files[0]
+    const newRegister = this.atualizaDocumento.nativeElement.files[0];
     const novoDocumento = new FormData();
-    novoDocumento.append('file', newRegister)
+    novoDocumento.append('file', newRegister);
 
     // console.log('novoDocumento', novoDocumento)
 
     this.anexo.atualizAnexo(novoDocumento, this.anexo_id).subscribe({
       next: (res: any) => {
-        this.toastr.success('Certificado atualizado com sucesso!!!')
+        this.toastr.success('Certificado atualizado com sucesso!!!');
         const myModal = bootstrap.Modal.getInstance(
           document.getElementById('modalDocumento') as HTMLElement,
         );
@@ -373,14 +529,13 @@ export class ListFarmersComponent implements OnInit {
         }
         this.formAnexo.reset();
       },
-      error:(e) => {
+      error: (e) => {
         console.error(e);
-        this.toastr.error(e.error.message)
-        this.formAnexo.reset()
-      }
-    })
+        this.toastr.error(e.error.message);
+        this.formAnexo.reset();
+      },
+    });
     this.saveRegister(this.farmer_name, 'Atualização de documento');
-
   }
 
   updateComprovante() {
@@ -412,6 +567,17 @@ export class ListFarmersComponent implements OnInit {
     this.saveRegister(this.farmer_name, 'Atualização de comprovante');
   }
 
+  desistirPrograma(farmer: any) {
+    this.cadastroAgricultorService
+      .desistirPrograma({ status_farmer: false }, farmer.id)
+      .subscribe((res) => {
+        this.toastr.success(res.mensagem);
+        this.getFarmers();
+      });
+
+    this.saveRegister(farmer.nome, 'Desistência do programa');
+  }
+
   deletaFarmer(user: any) {
     this.cadastroAgricultorService
       .deleteAgricultor(user.id)
@@ -426,6 +592,17 @@ export class ListFarmersComponent implements OnInit {
   saveRegister(name: any, tipo: any): void {
     this.registro.tipo_acao = tipo;
     this.registro.acao = `O usuário ${this.user_name} alterou os dados do agricultor ${name}`;
+    this.auditService.cadastrarRegistros(this.registro).subscribe({
+      next: (res: any) => {
+        // console.log('registro', res)
+      },
+      error: (e) => this.toastr.error(e),
+    });
+  }
+
+  saveAudit(tipo: any): void {
+    this.registro.tipo_acao = tipo;
+    this.registro.acao = `O usuário ${this.user_name} Exportou uma planilha de agricultores`;
     this.auditService.cadastrarRegistros(this.registro).subscribe({
       next: (res: any) => {
         // console.log('registro', res)
