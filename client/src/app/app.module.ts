@@ -27,6 +27,7 @@ import { AnexoComponent } from './components/anexo/anexo.component';
 import { TelefoneValidoDirective } from './services/diretiva/telefone-valido.directive';
 import { ListFarmesDropoutsComponent } from './components/admin/list-farmes-dropouts/list-farmes-dropouts.component';
 import { DuvidasComponent } from './components/duvidas/duvidas.component';
+import { CpfcnpjMaskDirective } from './directives/cpf_cnpj/cpfcnpj-mask.directive';
 
 @NgModule({
   declarations: [
@@ -45,7 +46,8 @@ import { DuvidasComponent } from './components/duvidas/duvidas.component';
     AnexoComponent,
     TelefoneValidoDirective,
     ListFarmesDropoutsComponent,
-    DuvidasComponent
+    DuvidasComponent,
+    CpfcnpjMaskDirective
   ],
   imports: [
     BrowserModule,
