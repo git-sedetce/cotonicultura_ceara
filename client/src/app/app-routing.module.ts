@@ -12,6 +12,8 @@ import { HomeAdminComponent } from './components/admin/home-admin/home-admin.com
 import { AnexoComponent } from './components/anexo/anexo.component';
 import { ListFarmesDropoutsComponent } from './components/admin/list-farmes-dropouts/list-farmes-dropouts.component';
 import { DuvidasComponent } from './components/duvidas/duvidas.component';
+import { AuditoriaComponent } from './components/admin/auditoria/auditoria.component';
+import { authGuard } from './services/auth/auth.guard';
 
 const routes: Routes = [
 
@@ -27,6 +29,12 @@ const routes: Routes = [
   { path: 'admin', component: HomeAdminComponent },
   { path: 'anexo', component: AnexoComponent},
   { path: 'desistentes', component: ListFarmesDropoutsComponent},
+  {
+    path: 'auditoria',
+    component: AuditoriaComponent,
+    canActivate: [authGuard],
+    data: { roles: [1, 2, 3] },
+  },
   // { path: 'whats', component: WhoAreComponent},
   { path: 'questions', component: DuvidasComponent},
 

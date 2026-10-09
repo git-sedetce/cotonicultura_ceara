@@ -12,9 +12,9 @@ class UserController {
         return res.status(400).json({ message: "Dados obrigatórios ausentes" });
       }
 
-      if(novoUser.user_email.split('@')[1] !== 'sde.ce.gov.br') {
-        return res.status(400).json({ message: "Email inválido para cadastro!" });
-      }
+      // if(novoUser.user_email.split('@')[1] !== 'sde.ce.gov.br') {
+      //   return res.status(400).json({ message: "Email inválido para cadastro!" });
+      // }
 
       const emailExistente = await database.user.findOne({
         where: { user_email: novoUser.user_email },
@@ -23,10 +23,24 @@ class UserController {
         return res.status(400).json({ message: "Email já cadastrado!" });
       }      
 
+      if (Number(novoUser.sexec_id) === 8) {
+        const perfilGestorMunicipal = await database.profile.findOne({
+          where: { perfil: "Gestor Municipal" },
+          attributes: ["id"],
+        });
+
+        if (!perfilGestorMunicipal) {
+          return res
+            .status(500)
+            .json({ message: "Perfil Gestor Municipal não está configurado" });
+        }
+
+        novoUser.profile_id = perfilGestorMunicipal.id;
+      }
+
       const salt = await bcrypt.genSalt(10);
       novoUser.user_password = await bcrypt.hash(novoUser.user_password, salt);
       novoUser.user_pin = Math.floor(1000 + Math.random() * 9000);
-      novoUser.profile_id = 4;
       novoUser.user_active = false;
 
       const userCriado = await database.user.create(novoUser);
@@ -241,6 +255,18 @@ class UserController {
       return res.status(200).json(getSexec);
     } catch (error) {
       return res.status(500).json({ message: "Secretaria não encontrado" });
+    }
+  }
+
+  static async getProfile(req, res) {
+    try {
+      const getPerfil = await database.profile.findAll({
+        order: ["perfil"],
+        attributes: ["id", "perfil"],
+      });
+      return res.status(200).json(getPerfil);
+    } catch (error) {
+      return res.status(500).json({ message: "Perfil não encontrado" });
     }
   }
 

@@ -112,6 +112,7 @@ export class ListFarmersComponent implements OnInit {
       regiao: [''],
       pedidoAtendido: [''],
       cadastroADAGRI: [''],
+      etapa: [''],
       dataInicio: [''],
       dataFim: [''],
     });
@@ -229,6 +230,7 @@ export class ListFarmersComponent implements OnInit {
       regiao,
       pedidoAtendido,
       cadastroADAGRI,
+      etapa,
       dataInicio,
       dataFim,
     } = this.formFiltro.value;
@@ -252,6 +254,9 @@ export class ListFarmersComponent implements OnInit {
       const matchADAGRI =
         cadastroADAGRI === '' || farmer?.tem_cadastro_adagri === cadastroADAGRI;
 
+      const matchEtapa =
+        !etapa || Number(farmer?.etapa) === Number(etapa);
+
       /* 📅 FILTRO POR DATA DE CADASTRO */
       const dataCadastro = new Date(farmer.createdAt);
 
@@ -269,6 +274,7 @@ export class ListFarmersComponent implements OnInit {
         matchRegiao &&
         matchPedido &&
         matchADAGRI &&
+        matchEtapa &&
         matchDataInicio &&
         matchDataFim
       );
@@ -284,6 +290,7 @@ export class ListFarmersComponent implements OnInit {
       regiao: '',
       pedidoAtendido: '',
       cadastroADAGRI: '',
+      etapa: '',
       dataInicio: '',
       dataFim: '',
     });

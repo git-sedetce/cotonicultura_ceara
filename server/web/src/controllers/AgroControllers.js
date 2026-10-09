@@ -5,7 +5,7 @@ const path = require("path");
 
 class AgroControllers {
   static async registerAgro(req, res) {
-    const newRegister = req.body;
+    const newRegister = { ...req.body, etapa: 2 };
     // console.log('newRegister', newRegister);
     try {
       const novoProdutor = await database.produtor_rural.create(newRegister);
@@ -34,9 +34,10 @@ class AgroControllers {
       const dados = JSON.parse(req.body.dados);
 
       // ===== 3. CRIAR AGRICULTOR =====
-      const novoProdutor = await database.produtor_rural.create(dados, {
-        transaction: t,
-      });
+      const novoProdutor = await database.produtor_rural.create(
+        { ...dados, etapa: 2 },
+        { transaction: t },
+      );
 
       const numeroPedido = `PED-${String(novoProdutor.id).padStart(6, "0")}`;
       await novoProdutor.update({ pedido: numeroPedido }, { transaction: t });
@@ -210,6 +211,7 @@ class AgroControllers {
           "apelido_trabalhador",
           "tem_cadastro_adagri",
           "uso_dados",
+          "etapa",
           "status_farmer",
           "createdAt",
         ],

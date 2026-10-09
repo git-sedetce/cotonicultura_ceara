@@ -94,6 +94,7 @@ export class ListFarmesDropoutsComponent implements OnInit {
       regiao: [''],
       pedidoAtendido: [''],
       cadastroADAGRI: [''],
+      etapa: [''],
       dataInicio: [''],
       dataFim: [''],
     });
@@ -202,6 +203,7 @@ export class ListFarmesDropoutsComponent implements OnInit {
       regiao,
       pedidoAtendido,
       cadastroADAGRI,
+      etapa,
       dataInicio,
       dataFim,
     } = this.formFiltro.value;
@@ -225,6 +227,9 @@ export class ListFarmesDropoutsComponent implements OnInit {
       const matchADAGRI =
         cadastroADAGRI === '' || farmer?.tem_cadastro_adagri === cadastroADAGRI;
 
+      const matchEtapa =
+        !etapa || Number(farmer?.etapa) === Number(etapa);
+
       /* 📅 FILTRO POR DATA DE CADASTRO */
       const dataCadastro = new Date(farmer.createdAt);
 
@@ -242,6 +247,7 @@ export class ListFarmesDropoutsComponent implements OnInit {
         matchRegiao &&
         matchPedido &&
         matchADAGRI &&
+        matchEtapa &&
         matchDataInicio &&
         matchDataFim
       );
@@ -257,6 +263,7 @@ export class ListFarmesDropoutsComponent implements OnInit {
       regiao: '',
       pedidoAtendido: '',
       cadastroADAGRI: '',
+      etapa: '',
       dataInicio: '',
       dataFim: '',
     });

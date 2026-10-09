@@ -96,6 +96,10 @@ export class CadastroService {
       return this.http.get(environment.apiUrl + metodo)
     }
 
+    pegar_perfil(metodo: string): Observable<any> {
+      return this.http.get(environment.apiUrl + metodo)
+    }
+
     resetPin(data:any): Observable<any> {
       return this.http.post(environment.apiUrl + 'newPin',  data)
     }

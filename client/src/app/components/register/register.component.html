@@ -20,22 +20,45 @@
               </div>
             </div>
             <div class="row">
-              <input type="email" name="user_email" id="user_email" class="form__input form-control" #user_email="ngModel" [(ngModel)]="user.user_email" placeholder="Email do usuário" (blur)="verificaEmail(user_email)" (blur)="consultaEmail(user.user_email, formCadastroUser)" required>
+              <input type="email" name="user_email" id="user_email" class="form__input form-control" #user_email="ngModel" [(ngModel)]="user.user_email" placeholder="Email do usuário" (blur)="consultaEmail(user.user_email, formCadastroUser)" required>
               <div *ngIf="!user_email.valid && user_email.touched" class="alert alert-danger" role="alert">
                 Email inválido
               </div>
             </div>
 
             <div class="row">
-              <select class="form__input form-control" id="sexec_id" name="sexec_id" #sexec_id="ngModel" [(ngModel)]="user.sexec_id" required>
-                <option value="" disabled hidden>Insira a Secretaria Executiva</option>
-                <option *ngFor="let sexec of lista_sexec" [value]="sexec.id">{{ sexec.secretaria }} - {{ sexec.sigla }}</option>
+              <select class="form__input form-control" id="sexec_id" name="sexec_id" #sexec_id="ngModel" [(ngModel)]="user.sexec_id" (ngModelChange)="onSecretariaChange($event)" required>
+                <option value="" disabled>Insira a Secretaria Executiva</option>
+                <option *ngFor="let sexec of lista_sexec" [ngValue]="sexec.id">{{ sexec.secretaria }} - {{ sexec.sigla }}</option>
               </select>
               <div *ngIf="!sexec_id.valid && sexec_id.touched" class="alert alert-danger" role="alert">
                 Secretaria Executiva é obrigatório
               </div>
             </div>
 
+            <div class="row">
+              <select class="form__input form-control" id="cidade_id" name="cidade_id" #cidade_id="ngModel" [(ngModel)]="user.cidade_id" required>
+                <option [ngValue]="undefined" disabled>Selecione a cidade</option>
+                <option *ngFor="let city of city_list" [ngValue]="city.id">{{ city.nome_municipio }}</option>
+              </select>
+              <div *ngIf="!cidade_id.valid && cidade_id.touched" class="alert alert-danger" role="alert">
+                Cidade é obrigatória
+              </div>
+            </div>
+
+            <div class="row" *ngIf="user.sexec_id !== 8">
+              <select class="form__input form-control" id="profile_id" name="profile_id" #profile_id="ngModel" [(ngModel)]="user.profile_id" required>
+                <option [ngValue]="undefined" disabled>Selecione o perfil</option>
+                <option *ngFor="let profile of profile_list" [ngValue]="profile.id">{{ profile.perfil }}</option>
+              </select>
+              <div *ngIf="!profile_id.valid && profile_id.touched" class="alert alert-danger" role="alert">
+                Perfil é obrigatório
+              </div>
+            </div>
+
+            <div class="row" *ngIf="user.sexec_id === 8">
+              <input type="text" name="matricula_prefeitura" id="matricula_prefeitura" class="form__input form-control" #matricula_prefeitura="ngModel" [(ngModel)]="user.matricula_prefeitura" placeholder="Matrícula da prefeitura">
+            </div>
 
             <div class="row" *ngIf="!authenticated">
               <!-- <span class="fa fa-lock"></span> -->

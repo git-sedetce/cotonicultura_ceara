@@ -10,5 +10,7 @@ export class User {
     public confirm_password?: string,
     public profile_id?: number,
     public sexec_id: number | '' = '',
+    public cidade_id?: number,
+    public matricula_prefeitura?: string,
   ) {}
 }

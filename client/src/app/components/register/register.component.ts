@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Audit } from '../../models/audit.model';
 import { AuditService } from '../../services/audit.service';
+import { CadastroAgricultorService } from '../../services/cadastro-agricultor.service';
 
 @Component({
   selector: 'app-register',
@@ -25,17 +26,22 @@ export class RegisterComponent implements OnInit {
   profile_id!: any;
   user_name!: any;
   authenticated: boolean = false;
+  city_list!: any[];
+  profile_list!: any[];
 
   constructor(
     private serviceUser: CadastroService,
     private router: Router,
     private toastr: ToastrService,
     private auditService: AuditService,
+    private cadastroAgricultorService: CadastroAgricultorService,
   ) {}
 
   ngOnInit(): void {
     this.user = new User();
     this.listarSecretaria();
+    this.getCity();
+    this.getProfile();
 
     this.registro = new Audit();
     this.loadUserData();
@@ -59,6 +65,49 @@ export class RegisterComponent implements OnInit {
       },
       (erro: any) => console.error(erro),
     );
+  }
+
+  getCity() {
+    this.cadastroAgricultorService.getCitys('takecitys').subscribe(
+      (cityBr: any[]) => {
+        // console.log('cityBr', cityBr)
+        this.city_list = cityBr;
+      },
+      (erro: any) => console.error('erro', erro),
+    );
+  }
+
+  getProfile() {
+    this.serviceUser.pegar_perfil('getProfile').subscribe(
+      (res: any) => {
+        this.profile_list = res.filter(
+          (profile: any) => profile.perfil?.trim().toLowerCase() !== 'admin',
+        );
+        if (Number(this.user.sexec_id) === 8) {
+          this.definirPerfilGestorMunicipal();
+        }
+      },
+      (erro: any) => console.error('erro', erro),
+    );
+  }
+
+  onSecretariaChange(sexecId: number | ''): void {
+    if (Number(sexecId) !== 8) {
+      this.user.cidade_id = undefined;
+      this.user.profile_id = undefined;
+      return;
+    }
+
+    this.definirPerfilGestorMunicipal();
+  }
+
+  private definirPerfilGestorMunicipal(): void {
+    const perfilGestorMunicipal = this.profile_list?.find(
+      (profile: any) =>
+        profile.perfil?.trim().toLowerCase() === 'gestor municipal',
+    );
+
+    this.user.profile_id = perfilGestorMunicipal?.id;
   }
 
   verificaEmail(email: any) {

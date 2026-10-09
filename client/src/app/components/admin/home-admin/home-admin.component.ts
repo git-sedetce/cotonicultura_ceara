@@ -18,6 +18,7 @@ export class HomeAdminComponent implements OnInit {
   municipioSelecionado = '';
   agricultoresAtendidos = 0;
   totalSementes = 0;
+  totalSementesFormatado = '0,00';
   areaParaCultivo = 0;
   areaParaCultivoFormatada = '';
   areaMonitorada = '';
@@ -105,6 +106,13 @@ export class HomeAdminComponent implements OnInit {
         Number(res.atendidos.agricultores_atendidos) || 0;
       this.totalSementes =
         Number(res.sementes.total_sementes_distribuidas) || 0;
+      this.totalSementesFormatado = this.totalSementes.toLocaleString(
+        'pt-BR',
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        },
+      );
       this.areaParaCultivo = Number(res.area.total_area_cultivo) || 0;
       this.areaParaCultivoFormatada = (
         Number(res.area.total_area_cultivo) || 0

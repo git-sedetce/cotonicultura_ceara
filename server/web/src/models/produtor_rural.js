@@ -36,6 +36,7 @@ module.exports = (sequelize, DataTypes) => {
     apelido_trabalhador: DataTypes.STRING,
     tem_cadastro_adagri: DataTypes.BOOLEAN,
     uso_dados: DataTypes.BOOLEAN,
+    etapa: DataTypes.INTEGER,
     status_farmer: DataTypes.BOOLEAN
   }, {
     sequelize,

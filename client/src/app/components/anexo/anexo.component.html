@@ -71,7 +71,7 @@
                   (click)="uploadFile(item.key)">
                   Enviar
                 </button>
-                <button class="btn btn-danger w-100 mt-2" [disabled]="!item.uploaded || item.file"
+                <button *ngIf="profile_id === 1 || profile_id === 3" class="btn btn-danger w-100 mt-2" [disabled]="!item.uploaded || item.file"
                   (click)="deleteFile(item.key)">
                   Remover
                 </button>

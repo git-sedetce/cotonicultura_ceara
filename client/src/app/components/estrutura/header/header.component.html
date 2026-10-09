@@ -48,6 +48,12 @@
             </a>
           </li>
 
+          <li class="nav-item" *ngIf="profile === 1 || profile === 2 || profile === 3">
+            <a routerLink="/auditoria" class="nav-link">
+              <i class="fa-solid fa-clipboard-list me-1"></i> Auditoria
+            </a>
+          </li>
+
           <li class="nav-item" *ngIf="profile === 1">
             <a routerLink="/cadastro" class="nav-link">
               <i class="fa-solid fa-user-plus me-1"></i> Adicionar Usuário
@@ -66,7 +72,7 @@
 
           <ng-container *ngIf="!authenticated">
             <button routerLink="/login" class="btn btn-light">Login</button>
-            <button routerLink="/cadastro" class="btn btn-primary">Cadastre-se</button>
+            <!-- <button routerLink="/cadastro" class="btn btn-primary">Cadastre-se</button> -->
           </ng-container>
 
           <ng-container *ngIf="authenticated">

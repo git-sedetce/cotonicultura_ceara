@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       cidades.belongsTo(models.regiao, { foreignKey: 'regiao_id', as: 'ass_municipio_regiao' })
       cidades.hasMany(models.produtor_rural, { foreignKey: 'cidade', as: 'ass_cidades_produtor_rural' })
+      cidades.hasMany(models.user, { foreignKey: 'cidade_id', as: 'ass_cidades_user' })
     }
   }
   cidades.init({

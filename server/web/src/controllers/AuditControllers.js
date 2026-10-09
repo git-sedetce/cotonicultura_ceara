@@ -15,6 +15,25 @@ class AuditControllers {
 
    }
 
+   static async getRegisters(req, res) {
+       try {
+         const registers = await database.audit.findAll({
+           order: [["createdAt", "ASC"]],
+           attributes: ["tipo_acao", "acao", "createdAt"],
+           include: [
+          {
+            association: "ass_audit_users",
+            attributes: ["id", "nome", "user_email"],
+          }
+        ],
+         });
+   
+         return res.status(200).json(registers);
+       } catch (error) {
+         return res.status(500).json(error.message);
+       }
+     }
+
 }
 
 module.exports = AuditControllers;

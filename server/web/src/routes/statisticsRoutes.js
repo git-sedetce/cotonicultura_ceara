@@ -4,21 +4,21 @@ var auth = require('../service/AutenticaService');
 var checkRole = require('../service/checkRole');
 
 const router = Router()
-router.get('/totalAgricultores', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.countProdutores);
-router.get('/countPorMunicipio', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.countPorMunicipio);
-router.get('/countPorRegiao', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.countPorRegiao);
-router.get('/countAtendidos', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.countAgricultoresAtendidos);
-router.get('/totalSementesDistribuidas', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.totalSementesDistribuidas);
-router.get('/sementesParaDistribuir', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.totalSementesParaDistribuir);
-router.get('/totalAreaCultivo', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.totalAreaCultivo);
-router.get('/totalAreaCultivoTrabalhado', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.totalAreaCultivoTrabalhado);
-router.get('/sementesPorRegiao', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.sementesPorRegiao);
-router.get('/sementesPorMunicipio', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.sementesPorMunicipio);
-router.get('/countPorTipoCultivo', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.countPorTipoCultivo);
-router.get('/hectareMunicipio', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.sumAreaCultivo);
-router.get('/hectareRegiao', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.sumAreaCultivoRegiao);
+router.get('/totalAgricultores', auth.authenticatedUser, checkRole.checkRole([1,2,3,4,5]), StatisticsController.countProdutores);
+router.get('/countPorMunicipio', auth.authenticatedUser, checkRole.checkRole([1,2,3,4,5]), StatisticsController.countPorMunicipio);
+router.get('/countPorRegiao', auth.authenticatedUser, checkRole.checkRole([1,2,3,4,5]), StatisticsController.countPorRegiao);
+router.get('/countAtendidos', auth.authenticatedUser, checkRole.checkRole([1,2,3,4,5]), StatisticsController.countAgricultoresAtendidos);
+router.get('/totalSementesDistribuidas', auth.authenticatedUser, checkRole.checkRole([1,2,3,4,5]), StatisticsController.totalSementesDistribuidas);
+router.get('/sementesParaDistribuir', auth.authenticatedUser, checkRole.checkRole([1,2,3,4,5]), StatisticsController.totalSementesParaDistribuir);
+router.get('/totalAreaCultivo', auth.authenticatedUser, checkRole.checkRole([1,2,3,4,5]), StatisticsController.totalAreaCultivo);
+router.get('/totalAreaCultivoTrabalhado', auth.authenticatedUser, checkRole.checkRole([1,2,3,4,5]), StatisticsController.totalAreaCultivoTrabalhado);
+router.get('/sementesPorRegiao', auth.authenticatedUser, checkRole.checkRole([1,2,3,4,5]), StatisticsController.sementesPorRegiao);
+router.get('/sementesPorMunicipio', auth.authenticatedUser, checkRole.checkRole([1,2,3,4,5]), StatisticsController.sementesPorMunicipio);
+router.get('/countPorTipoCultivo', auth.authenticatedUser, checkRole.checkRole([1,2,3,4,5]), StatisticsController.countPorTipoCultivo);
+router.get('/hectareMunicipio', auth.authenticatedUser, checkRole.checkRole([1,2,3,4,5]), StatisticsController.sumAreaCultivo);
+router.get('/hectareRegiao', auth.authenticatedUser, checkRole.checkRole([1,2,3,4,5]), StatisticsController.sumAreaCultivoRegiao);
 
-router.get('/mapa', auth.authenticatedUser, checkRole.checkRole([1,2,3,4]), StatisticsController.dadosMapa);
+router.get('/mapa', auth.authenticatedUser, checkRole.checkRole([1,2,3,4,5]), StatisticsController.dadosMapa);
 
 
 module.exports = router

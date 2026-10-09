@@ -63,17 +63,25 @@
       </div>
 
       <div class="row g-2 align-items-end">
-        <div class="col-lg-4 col-md-6 col-sm-12">
+        <div class="col-lg-3 col-md-6 col-sm-12">
           <input type="date" class="form-control shadow-sm" formControlName="dataInicio"
             title="Data inicial de cadastro" />
         </div>
 
-        <div class="col-lg-4 col-md-6 col-sm-12">
+        <div class="col-lg-3 col-md-6 col-sm-12">
           <input type="date" class="form-control shadow-sm" formControlName="dataFim" title="Data final de cadastro" />
         </div>
 
+        <div class="col-lg-2 col-md-6 col-sm-12">
+          <select class="form-select shadow-sm" formControlName="etapa" (change)="filtrarUsuarios()">
+            <option value="">Etapa</option>
+            <option value="1">Etapa 1</option>
+            <option value="2">Etapa 2</option>
+          </select>
+        </div>
+
         <!-- Botões com mesma altura dos selects -->
-        <div class="col-lg-2 col-md-12 col-sm-12">
+        <div class="col-lg-4 col-md-12 col-sm-12">
           <div class="d-flex gap-2">
             <button type="button" class="btn btn-success btn-form w-100" (click)="limparFiltros()">
               Exibir todos
@@ -144,7 +152,7 @@
             <td class="text-center">{{ farmer.createdAt | date :'dd/MM/yyyy'}}</td>
 
             <td class="text-center">
-              <button class="btn btn-primary btn-sm" title="Desistência" [disabled]="profile_id !== 1 && profile_id !== 3"
+              <button class="btn btn-primary btn-sm" title="Desistência" [disabled]="profile_id !== 1 && profile_id !== 3 && profile_id !== 5"
                 (click)="retornarPrograma(farmer)">
                 <i class="fa-solid fa-arrow-rotate-left"></i>
               </button>

@@ -1,0 +1,73 @@
+.audit-section {
+  padding-top: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+.audit-header {
+  background: #0d6efd;
+  color: #fff;
+  padding: 1rem;
+}
+
+.audit-header h1 {
+  font-size: clamp(1.35rem, 1rem + 1vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.filter-card,
+.empty-state,
+.record-card {
+  background: #fff;
+}
+
+.results-count {
+  color: #5f6368;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.table th {
+  white-space: nowrap;
+}
+
+.sort-button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  display: inline-flex;
+  font: inherit;
+  gap: 0.4rem;
+  padding: 0;
+  text-align: left;
+}
+
+.sort-button:hover,
+.sort-button:focus-visible {
+  text-decoration: underline;
+}
+
+.date-cell {
+  min-width: 10rem;
+  white-space: nowrap;
+}
+
+.action-cell {
+  min-width: 16rem;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.record-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.record-heading time {
+  color: #5f6368;
+  font-size: 0.85rem;
+  text-align: right;
+}

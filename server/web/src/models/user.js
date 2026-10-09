@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       user.belongsTo(models.profile, { foreignKey: 'profile_id', as: 'ass_user_profile' })
       user.belongsTo(models.secretaria_executiva, { foreignKey: 'sexec_id', as: 'ass_user_sexec' })
       user.hasMany(models.audit, { foreignKey: 'user_id', as: 'ass_users_audit' });
+      user.belongsTo(models.cidades, { foreignKey: 'cidade_id', as: 'ass_user_cidade' })
     }
   }
   user.init({
@@ -21,7 +22,8 @@ module.exports = (sequelize, DataTypes) => {
     user_email: DataTypes.STRING,
     user_active: DataTypes.BOOLEAN,
     user_password: DataTypes.STRING,
-    user_pin: DataTypes.STRING
+    user_pin: DataTypes.STRING,
+    matricula_prefeitura: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'user',

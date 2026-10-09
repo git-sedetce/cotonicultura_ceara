@@ -1,1 +1,47 @@
 /* You can add global styles to this file, and also import other style files */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+app-root {
+  display: block;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+app-root:has(.hero) {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+app-root:has(.hero) > main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+app-root:has(.hero) > main > app-home {
+  display: flex;
+  flex: 1;
+}
+
+app-root:has(.hero) > app-footer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+}

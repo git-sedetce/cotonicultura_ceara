@@ -14,8 +14,7 @@
         <div class="row">
           <form control="" class="form-group" #formLogin="ngForm">
             <div class="row">
-              <input type="email" name="user_email" id="user_email" class="form__input form-control"
-                (blur)="verificaEmail(user_email)" #user_email="ngModel" [(ngModel)]="loginUsers.user_email"
+              <input type="email" name="user_email" id="user_email" class="form__input form-control" #user_email="ngModel" [(ngModel)]="loginUsers.user_email"
                 placeholder="Email do usuário" required>
               <div *ngIf="!user_email.valid && user_email.touched" class="alert alert-danger" role="alert">Informe o
                 email do usuário</div>

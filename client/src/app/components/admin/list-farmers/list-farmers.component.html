@@ -63,17 +63,25 @@
       </div>
 
       <div class="row g-2 align-items-end">
-        <div class="col-lg-4 col-md-6 col-sm-12">
+        <div class="col-lg-3 col-md-6 col-sm-12">
           <input type="date" class="form-control shadow-sm" formControlName="dataInicio"
             title="Data inicial de cadastro" />
         </div>
 
-        <div class="col-lg-4 col-md-6 col-sm-12">
+        <div class="col-lg-3 col-md-6 col-sm-12">
           <input type="date" class="form-control shadow-sm" formControlName="dataFim" title="Data final de cadastro" />
         </div>
 
+        <div class="col-lg-2 col-md-6 col-sm-12">
+          <select class="form-select shadow-sm" formControlName="etapa" (change)="filtrarUsuarios()">
+            <option value="">Etapa</option>
+            <option value="1">Etapa 1</option>
+            <option value="2">Etapa 2</option>
+          </select>
+        </div>
+
         <!-- Botões com mesma altura dos selects -->
-        <div class="col-lg-2 col-md-12 col-sm-12">
+        <div class="col-lg-4 col-md-12 col-sm-12">
           <div class="d-flex gap-2">
             <button type="button" class="btn btn-success btn-form w-100" (click)="limparFiltros()">
               Exibir todos
@@ -123,7 +131,7 @@
             <th class="text-center">Município</th>
             <th class="text-center">Região</th>
             <th class="text-center">Data de Cadastro</th>
-            <th class="text-center" colspan="6">Ações</th>
+            <th class="text-center" colspan="7">Ações</th>
           </tr>
         </thead>
 
@@ -144,7 +152,7 @@
             <td class="text-center">{{ farmer.createdAt | date :'dd/MM/yyyy'}}</td>
 
             <td class="text-center">
-              <button class="btn btn-warning btn-sm" (click)="onEdit(farmer)" data-bs-toggle="modal"
+              <button class="btn btn-warning btn-sm" (click)="onEdit(farmer)" data-bs-toggle="modal" title="Editar Agricultor"
                 data-bs-target="#modalEdit">
                 <i class="fa-solid fa-pen-to-square"></i>
               </button>
@@ -158,14 +166,14 @@
 
 
             <td class="text-center" *ngIf="!faltandoDocumentosBasicos(farmer) && faltandoAlgumTermo(farmer)">
-              <button class="btn btn-warning btn-sm" (click)="anexarArquivo(farmer.id)" title="Anexar Termos">
+              <button class="btn btn-info btn-sm" (click)="anexarArquivo(farmer.id)" title="Editar Termos">
                 <i class="fa-solid fa-file-signature"></i>
               </button>
             </td>
 
 
             <td class="text-center" *ngIf="possuiCpf(farmer)">
-              <button class="btn btn-success btn-sm" (click)="getFile(farmer, 'comprovante_cpf_cnpj')"
+              <button class="btn btn-success btn-sm" (click)="getFile(farmer, 'comprovante_cpf_cnpj')" title="Documento"
                 data-bs-toggle="modal" data-bs-target="#modalDocumento">
                 <i class="fa-solid fa-id-badge"></i>
               </button>
@@ -173,21 +181,21 @@
 
 
             <td class="text-center" *ngIf="possuiResid(farmer)">
-              <button class="btn btn-success btn-sm" (click)="getFile(farmer, 'comprovante_residencia')"
+              <button class="btn btn-success btn-sm" (click)="getFile(farmer, 'comprovante_residencia')" title="Comprovante de Residência"
                 data-bs-toggle="modal" data-bs-target="#modalResidencia">
                 <i class="fa-solid fa-house-circle-check"></i>
               </button>
             </td>
 
             <td class="text-center" *ngIf="possuiTermoDoacao(farmer)">
-              <button class="btn btn-success btn-sm" (click)="getFile(farmer, 'termo_doacao')" data-bs-toggle="modal"
+              <button class="btn btn-success btn-sm" (click)="getFile(farmer, 'termo_doacao')" data-bs-toggle="modal" title="Termo de Doação"
                 data-bs-target="#modalTermoDoacao">
                 <i class="fa-solid fa-file-contract"></i>
               </button>
             </td>
 
             <td class="text-center" *ngIf="possuiTermoCompromisso(farmer)">
-              <button class="btn btn-success btn-sm" (click)="getFile(farmer, 'termo_compromisso')"
+              <button class="btn btn-success btn-sm" (click)="getFile(farmer, 'termo_compromisso')" title="Termo de Compromisso"
                 data-bs-toggle="modal" data-bs-target="#modalTermoCompromisso">
                 <i class="fa-solid fa-file-invoice"></i>
               </button>
@@ -394,7 +402,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" id="cancel" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" (click)="updateFarmer()" [disabled]="profile_id !== 1 && profile_id !== 3"
+        <button type="button" (click)="updateFarmer()" [disabled]="profile_id !== 1 && profile_id !== 3 && profile_id !== 5"
           class="btn btn-warning">Update</button>
       </div>
     </div>

@@ -13,4 +13,8 @@ export class AuditService {
   cadastrarRegistros(data: any) : Observable<any> {
       return this.http.post(environment.apiUrl + 'newRegister', data)
     }
+
+  pegarRegistros(): Observable<any> {
+    return this.http.get(environment.apiUrl + 'register');
+  }
 }
