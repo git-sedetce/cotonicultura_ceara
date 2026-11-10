@@ -282,6 +282,11 @@ export class HomeAdminComponent implements OnInit {
       lat: -5.1989,
       lng: -39.2951,
     },
+    {
+      nome: 'Missão Velha',
+      lat: -7.25711,
+      lng: -39.1458,
+    },
   ];
 
   iconeDistribuicao = L.icon({
