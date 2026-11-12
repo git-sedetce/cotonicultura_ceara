@@ -30,8 +30,10 @@
     <!-- GRÁFICOS (DIREITA) -->
 
     <div class="chart-card">
-      <apx-chart [series]="cultivoChart.series!" [chart]="cultivoChart.chart!" [labels]="cultivoChart.labels!"
-        [title]="cultivoChart.title!" [responsive]="cultivoChart.responsive!" [colors]="farmersMunicipioChart.colors || []">
+      <apx-chart [series]="sementesAnoChart.series!" [chart]="sementesAnoChart.chart!"
+        [title]="sementesAnoChart.title!" [xaxis]="sementesAnoChart.xaxis!"
+        [yaxis]="sementesAnoChart.yaxis!" [tooltip]="sementesAnoChart.tooltip!"
+        [dataLabels]="sementesAnoChart.dataLabels!" [plotOptions]="sementesAnoChart.plotOptions!">
       </apx-chart>
     </div>
 

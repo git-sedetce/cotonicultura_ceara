@@ -9,9 +9,9 @@ class AgroControllers {
     // console.log('newRegister', newRegister);
     try {
       const novoProdutor = await database.produtor_rural.create(newRegister);
-      const numeroPedido = `PED-${String(novoProdutor.id).padStart(6, "0")}`;
+      // const numeroPedido = `PED-${String(novoProdutor.id).padStart(6, "0")}`;
 
-      await novoProdutor.update({ pedido: numeroPedido });
+      // await novoProdutor.update({ pedido: numeroPedido });
       ("");
       return res.status(200).json(novoProdutor);
     } catch (error) {

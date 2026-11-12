@@ -93,9 +93,18 @@ class StatisticsController {
     try {
       const total = await database.produtor_rural.count({
         where: {
-          pedido_atendido: true,
-          status_farmer: true
+          status_farmer: true,
         },
+        include: [
+          {
+            association: "ass_agricultor_distribuicao_sementes",
+            attributes: [],
+            where: { pedido_atendido: true },
+            required: true,
+          },
+        ],
+        distinct: true,
+        col: "id",
       });
 
       return res.status(200).json({
@@ -134,6 +143,30 @@ class StatisticsController {
       console.error(error);
       return res.status(500).json({
         message: "Erro ao somar sementes distribuídas",
+      });
+    }
+  }
+
+  static async sementesPorAno(req, res) {
+    try {
+      const resultado = await database.sequelize.query(
+        `SELECT ds.ano_distribuicao,
+                COALESCE(SUM(ds.qtde_sementes), 0) AS total_sementes
+         FROM distribuicao_sementes AS ds
+         INNER JOIN produtor_rurals AS pr ON pr.id = ds.agricultor_id
+         WHERE ds.pedido_atendido = true
+           AND ds.ano_distribuicao IS NOT NULL
+           AND pr.status_farmer = true
+         GROUP BY ds.ano_distribuicao
+         ORDER BY ds.ano_distribuicao ASC`,
+        { type: QueryTypes.SELECT },
+      );
+
+      return res.status(200).json(resultado);
+    } catch (error) {
+      console.error("Erro ao somar sementes distribuídas por ano:", error);
+      return res.status(500).json({
+        message: "Erro ao buscar sementes distribuídas por ano",
       });
     }
   }
@@ -188,20 +221,21 @@ class StatisticsController {
 
   static async totalAreaCultivoTrabalhado(req, res) {    
     try {
-      const resultado = await database.produtor_rural.findOne({
-        where: {
-          status_farmer: true
-        },
-        attributes: [
-          [
-            fn("COALESCE", fn("SUM", col("area_algodao")), 0),
-            "area_algodao",
-          ],
-        ],
-      });
+      const [resultado] = await database.sequelize.query(
+        `SELECT COALESCE(SUM(pr.area_algodao), 0) AS area_algodao
+         FROM produtor_rurals AS pr
+         WHERE pr.status_farmer = true
+           AND EXISTS (
+             SELECT 1
+             FROM distribuicao_sementes AS ds
+             WHERE ds.agricultor_id = pr.id
+               AND ds.pedido_atendido = true
+           )`,
+        { type: QueryTypes.SELECT },
+      );
 
       return res.status(200).json({
-        total_area_cultivo: resultado.get("area_algodao"),
+        total_area_cultivo: resultado.area_algodao,
       });
     } catch (error) {
       console.error(error);
@@ -371,59 +405,46 @@ class StatisticsController {
   }
 
   static async dadosMapa(req, res) {
-  try {
-    const resultado = await database.produtor_rural.findAll({
-      where: { status_farmer: true },
-      attributes: [
-        [col("ass_produtor_rural_cidade.nome_municipio"), "nome_municipio"],
+    try {
+      const resultado = await database.sequelize.query(
+        `WITH agricultores_por_municipio AS (
+           SELECT c.nome_municipio,
+                  COUNT(pr.id) AS total_agricultores,
+                  COALESCE(SUM(pr.area_algodao), 0) AS total_area_algodao
+           FROM produtor_rurals AS pr
+           INNER JOIN cidades AS c ON c.id = pr.cidade
+           WHERE pr.status_farmer = true
+           GROUP BY c.nome_municipio
+         ),
+         sementes_por_municipio AS (
+           SELECT c.nome_municipio,
+                  COALESCE(SUM(ds.qtde_sementes), 0) AS total_sementes
+           FROM distribuicao_sementes AS ds
+           INNER JOIN produtor_rurals AS pr ON pr.id = ds.agricultor_id
+           INNER JOIN cidades AS c ON c.id = pr.cidade
+           WHERE pr.status_farmer = true
+             AND ds.pedido_atendido = true
+           GROUP BY c.nome_municipio
+         )
+         SELECT a.nome_municipio,
+                COALESCE(s.total_sementes, 0) AS total_sementes,
+                a.total_agricultores,
+                a.total_area_algodao
+         FROM agricultores_por_municipio AS a
+         LEFT JOIN sementes_por_municipio AS s
+           ON s.nome_municipio = a.nome_municipio
+         ORDER BY a.nome_municipio ASC`,
+        { type: QueryTypes.SELECT },
+      );
 
-        // Soma de sementes somente quando pedido_atendido = true
-        [
-          fn(
-            "COALESCE",
-            fn(
-              "SUM",
-              literal(
-                `CASE WHEN produtor_rural.pedido_atendido = true 
-                      THEN produtor_rural.sementes_recebidas 
-                      ELSE 0 END`
-              )
-            ),
-            0
-          ),
-          "total_sementes",
-        ],
-
-        // Quantidade de agricultores cadastrados
-        [
-          fn("COUNT", col("produtor_rural.id")),
-          "total_agricultores",
-        ],
-
-        // Soma da área de cultivo de algodão
-        [
-          fn("COALESCE", fn("SUM", col("area_algodao")), 0),
-          "total_area_algodao",
-        ],
-      ],
-      include: [
-        {
-          association: "ass_produtor_rural_cidade",
-          attributes: [],
-        },
-      ],
-      group: ["ass_produtor_rural_cidade.nome_municipio"],
-      order: [[col("ass_produtor_rural_cidade.nome_municipio"), "ASC"]],
-    });
-
-    return res.status(200).json(resultado);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      message: "Erro ao buscar dados por município",
-    });
+      return res.status(200).json(resultado);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: "Erro ao buscar dados por município",
+      });
+    }
   }
-}
 
 
 }

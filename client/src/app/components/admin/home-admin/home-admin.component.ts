@@ -161,17 +161,18 @@ export class HomeAdminComponent implements OnInit {
   }
 
   carregarGraficos() {
-    // Cultivo (Donut)
-    this.statisticsService.estatiticaCultivo({}).subscribe((res) => {
-      const labels = res.map((c: any) => c.tipo_cultivo);
-      const series = res.map((c: any) => Number(c.qtd_agricultores));
-      const colors = labels.map((l: any) => this.getColorFromMunicipio(l));
-
-      this.cultivoChart = {
-        ...this.cultivoChart,
-        labels,
-        series,
-        colors,
+    this.statisticsService.sementesDistribuidasPorAno().subscribe((res) => {
+      this.sementesAnoChart = {
+        ...this.sementesAnoChart,
+        series: [
+          {
+            name: 'Sementes distribuídas (kg)',
+            data: res.map((item: any) => Number(item.total_sementes) || 0),
+          },
+        ],
+        xaxis: {
+          categories: res.map((item: any) => String(item.ano_distribuicao)),
+        },
       };
     });
 
@@ -415,19 +416,37 @@ export class HomeAdminComponent implements OnInit {
   }
 
   // ================= CONFIG CHARTS =================
-  cultivoChart: ApexOptions = {
+  sementesAnoChart: ApexOptions = {
     series: [],
-    chart: { type: 'donut', height: 240 },
+    chart: { type: 'bar', height: 300, toolbar: { show: false } },
     title: {
-      text: 'Tipo de Cultivo',
+      text: 'Sementes Distribuídas por Ano',
       align: 'center',
       style: {
         fontSize: '18px',
         fontWeight: '600',
       },
     },
-    labels: [],
-    colors: [] as string[],
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        columnWidth: '50%',
+      },
+    },
+    dataLabels: { enabled: false },
+    xaxis: { categories: [] },
+    yaxis: {
+      title: { text: 'Sementes (kg)' },
+      labels: {
+        formatter: (value: number) => value.toLocaleString('pt-BR'),
+      },
+    },
+    tooltip: {
+      y: {
+        formatter: (value: number) =>
+          `${value.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} kg`,
+      },
+    },
   };
 
   farmersMunicipioChart: ApexOptions = {
