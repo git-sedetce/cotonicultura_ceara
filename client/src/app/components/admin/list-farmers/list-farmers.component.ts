@@ -4,7 +4,7 @@ import { Audit } from '../../../models/audit.model';
 import { CadastroAgricultorService } from '../../../services/cadastro-agricultor.service';
 import { AuditService } from '../../../services/audit.service';
 import { ToastrService } from 'ngx-toastr';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CadastroService } from '../../../services/cadastro.service';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -53,6 +53,12 @@ export class ListFarmersComponent implements OnInit {
   formAnexo!: FormGroup;
   formFiltro!: FormGroup;
   formFarmer!: FormGroup;
+  formDistribuicoes!: FormGroup;
+  nomeFarmerDistribuicoes = '';
+  farmerDistribuicoesId: number | null = null;
+  distribuicoesExistentes: any[] = [];
+  savingAtendimento = false;
+  savingNovosPedidos = false;
   arquivoUrl: SafeResourceUrl | null = null;
   arquivoCpfUrl: SafeResourceUrl | null = null;
   arquivoResidenciaUrl: SafeResourceUrl | null = null;
@@ -127,6 +133,11 @@ export class ListFarmersComponent implements OnInit {
       file: [null], // ← OBRIGATÓRIO
     });
 
+    this.formDistribuicoes = this.formBuilder.group({
+      existentes: this.formBuilder.array([]),
+      novosPedidos: this.formBuilder.array([]),
+    });
+
     this.registro = new Audit();
     this.pegarCidades();
     this.pegarRegioes();
@@ -171,6 +182,7 @@ export class ListFarmersComponent implements OnInit {
     this.cadastroAgricultorService.agricultorRural(true).subscribe(
       (usr: any[]) => {
         this.lista_farmers = usr;
+        // console.log('lista_farmers', this.lista_farmers);
         this.lista_filtrada = usr; // inicia filtrada
       },
       (erro: any) => console.error(erro),
@@ -371,6 +383,163 @@ export class ListFarmersComponent implements OnInit {
   anexarArquivo(id: number) {
     this.cadastroAgricultorService.setAgricultor(Number(id));
     this.router.navigate(['/anexo']);
+  }
+
+  get novosPedidos(): FormArray {
+    return this.formDistribuicoes.get('novosPedidos') as FormArray;
+  }
+
+  get atendimentosExistentes(): FormArray {
+    return this.formDistribuicoes.get('existentes') as FormArray;
+  }
+
+  abrirDistribuicoes(farmer: any): void {
+    this.farmerDistribuicoesId = farmer.id;
+    this.nomeFarmerDistribuicoes = farmer.nome;
+    this.distribuicoesExistentes = farmer.ass_agricultor_distribuicao_sementes ?? [];
+    this.atendimentosExistentes.clear();
+    this.novosPedidos.clear();
+
+    for (const distribuicao of this.distribuicoesExistentes) {
+      this.atendimentosExistentes.push(
+        this.formBuilder.group({
+          id: [distribuicao.id],
+          pedido_atendido: [distribuicao.pedido_atendido === true],
+        }),
+      );
+    }
+  }
+
+  atendimentoAlterado(index: number): boolean {
+    return (
+      this.atendimentosExistentes.at(index).value.pedido_atendido !==
+      (this.distribuicoesExistentes[index].pedido_atendido === true)
+    );
+  }
+
+  get existeAtendimentoAlterado(): boolean {
+    return this.atendimentosExistentes.controls.some((_, index) =>
+      this.atendimentoAlterado(index),
+    );
+  }
+
+  salvarAtendimentos(): void {
+    if (
+      this.farmerDistribuicoesId === null ||
+      this.savingAtendimento ||
+      !this.existeAtendimentoAlterado
+    ) {
+      return;
+    }
+
+    const distribuicoes = this.atendimentosExistentes.getRawValue().filter(
+      (distribuicao: any, index: number) => this.atendimentoAlterado(index),
+    );
+
+    this.savingAtendimento = true;
+    this.cadastroAgricultorService
+      .atualizarAtendimentos(this.farmerDistribuicoesId, distribuicoes)
+      .subscribe({
+        next: () => {
+          this.savingAtendimento = false;
+          this.toastr.success('Situação de atendimento atualizada com sucesso.');
+          this.saveRegister(
+            this.nomeFarmerDistribuicoes,
+            'Atualização da situação de atendimento de sementes',
+          );
+          const atendimentosSalvos = new Map(
+            distribuicoes.map((distribuicao: any) => [
+              distribuicao.id,
+              distribuicao.pedido_atendido,
+            ]),
+          );
+          this.distribuicoesExistentes = this.distribuicoesExistentes.map(
+            (distribuicao, index) => {
+              const pedidoAtendido = atendimentosSalvos.get(distribuicao.id);
+              if (pedidoAtendido !== undefined) {
+                this.atendimentosExistentes
+                  .at(index)
+                  .get('pedido_atendido')
+                  ?.setValue(pedidoAtendido);
+                return { ...distribuicao, pedido_atendido: pedidoAtendido };
+              }
+              return distribuicao;
+            },
+          );
+          this.getFarmers();
+        },
+        error: (error) => {
+          this.savingAtendimento = false;
+          console.error('Erro ao atualizar situação de atendimento:', error);
+          this.toastr.error(
+            error.error?.message ?? 'Erro ao atualizar situação de atendimento.',
+          );
+        },
+      });
+  }
+
+  adicionarPedido(): void {
+    this.novosPedidos.push(
+      this.formBuilder.group({
+        ano_distribuicao: [
+          new Date().getFullYear(),
+          [Validators.required, Validators.pattern(/^\d+$/), Validators.min(1)],
+        ],
+        qtde_sementes: [
+          null,
+          [Validators.required, Validators.min(0)],
+        ],
+        pedido_atendido: [false],
+      }),
+    );
+  }
+
+  removerPedido(index: number): void {
+    this.novosPedidos.removeAt(index);
+  }
+
+  salvarDistribuicoes(): void {
+    if (
+      this.formDistribuicoes.invalid ||
+      this.novosPedidos.length === 0 ||
+      this.farmerDistribuicoesId === null ||
+      this.savingNovosPedidos
+    ) {
+      this.formDistribuicoes.markAllAsTouched();
+      return;
+    }
+
+    this.savingNovosPedidos = true;
+    const distribuicoes = this.novosPedidos.getRawValue();
+    this.cadastroAgricultorService
+      .adicionarDistribuicoes(this.farmerDistribuicoesId, distribuicoes)
+      .subscribe({
+        next: () => {
+          this.savingNovosPedidos = false;
+          this.toastr.success('Pedidos de sementes adicionados com sucesso.');
+          this.saveRegister(
+            this.nomeFarmerDistribuicoes,
+            'Inclusão de pedido de sementes',
+          );
+          this.novosPedidos.clear();
+          this.getFarmers();
+
+          const modalEl = document.getElementById('modalDistribuicoes');
+          if (modalEl) {
+            const modal =
+              bootstrap.Modal.getInstance(modalEl) ||
+              new bootstrap.Modal(modalEl);
+            modal.hide();
+          }
+        },
+        error: (error) => {
+          this.savingNovosPedidos = false;
+          console.error('Erro ao adicionar pedidos de sementes:', error);
+          this.toastr.error(
+            error.error?.message ?? 'Erro ao adicionar pedidos de sementes.',
+          );
+        },
+      });
   }
 
   onEdit(farmer: any) {

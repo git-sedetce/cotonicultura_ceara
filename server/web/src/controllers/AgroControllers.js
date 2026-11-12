@@ -39,9 +39,6 @@ class AgroControllers {
         { transaction: t },
       );
 
-      const numeroPedido = `PED-${String(novoProdutor.id).padStart(6, "0")}`;
-      await novoProdutor.update({ pedido: numeroPedido }, { transaction: t });
-
       // ===== 4. PROCESSAR ARQUIVOS =====
       const arquivos = [
         {
@@ -191,7 +188,6 @@ class AgroControllers {
         order: [["nome", "ASC"]],
         attributes: [
           "id",
-          "pedido",
           "nome",
           "telefone",
           "cpf_cnpj",
@@ -202,8 +198,6 @@ class AgroControllers {
           "ponto_referencia",
           "area_total",
           "area_algodao",
-          "pedido_atendido",
-          "sementes_recebidas",
           "regime_cultivo",
           "cadastro_adagri",
           "confirma_informacao",
@@ -230,6 +224,10 @@ class AgroControllers {
             association: "ass_agricultor_anexo",
             attributes: ["id", "tipo_anexo"],
           },
+          {
+            association: "ass_agricultor_distribuicao_sementes",
+            attributes: ["id", "pedido", "qtde_sementes", "ano_distribuicao", "pedido_atendido"],
+          },
         ],
       });
 
@@ -247,7 +245,6 @@ class AgroControllers {
         where: { id: Number(id) },
         attributes: [
           "id",
-          "pedido",
           "nome",
           "telefone",
           "cpf_cnpj",
@@ -258,7 +255,6 @@ class AgroControllers {
           "ponto_referencia",
           "area_total",
           "area_algodao",
-          "pedido_atendido",
           "sementes_recebidas",
           "regime_cultivo",
           "cadastro_adagri",
@@ -277,6 +273,10 @@ class AgroControllers {
                 attributes: ["id", "nome"],
               },
             ],
+          },
+          {
+            association: "ass_agricultor_distribuicao_sementes",
+            attributes: ["pedido", "qtde_sementes", "ano_distribuicao", "pedido_atendido"],
           },
         ],
       });
@@ -305,13 +305,11 @@ class AgroControllers {
       const getFarmer = await database.produtor_rural.findAll({
         where: { cidade: getCity.id },
         attributes: [
-          "pedido",
           "nome",
           "cpf_cnpj",
           "cidade",
           "nome_propriedade",
           "area_algodao",
-          "pedido_atendido",
           "sementes_recebidas",
           "regime_cultivo",
         ],
@@ -323,6 +321,10 @@ class AgroControllers {
           {
             association: "ass_agricultor_anexo",
             attributes: ["tipo_anexo"],
+          },
+          {
+            association: "ass_agricultor_distribuicao_sementes",
+            attributes: ["pedido", "qtde_sementes", "ano_distribuicao", "pedido_atendido"],
           },
         ],
       });
@@ -342,13 +344,11 @@ class AgroControllers {
       const getFarmer = await database.produtor_rural.findAll({
         where: { cidade: Number(id) },
         attributes: [
-          "pedido",
           "nome",
           "cpf_cnpj",
           "cidade",
           "nome_propriedade",
           "area_algodao",
-          "pedido_atendido",
           "sementes_recebidas",
           "regime_cultivo",
         ],
@@ -362,6 +362,10 @@ class AgroControllers {
                 attributes: ["id", "nome"],
               },
             ],
+          },
+          {
+            association: "ass_agricultor_distribuicao_sementes",
+            attributes: ["pedido", "qtde_sementes", "ano_distribuicao", "pedido_atendido"],
           },
         ],
       });
@@ -383,7 +387,7 @@ class AgroControllers {
             ),
           },
         },
-        attributes: ["id", "pedido", "nome"],
+        attributes: ["id", "nome"],
         order: [["nome", "ASC"]],
       });
 
@@ -408,6 +412,177 @@ class AgroControllers {
       return res.status(200).json(updateFarmer);
     } catch (error) {
       return res.status(500).json(error.message);
+    }
+  }
+
+  static async adicionaDistribuicoes(req, res) {
+    const agricultorId = Number(req.params.id);
+    const distribuicoes = req.body?.distribuicoes;
+
+    if (!Number.isInteger(agricultorId) || agricultorId <= 0) {
+      return res.status(400).json({ message: "ID do agricultor inválido" });
+    }
+
+    if (!Array.isArray(distribuicoes) || distribuicoes.length === 0) {
+      return res.status(400).json({ message: "Informe ao menos um pedido de sementes" });
+    }
+
+    const registrosValidos = distribuicoes.every(
+      (distribuicao) =>
+        distribuicao &&
+        typeof distribuicao === "object" &&
+        !Array.isArray(distribuicao),
+    );
+    if (!registrosValidos) {
+      return res.status(400).json({ message: "Dados de distribuição inválidos" });
+    }
+
+    const dadosValidos = distribuicoes.every((distribuicao) => {
+      const ano = Number(distribuicao.ano_distribuicao);
+      const quantidade = Number(distribuicao.qtde_sementes);
+
+      return (
+        distribuicao.ano_distribuicao !== null &&
+        distribuicao.ano_distribuicao !== undefined &&
+        distribuicao.ano_distribuicao !== "" &&
+        distribuicao.qtde_sementes !== null &&
+        distribuicao.qtde_sementes !== undefined &&
+        distribuicao.qtde_sementes !== "" &&
+        Number.isInteger(ano) &&
+        ano > 0 &&
+        Number.isFinite(quantidade) &&
+        quantidade >= 0 &&
+        typeof distribuicao.pedido_atendido === "boolean"
+      );
+    });
+
+    if (!dadosValidos) {
+      return res.status(400).json({ message: "Dados de distribuição inválidos" });
+    }
+
+    let transaction;
+
+    try {
+      transaction = await database.sequelize.transaction();
+      const agricultor = await database.produtor_rural.findByPk(agricultorId, {
+        transaction,
+      });
+
+      if (!agricultor) {
+        await transaction.rollback();
+        return res.status(404).json({ message: "Agricultor não encontrado" });
+      }
+
+      const novosRegistros = distribuicoes.map((distribuicao) => ({
+        agricultor_id: agricultorId,
+        ano_distribuicao: Number(distribuicao.ano_distribuicao),
+        qtde_sementes: Number(distribuicao.qtde_sementes),
+        pedido_atendido: distribuicao.pedido_atendido,
+      }));
+      const anoAtual = new Date().getFullYear();
+
+      const pedidosCriados = [];
+      for (const registro of novosRegistros) {
+        const pedido = await database.distribuicao_sementes.create(registro, {
+          transaction,
+        });
+        await pedido.update(
+          {
+            pedido: `PED-${String(pedido.id).padStart(6, "0")}-${anoAtual}`,
+          },
+          { transaction },
+        );
+        pedidosCriados.push(pedido);
+      }
+      await transaction.commit();
+
+      return res.status(200).json({
+        message: "Pedidos de sementes adicionados com sucesso",
+        distribuicoes: pedidosCriados,
+      });
+    } catch (error) {
+      if (transaction && !transaction.finished) {
+        await transaction.rollback();
+      }
+      console.error("Erro ao adicionar pedidos de sementes:", error);
+      return res.status(500).json({
+        message: "Erro ao adicionar pedidos de sementes",
+      });
+    }
+  }
+
+  static async atualizaAtendimentoDistribuicoes(req, res) {
+    const agricultorId = Number(req.params.id);
+    const distribuicoes = req.body?.distribuicoes;
+
+    if (!Number.isInteger(agricultorId) || agricultorId <= 0) {
+      return res.status(400).json({ message: "ID do agricultor inválido" });
+    }
+
+    if (!Array.isArray(distribuicoes) || distribuicoes.length === 0) {
+      return res.status(400).json({ message: "Informe os atendimentos para atualizar" });
+    }
+
+    const dadosValidos = distribuicoes.every(
+      (distribuicao) =>
+        distribuicao &&
+        typeof distribuicao === "object" &&
+        !Array.isArray(distribuicao) &&
+        Number.isInteger(Number(distribuicao.id)) &&
+        Number(distribuicao.id) > 0 &&
+        typeof distribuicao.pedido_atendido === "boolean",
+    );
+    const ids = distribuicoes.map((distribuicao) => Number(distribuicao?.id));
+
+    if (!dadosValidos || new Set(ids).size !== ids.length) {
+      return res.status(400).json({ message: "Dados de atendimento inválidos" });
+    }
+
+    let transaction;
+
+    try {
+      transaction = await database.sequelize.transaction();
+      const registros = await database.distribuicao_sementes.findAll({
+        where: {
+          agricultor_id: agricultorId,
+          id: ids,
+        },
+        transaction,
+      });
+
+      if (registros.length !== distribuicoes.length) {
+        await transaction.rollback();
+        return res.status(404).json({
+          message: "Uma ou mais distribuições não pertencem a este agricultor",
+        });
+      }
+
+      const atendimentos = new Map(
+        distribuicoes.map((distribuicao) => [
+          Number(distribuicao.id),
+          distribuicao.pedido_atendido,
+        ]),
+      );
+
+      for (const registro of registros) {
+        await registro.update(
+          { pedido_atendido: atendimentos.get(registro.id) },
+          { transaction },
+        );
+      }
+      await transaction.commit();
+
+      return res.status(200).json({
+        message: "Situação de atendimento atualizada com sucesso",
+      });
+    } catch (error) {
+      if (transaction && !transaction.finished) {
+        await transaction.rollback();
+      }
+      console.error("Erro ao atualizar situação de atendimento:", error);
+      return res.status(500).json({
+        message: "Erro ao atualizar situação de atendimento",
+      });
     }
   }
 

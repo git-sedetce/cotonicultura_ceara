@@ -26,7 +26,7 @@
             formControlName="nome" (keyup)="filtrarUsuarios()" />
         </div>
 
-        <div class="col-lg-2 col-md-6 col-sm-6">
+        <div class="col-lg-3 col-md-6 col-sm-6">
           <select class="form-select shadow-sm" formControlName="cidade" (change)="filtrarUsuarios()">
             <option value="">Cidade</option>
             <option *ngFor="let c of lista_cidade" [value]="c.nome_municipio">
@@ -35,7 +35,7 @@
           </select>
         </div>
 
-        <div class="col-lg-2 col-md-6 col-sm-6">
+        <div class="col-lg-3 col-md-6 col-sm-6">
           <select class="form-select shadow-sm" formControlName="regiao" (change)="filtrarUsuarios()">
             <option value="">Região</option>
             <option *ngFor="let r of lista_regiao" [value]="r.nome">
@@ -44,13 +44,13 @@
           </select>
         </div>
 
-        <div class="col-lg-2 col-md-6 col-sm-6">
+        <!-- <div class="col-lg-2 col-md-6 col-sm-6">
           <select class="form-select shadow-sm" formControlName="pedidoAtendido" (change)="filtrarUsuarios()">
             <option value="">Pedido Atendido</option>
             <option [ngValue]="true">Sim</option>
             <option [ngValue]="false">Não</option>
           </select>
-        </div>
+        </div> -->
 
         <div class="col-lg-2 col-md-6 col-sm-6">
           <select class="form-select shadow-sm" formControlName="cadastroADAGRI" (change)="filtrarUsuarios()">
@@ -126,12 +126,12 @@
           <tr>
             <th class="text-center">Nome Completo</th>
             <th class="text-center">Telefone</th>
-            <th class="text-center">Foi Atendido?</th>
+            <!-- <th class="text-center">Foi Atendido?</th> -->
             <th class="text-center">Possui cadastro ADAGRI?</th>
             <th class="text-center">Município</th>
             <th class="text-center">Região</th>
             <th class="text-center">Data de Cadastro</th>
-            <th class="text-center" colspan="7">Ações</th>
+            <th class="text-center" colspan="8">Ações</th>
           </tr>
         </thead>
 
@@ -139,10 +139,10 @@
           <tr *ngFor="let farmer of lista_filtrada | paginate: { itemsPerPage: itemsPerPage, currentPage: page }">
             <td>{{ farmer.nome }}</td>
             <td class="text-center">{{ farmer.telefone }}</td>
-            <td class="text-center">
+            <!-- <td class="text-center">
               <i *ngIf="farmer.pedido_atendido" class="bi bi-check-circle-fill text-success fs-5"></i>
               <i *ngIf="!farmer.pedido_atendido" class="bi bi-x-circle-fill text-danger fs-5"></i>
-            </td>
+            </td> -->
             <td class="text-center">
               <i *ngIf="farmer.tem_cadastro_adagri" class="bi bi-check-circle-fill text-success fs-5"></i>
               <i *ngIf="!farmer.tem_cadastro_adagri" class="bi bi-x-circle-fill text-danger fs-5"></i>
@@ -155,6 +155,14 @@
               <button class="btn btn-warning btn-sm" (click)="onEdit(farmer)" data-bs-toggle="modal" title="Editar Agricultor"
                 data-bs-target="#modalEdit">
                 <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+            </td>
+
+            <td class="text-center">
+              <button class="btn btn-primary btn-sm" (click)="abrirDistribuicoes(farmer)"
+                data-bs-toggle="modal" data-bs-target="#modalDistribuicoes"
+                title="Consultar e adicionar pedidos de sementes">
+                <i class="fa-solid fa-seedling"></i>
               </button>
             </td>
 
@@ -224,6 +232,117 @@
     <pagination-controls class="text-center mt-3" (pageChange)="page = $event"></pagination-controls>
   </div>
 </section>
+
+<div class="modal fade" id="modalDistribuicoes" tabindex="-1" aria-labelledby="modalDistribuicoesLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable mt-5">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalDistribuicoesLabel">
+          Atendimento e sementes — {{ nomeFarmerDistribuicoes }}
+        </h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <h2 class="h6">Pedidos já registrados</h2>
+        <div *ngIf="distribuicoesExistentes.length === 0" class="alert alert-info">
+          Não há distribuições de sementes registradas para este trabalhador.
+        </div>
+
+        <form *ngIf="distribuicoesExistentes.length > 0" [formGroup]="formDistribuicoes"
+          class="table-responsive mb-4">
+          <table class="table table-sm table-striped align-middle">
+            <thead>
+              <tr>
+                <th>Número do pedido</th>
+                <th>Ano</th>
+                <th>Sementes recebidas</th>
+                <th>Atendido?</th>
+              </tr>
+            </thead>
+            <tbody formArrayName="existentes">
+              <tr *ngFor="let distribuicao of distribuicoesExistentes; let i = index"
+                [formGroupName]="i">
+                <td>{{ distribuicao.pedido }}</td>
+                <td>{{ distribuicao.ano_distribuicao }}</td>
+                <td>{{ distribuicao.qtde_sementes }}</td>
+                <td>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox"
+                      [id]="'atendimento-existente-' + i" formControlName="pedido_atendido">
+                    <label class="form-check-label" [for]="'atendimento-existente-' + i">
+                      {{ atendimentosExistentes.at(i).value.pedido_atendido ? 'Sim' : 'Não' }}
+                    </label>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button type="button" class="btn btn-outline-success btn-sm"
+            (click)="salvarAtendimentos()"
+            [disabled]="(profile_id !== 1 && profile_id !== 3 && profile_id !== 5) || savingAtendimento || !existeAtendimentoAlterado">
+            <span *ngIf="savingAtendimento" class="spinner-border spinner-border-sm me-1" role="status"
+              aria-hidden="true"></span>
+            Salvar situação de atendimento
+          </button>
+        </form>
+
+        <hr>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h6 mb-0">Adicionar pedidos</h2>
+          <button type="button" class="btn btn-outline-primary btn-sm" (click)="adicionarPedido()">
+            <i class="fa-solid fa-plus me-1"></i>Adicionar pedido
+          </button>
+        </div>
+
+        <form [formGroup]="formDistribuicoes">
+          <div formArrayName="novosPedidos">
+            <div *ngFor="let pedido of novosPedidos.controls; let i = index"
+              [formGroupName]="i" class="border rounded p-3 mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="h6 mb-0">Novo pedido {{ i + 1 }}</h3>
+                <button type="button" class="btn btn-outline-danger btn-sm" (click)="removerPedido(i)"
+                  title="Remover pedido">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+              <div class="row g-3 align-items-center">
+                <div class="col-md-4">
+                  <label class="form-label" [for]="'ano-distribuicao-' + i">Ano</label>
+                  <input class="form-control" type="number" step="1" min="1"
+                    [id]="'ano-distribuicao-' + i" formControlName="ano_distribuicao">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label" [for]="'qtde-sementes-' + i">Sementes recebidas</label>
+                  <input class="form-control" type="number" min="0" step="any"
+                    [id]="'qtde-sementes-' + i" formControlName="qtde_sementes">
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check form-switch mt-4">
+                    <input class="form-check-input" type="checkbox"
+                      [id]="'pedido-atendido-' + i" formControlName="pedido_atendido">
+                    <label class="form-check-label" [for]="'pedido-atendido-' + i">
+                      Trabalhador atendido
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        <button type="button" class="btn btn-primary" (click)="salvarDistribuicoes()"
+          [disabled]="(profile_id !== 1 && profile_id !== 3 && profile_id !== 5) || savingNovosPedidos || novosPedidos.length === 0">
+          <span *ngIf="savingNovosPedidos" class="spinner-border spinner-border-sm me-1" role="status"
+            aria-hidden="true"></span>
+          Salvar novos pedidos
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal -->
 <div class="modal fade" id="modalEdit" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
@@ -346,18 +465,7 @@
               </div>
             </div>
 
-            <div class="form-group col-sm-3 col-12 ">
-              <div class="form-floating">
-                <input type="number" id="sementes_recebidas" name="sementes_recebidas"
-                  placeholder="Sementes Recebidas (Kg)" required formControlName="sementes_recebidas"
-                  class="form-control" />
-                <label class="form-label pergunta" for="sementes_recebidas">Sementes Recebidas (Kg)</label>
-              </div>
-            </div>
-          </div>
-
-          <div class="row mt-4 mb-4">
-            <div class="form-floating col-sm-2 col-12 mb-2">
+            <div class="form-floating col-sm-3 col-12 mb-2">
               <select name="regime_cultivo" id="regime_cultivo" class="form-select text-capitalize"
                 formControlName="regime_cultivo" required>
                 <option value='irrigado'> Irrigado </option>
@@ -366,14 +474,27 @@
               <label class="form-label pergunta ms-3" for="mes">Regime do Cultivo</label>
             </div>
 
-            <div class="col-sm-3 col-12 mt-3">
+            <!-- <div class="form-group col-sm-3 col-12 ">
+              <div class="form-floating">
+                <input type="number" id="sementes_recebidas" name="sementes_recebidas"
+                  placeholder="Sementes Recebidas (Kg)" required formControlName="sementes_recebidas"
+                  class="form-control" />
+                <label class="form-label pergunta" for="sementes_recebidas">Sementes Recebidas (Kg)</label>
+              </div>
+            </div> -->
+          </div>
+
+          <div class="row mt-4 mb-4">
+
+
+            <div class="col-sm-4 col-12 mt-3">
               <div class="form-check form-switch">
                 <label class="form-check-label" for="tem_cadastro_adagri">Tem cadastro na ADAGRI?</label>
                 <input type="checkbox" class="form-check-input" formControlName="tem_cadastro_adagri">
               </div>
             </div>
 
-            <div class="form-group col-sm-2 col-12 ">
+            <div class="form-group col-sm-4 col-12">
               <div class="form-floating">
                 <input type="text" id="cadastro_adagri" name="cadastro_adagri" placeholder="Cadastro da ADAGRI" required
                   formControlName="cadastro_adagri" class="form-control" />
@@ -381,14 +502,14 @@
               </div>
             </div>
 
-            <div class="col-sm-3 col-12 mt-3">
+            <!-- <div class="col-sm-3 col-12 mt-3">
               <div class="form-check form-switch">
                 <label class="form-check-label" for="pedido_atendido">O Agricultor foi atendido?</label>
                 <input type="checkbox" class="form-check-input" formControlName="pedido_atendido">
               </div>
-            </div>
+            </div> -->
 
-            <div class="col-sm-2 col-12 mt-3">
+            <div class="col-sm-4 col-12 mt-3">
               <div class="form-check form-switch">
                 <label class="form-check-label" for="uso_dados">Uso de dados?</label>
                 <input type="checkbox" class="form-check-input" formControlName="uso_dados">

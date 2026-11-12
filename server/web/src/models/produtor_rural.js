@@ -14,10 +14,10 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       produtor_rural.belongsTo(models.cidades, { foreignKey: 'cidade', as: 'ass_produtor_rural_cidade' })
       produtor_rural.hasMany(models.anexo, { foreignKey: 'agricultor_id', as: 'ass_agricultor_anexo' });
+      produtor_rural.hasMany(models.distribuicao_sementes, { foreignKey: 'agricultor_id', as: 'ass_agricultor_distribuicao_sementes' });
     }
   }
-  produtor_rural.init({
-    pedido: DataTypes.STRING,
+  produtor_rural.init({    
     nome: DataTypes.STRING,
     telefone: DataTypes.STRING,
     cpf_cnpj: DataTypes.STRING,
@@ -26,9 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     nome_propriedade: DataTypes.STRING,
     ponto_referencia: DataTypes.STRING,
     area_total: DataTypes.DOUBLE,
-    area_algodao: DataTypes.DOUBLE,
-    pedido_atendido: DataTypes.BOOLEAN,
-    sementes_recebidas: DataTypes.DOUBLE,
+    area_algodao: DataTypes.DOUBLE,    
     regime_cultivo: DataTypes.STRING,
     cadastro_adagri: DataTypes.STRING,
     confirma_informacao: DataTypes.BOOLEAN,

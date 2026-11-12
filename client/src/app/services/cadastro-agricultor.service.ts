@@ -62,6 +62,20 @@ export class CadastroAgricultorService {
       );
   }
 
+  adicionarDistribuicoes(id: number, distribuicoes: any[]) {
+    return this.http.post<any>(
+      environment.apiUrl + 'adicionaDistribuicoes/' + id,
+      { distribuicoes },
+    );
+  }
+
+  atualizarAtendimentos(id: number, distribuicoes: any[]) {
+    return this.http.patch<any>(
+      environment.apiUrl + 'atualizaAtendimentoDistribuicoes/' + id,
+      { distribuicoes },
+    );
+  }
+
   deleteAgricultor(id: number) {
     return this.http.delete<any>(environment.apiUrl + 'farmer/' + id).pipe(
       map((res: any) => {

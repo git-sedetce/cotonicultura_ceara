@@ -1,29 +1,69 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
 .user-section {
-  margin: 1rem;
+  margin: clamp(0.5rem, 1.5vw, 1.5rem);
+}
+
+.user-section > .container {
+  width: 100%;
 }
 
 .cabecalho {
   background-color: #0d6efd;
   border-radius: 8px;
+  padding-inline: clamp(0.75rem, 2vw, 2rem);
 }
 
 .cabecalho h3 {
   font-family: 'Kanit', 'Arial', sans-serif;
   font-weight: bold;
-  font-size: clamp(1.8rem, 1.2rem + 1vw, 2.6rem);
-  letter-spacing: 0.1em;
+  font-size: clamp(1.25rem, 1rem + 1.3vw, 2.6rem);
+  letter-spacing: clamp(0.02em, 0.1vw, 0.1em);
+  line-height: 1.25;
 }
 
 .table-responsive {
+  max-width: 100%;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive > .table {
+  margin-bottom: 15px;
 }
 
 .table th {
   white-space: nowrap;
 }
 
+.table td {
+  vertical-align: middle;
+}
+
+.user-section > .container > .table-responsive > .table {
+  min-width: 68rem;
+}
+
+.user-section > .container > .table-responsive > .table td:first-child {
+  min-width: 14rem;
+  overflow-wrap: anywhere;
+}
+
+.user-section > .container > .table-responsive > .table td:not(:first-child) {
+  white-space: nowrap;
+}
+
+.user-section > .container > .table-responsive > .table td.text-center {
+  text-align: center;
+}
+
 input.form-control,
 select.form-select {
+  min-width: 0;
   border-radius: 8px;
 }
 
@@ -32,16 +72,16 @@ button.btn-sm {
 }
 
 .empty-card {
+  width: min(100%, 500px);
+  margin: clamp(2rem, 12vh, 10rem) auto;
+  padding: clamp(1.5rem, 6vw, 3.6rem);
   background: #fff;
-  padding: 3.6rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  max-width: 500px;
-  margin: 10rem auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .empty-icon {
-  width: 80px;
+  width: clamp(3.5rem, 8vw, 5rem);
   height: auto;
   margin-bottom: 1rem;
   opacity: 0.7;
@@ -55,30 +95,185 @@ button.btn-sm {
 
 .empty-state p {
   color: #666;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 1vw, 1rem);
 }
 
 .btn-form {
-  height: 38px;            /* mesma altura do form-control */
-  padding: 0 1rem;
   display: flex;
+  min-height: 38px;
+  height: auto;
+  padding: 0.45rem 0.75rem;
   align-items: center;
   justify-content: center;
+  font-weight: 500;
   white-space: nowrap;
 }
 
-input[type="date"] {
-  min-width: 140px;
+input[type='date'] {
+  min-width: 0;
 }
 
-.btn-form {
-  height: 38px;
-  font-weight: 500;
+.modal-dialog {
+  max-width: calc(100vw - 2rem);
 }
 
-@media (max-width: 768px) {
+.modal-content {
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+}
+
+.modal-dialog-scrollable .modal-body {
+  min-height: 0;
+  overflow-x: hidden;
+}
+
+.modal-body .table-responsive {
+  margin-inline: -0.25rem;
+}
+
+@media (max-width: 767.98px) {
+  .user-section {
+    margin: 0.5rem;
+  }
+
+  .cabecalho {
+    margin-bottom: 1rem !important;
+    padding-block: 0.85rem !important;
+  }
+
+  .user-section > .container > form.mb-3 .row {
+    row-gap: 0.5rem;
+  }
+
+  .user-section > .container > form.mb-3 .d-flex.gap-2 {
+    flex-wrap: wrap;
+  }
+
+  .user-section > .container > form.mb-3 .d-flex.gap-2 > * {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 0;
+  }
+
+  .user-section > .container > form.mb-3 .btn-group {
+    flex-basis: 100%;
+  }
+
   .btn-form {
-    margin-top: 0.5rem;
+    width: 100%;
+    min-height: 42px;
+    margin-top: 0;
+    white-space: normal;
+  }
+
+  .user-section > .container > .table-responsive > .table {
+    min-width: 64rem;
+  }
+
+  .table-responsive > .table th,
+  .table-responsive > .table td {
+    padding: 0.55rem;
+  }
+
+  .modal-dialog {
+    margin: 0.5rem auto;
+  }
+
+  .modal-content {
+    max-height: calc(100vh - 1rem);
+    max-height: calc(100dvh - 1rem);
+  }
+
+  .modal-header,
+  .modal-footer {
+    padding: 0.75rem;
+  }
+
+  .modal-title {
+    font-size: 1rem !important;
+    overflow-wrap: anywhere;
+  }
+
+  .modal-footer {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .modal-footer > * {
+    margin: 0;
   }
 }
 
+@media (max-width: 575.98px) {
+  .cabecalho h3 {
+    letter-spacing: 0.02em;
+  }
+
+  .user-section > .container > form.mb-3 .d-flex.gap-2 > * {
+    flex-basis: 100%;
+  }
+
+  .user-section > .container > form.mb-3 .btn-group {
+    flex-basis: 100%;
+  }
+
+  .pagination-controls {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .modal-dialog {
+    width: calc(100% - 0.5rem);
+    max-width: none;
+    margin: 0.25rem auto;
+  }
+
+  .modal-content {
+    max-height: calc(100vh - 0.5rem);
+    max-height: calc(100dvh - 0.5rem);
+  }
+
+  .modal-body {
+    padding: 0.75rem;
+  }
+
+  .modal-body .row {
+    --bs-gutter-x: 0.75rem;
+  }
+
+  .modal-body .form-check {
+    margin-top: 0.25rem !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .user-section > .container {
+    max-width: min(94vw, 1680px);
+  }
+}
+
+@media (min-width: 1800px) {
+  .user-section > .container {
+    max-width: min(94vw, 2200px);
+  }
+
+  .user-section > .container > .table-responsive > .table {
+    min-width: 100%;
+    font-size: clamp(1rem, 0.35vw + 0.6rem, 1.25rem);
+  }
+
+  .user-section > .container > form.mb-3 .form-control,
+  .user-section > .container > form.mb-3 .form-select,
+  .btn-form {
+    min-height: 46px;
+    font-size: 1rem;
+  }
+
+  .modal-dialog.modal-xl {
+    max-width: min(90vw, 1800px);
+  }
+
+  .modal-dialog.modal-lg {
+    max-width: min(78vw, 1400px);
+  }
+}
