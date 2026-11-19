@@ -34,7 +34,9 @@ module.exports = (sequelize, DataTypes) => {
     tem_cadastro_adagri: DataTypes.BOOLEAN,
     uso_dados: DataTypes.BOOLEAN,
     etapa: DataTypes.INTEGER,
-    status_farmer: DataTypes.BOOLEAN
+    status_farmer: DataTypes.BOOLEAN,
+    password_trabalhador: DataTypes.STRING,
+    pin_trabalhador: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'produtor_rural',
@@ -53,7 +55,7 @@ module.exports = (sequelize, DataTypes) => {
 };
 
 const CAMPOS_EXCLUIDOS = [
-  'pedido', 'regime_cultivo'
+  'pedido', 'regime_cultivo', 'password_trabalhador', 'pin_trabalhador'
 ];
 
 // 🔹 Função genérica: percorre TODOS os campos STRING

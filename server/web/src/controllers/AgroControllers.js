@@ -1,5 +1,7 @@
 const database = require("../models");
 const { Op, Sequelize, where } = require("sequelize");
+const bcrypt = require("bcryptjs");
+const { randomInt } = require("node:crypto");
 const fs = require("fs");
 const path = require("path");
 
@@ -85,11 +87,26 @@ class AgroControllers {
         return res.status(400).json({ message: "Área de algodão inválida" });
       }
       const { area_algodao, ...dadosProdutor } = dados;
+      const cpfNumerico = String(dadosProdutor.cpf_cnpj ?? "").replace(/\D/g, "");
+      if (!cpfNumerico) {
+        return res.status(400).json({ message: "CPF/CNPJ inválido" });
+      }
+
+      const pin = String(randomInt(0, 1_000_000)).padStart(6, "0");
+      const [passwordHash, pinHash] = await Promise.all([
+        bcrypt.hash(cpfNumerico, 10),
+        bcrypt.hash(pin, 10),
+      ]);
 
       t = await database.sequelize.transaction();
 
       const novoProdutor = await database.produtor_rural.create(
-        { ...dadosProdutor, etapa: 2 },
+        {
+          ...dadosProdutor,
+          password_trabalhador: passwordHash,
+          pin_trabalhador: pinHash,
+          etapa: 2,
+        },
         { transaction: t },
       );
 
@@ -134,7 +151,10 @@ class AgroControllers {
 
       await t.commit();
 
-      return res.status(200).json(novoProdutor);
+      const produtorCriado = novoProdutor.toJSON();
+      delete produtorCriado.password_trabalhador;
+      delete produtorCriado.pin_trabalhador;
+      return res.status(200).json(produtorCriado);
     } catch (error) {
       if (t && !t.finished) {
         await t.rollback();
