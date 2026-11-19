@@ -26,7 +26,6 @@ module.exports = (sequelize, DataTypes) => {
     nome_propriedade: DataTypes.STRING,
     ponto_referencia: DataTypes.STRING,
     area_total: DataTypes.DOUBLE,
-    area_algodao: DataTypes.DOUBLE,    
     regime_cultivo: DataTypes.STRING,
     cadastro_adagri: DataTypes.STRING,
     confirma_informacao: DataTypes.BOOLEAN,

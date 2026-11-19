@@ -256,7 +256,8 @@
               <tr>
                 <th>Número do pedido</th>
                 <th>Ano</th>
-                <th>Sementes recebidas</th>
+                <th>Sementes calculadas (kg)</th>
+                <th>Área de algodão (ha)</th>
                 <th>Atendido?</th>
               </tr>
             </thead>
@@ -265,13 +266,24 @@
                 [formGroupName]="i">
                 <td>{{ distribuicao.pedido }}</td>
                 <td>{{ distribuicao.ano_distribuicao }}</td>
-                <td>{{ distribuicao.qtde_sementes }}</td>
+                <td>
+                  {{
+                    (distribuicao.pedido_atendido
+                      ? distribuicao.qtde_sementes
+                      : quantidadeSementes(atendimentosExistentes.at(i).getRawValue().area_algodao))
+                      | number:'1.2-2'
+                  }} kg
+                </td>
+                <td>
+                  <input class="form-control form-control-sm" type="number" min="0" step="any"
+                    formControlName="area_algodao" aria-label="Área de algodão (hectares)">
+                </td>
                 <td>
                   <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox"
                       [id]="'atendimento-existente-' + i" formControlName="pedido_atendido">
                     <label class="form-check-label" [for]="'atendimento-existente-' + i">
-                      {{ atendimentosExistentes.at(i).value.pedido_atendido ? 'Sim' : 'Não' }}
+                      {{ atendimentosExistentes.at(i).getRawValue().pedido_atendido ? 'Sim' : 'Não' }}
                     </label>
                   </div>
                 </td>
@@ -294,6 +306,7 @@
             <i class="fa-solid fa-plus me-1"></i>Adicionar pedido
           </button>
         </div>
+        <p class="form-text">A quantidade é calculada automaticamente: 10,2 kg por hectare.</p>
 
         <form [formGroup]="formDistribuicoes">
           <div formArrayName="novosPedidos">
@@ -307,17 +320,27 @@
                 </button>
               </div>
               <div class="row g-3 align-items-center">
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <label class="form-label" [for]="'ano-distribuicao-' + i">Ano</label>
                   <input class="form-control" type="number" step="1" min="1"
                     [id]="'ano-distribuicao-' + i" formControlName="ano_distribuicao">
                 </div>
-                <div class="col-md-4">
-                  <label class="form-label" [for]="'qtde-sementes-' + i">Sementes recebidas</label>
-                  <input class="form-control" type="number" min="0" step="any"
-                    [id]="'qtde-sementes-' + i" formControlName="qtde_sementes">
+                <div class="col-md-3">
+                  <label class="form-label">Sementes calculadas (kg)</label>
+                  <div class="form-control bg-light">
+                    {{ quantidadeSementes(pedido.get('area_algodao')?.value) | number:'1.2-2' }}
+                  </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                  <label class="form-label" [for]="'area-algodao-' + i">Área de algodão (ha)</label>
+                  <input class="form-control" type="number" min="0" step="any"
+                    [id]="'area-algodao-' + i" formControlName="area_algodao">
+                  <div class="text-danger small"
+                    *ngIf="pedido.get('area_algodao')?.invalid && pedido.get('area_algodao')?.touched">
+                    Informe uma área válida (zero ou maior).
+                  </div>
+                </div>
+                <div class="col-md-3">
                   <div class="form-check form-switch mt-4">
                     <input class="form-check-input" type="checkbox"
                       [id]="'pedido-atendido-' + i" formControlName="pedido_atendido">
@@ -454,14 +477,6 @@
                 <input type="number" id="area_total" name="area_total" placeholder="Área Total (ha)" required
                   formControlName="area_total" class="form-control" />
                 <label class="form-label pergunta" for="area_total">Área Total (ha)</label>
-              </div>
-            </div>
-
-            <div class="form-group col-sm-3 col-12 ">
-              <div class="form-floating">
-                <input type="number" id="area_algodao" name="area_algodao" placeholder="Área de Algodão (ha)" required
-                  formControlName="area_algodao" class="form-control" />
-                <label class="form-label pergunta" for="area_algodao">Área de Algodão (ha)</label>
               </div>
             </div>
 

@@ -144,7 +144,7 @@
                   <i *ngIf="!farmer.pedido_atendido" class="bi bi-x-circle-fill text-danger fs-5"></i>
                 </td>
                 <td class="text-center">{{ farmer.nome_propriedade }}</td>
-                <td class="text-center">{{ farmer.area_algodao }}</td>
+                <td class="text-center">{{ areasAlgodao(farmer) }}</td>
                 <td class="text-center">{{ farmer.regime_cultivo }}</td>
                 <td class="text-center">
                   {{ farmer.pedido_atendido ? farmer.sementes_recebidas : 'Ainda não recebidas' }}

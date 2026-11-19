@@ -3,43 +3,98 @@ const { Op, Sequelize, where } = require("sequelize");
 const fs = require("fs");
 const path = require("path");
 
+function calcularQuantidadeSementes(areaAlgodao) {
+  return Number((areaAlgodao * 10.2).toFixed(2));
+}
+
+async function criarDistribuicaoInicial(agricultorId, areaAlgodao, transaction) {
+  const ano = new Date().getFullYear();
+  const distribuicao = await database.distribuicao_sementes.create(
+    {
+      agricultor_id: agricultorId,
+      ano_distribuicao: ano,
+      qtde_sementes: calcularQuantidadeSementes(areaAlgodao),
+      pedido_atendido: false,
+      area_algodao: areaAlgodao,
+    },
+    { transaction },
+  );
+
+  await distribuicao.update(
+    {
+      pedido: `PED-${String(distribuicao.id).padStart(6, "0")}-${ano}`,
+    },
+    { transaction },
+  );
+}
+
 class AgroControllers {
   static async registerAgro(req, res) {
-    const newRegister = { ...req.body, etapa: 2 };
-    // console.log('newRegister', newRegister);
-    try {
-      const novoProdutor = await database.produtor_rural.create(newRegister);
-      // const numeroPedido = `PED-${String(novoProdutor.id).padStart(6, "0")}`;
+    const { area_algodao, ...dadosProdutor } = req.body;
+    const areaAlgodao = Number(area_algodao);
+    if (
+      area_algodao === undefined ||
+      area_algodao === null ||
+      area_algodao === "" ||
+      !Number.isFinite(areaAlgodao) ||
+      areaAlgodao < 0 ||
+      areaAlgodao > Number(dadosProdutor.area_total)
+    ) {
+      return res.status(400).json({ message: "Área de algodão inválida" });
+    }
 
-      // await novoProdutor.update({ pedido: numeroPedido });
-      ("");
+    let transaction;
+    try {
+      transaction = await database.sequelize.transaction();
+      const novoProdutor = await database.produtor_rural.create(
+        { ...dadosProdutor, etapa: 2 },
+        { transaction },
+      );
+
+      await criarDistribuicaoInicial(novoProdutor.id, areaAlgodao, transaction);
+
+      await transaction.commit();
       return res.status(200).json(novoProdutor);
     } catch (error) {
+      if (transaction && !transaction.finished) {
+        await transaction.rollback();
+      }
       return res.status(500).json(error.message);
     }
   }
 
   static async registerAgroCompleto(req, res) {
-    const t = await database.sequelize.transaction();
+    if (!req.files?.cpf || !req.files?.residencia) {
+      return res.status(400).json({
+        message: "CPF/CNPJ e comprovante de residência são obrigatórios",
+      });
+    }
 
+    let t;
     try {
-      // ===== 1. VALIDAR ARQUIVOS =====
-      if (!req.files?.cpf || !req.files?.residencia) {
-        return res.status(400).json({
-          message: "CPF/CNPJ e comprovante de residência são obrigatórios",
-        });
-      }
-
-      // ===== 2. DADOS =====
       const dados = JSON.parse(req.body.dados);
+      const areaAlgodao = Number(dados.area_algodao);
+      if (
+        dados.area_algodao === undefined ||
+        dados.area_algodao === null ||
+        dados.area_algodao === "" ||
+        !Number.isFinite(areaAlgodao) ||
+        areaAlgodao < 0 ||
+        areaAlgodao > Number(dados.area_total)
+      ) {
+        return res.status(400).json({ message: "Área de algodão inválida" });
+      }
+      const { area_algodao, ...dadosProdutor } = dados;
 
-      // ===== 3. CRIAR AGRICULTOR =====
+      t = await database.sequelize.transaction();
+
       const novoProdutor = await database.produtor_rural.create(
-        { ...dados, etapa: 2 },
+        { ...dadosProdutor, etapa: 2 },
         { transaction: t },
       );
 
-      // ===== 4. PROCESSAR ARQUIVOS =====
+      await criarDistribuicaoInicial(novoProdutor.id, areaAlgodao, t);
+
       const arquivos = [
         {
           file: req.files.cpf[0],
@@ -77,12 +132,13 @@ class AgroControllers {
         );
       }
 
-      // ===== 5. COMMIT =====
       await t.commit();
 
       return res.status(200).json(novoProdutor);
     } catch (error) {
-      await t.rollback();
+      if (t && !t.finished) {
+        await t.rollback();
+      }
       return res.status(500).json({ message: error.message });
     }
   }
@@ -197,7 +253,6 @@ class AgroControllers {
           "nome_propriedade",
           "ponto_referencia",
           "area_total",
-          "area_algodao",
           "regime_cultivo",
           "cadastro_adagri",
           "confirma_informacao",
@@ -226,7 +281,7 @@ class AgroControllers {
           },
           {
             association: "ass_agricultor_distribuicao_sementes",
-            attributes: ["id", "pedido", "qtde_sementes", "ano_distribuicao", "pedido_atendido"],
+            attributes: ["id", "pedido", "qtde_sementes", "ano_distribuicao", "pedido_atendido", "area_algodao"],
           },
         ],
       });
@@ -254,8 +309,6 @@ class AgroControllers {
           "nome_propriedade",
           "ponto_referencia",
           "area_total",
-          "area_algodao",
-          "sementes_recebidas",
           "regime_cultivo",
           "cadastro_adagri",
           "confirma_informacao",
@@ -276,7 +329,7 @@ class AgroControllers {
           },
           {
             association: "ass_agricultor_distribuicao_sementes",
-            attributes: ["pedido", "qtde_sementes", "ano_distribuicao", "pedido_atendido"],
+            attributes: ["pedido", "qtde_sementes", "ano_distribuicao", "pedido_atendido", "area_algodao"],
           },
         ],
       });
@@ -309,8 +362,6 @@ class AgroControllers {
           "cpf_cnpj",
           "cidade",
           "nome_propriedade",
-          "area_algodao",
-          "sementes_recebidas",
           "regime_cultivo",
         ],
         include: [
@@ -324,7 +375,7 @@ class AgroControllers {
           },
           {
             association: "ass_agricultor_distribuicao_sementes",
-            attributes: ["pedido", "qtde_sementes", "ano_distribuicao", "pedido_atendido"],
+            attributes: ["pedido", "qtde_sementes", "ano_distribuicao", "pedido_atendido", "area_algodao"],
           },
         ],
       });
@@ -348,8 +399,6 @@ class AgroControllers {
           "cpf_cnpj",
           "cidade",
           "nome_propriedade",
-          "area_algodao",
-          "sementes_recebidas",
           "regime_cultivo",
         ],
         include: [
@@ -365,7 +414,7 @@ class AgroControllers {
           },
           {
             association: "ass_agricultor_distribuicao_sementes",
-            attributes: ["pedido", "qtde_sementes", "ano_distribuicao", "pedido_atendido"],
+            attributes: ["pedido", "qtde_sementes", "ano_distribuicao", "pedido_atendido", "area_algodao"],
           },
         ],
       });
@@ -400,10 +449,8 @@ class AgroControllers {
 
   static async atualizaFarmer(req, res) {
     const { id } = req.params;
-    const produtor = req.body;
-    // console.log('user', user)
     try {
-      await database.produtor_rural.update(produtor, {
+      await database.produtor_rural.update(req.body, {
         where: { id: Number(id) },
       });
       const updateFarmer = await database.produtor_rural.findOne({
@@ -439,19 +486,19 @@ class AgroControllers {
 
     const dadosValidos = distribuicoes.every((distribuicao) => {
       const ano = Number(distribuicao.ano_distribuicao);
-      const quantidade = Number(distribuicao.qtde_sementes);
+      const areaAlgodao = Number(distribuicao.area_algodao);
 
       return (
         distribuicao.ano_distribuicao !== null &&
         distribuicao.ano_distribuicao !== undefined &&
         distribuicao.ano_distribuicao !== "" &&
-        distribuicao.qtde_sementes !== null &&
-        distribuicao.qtde_sementes !== undefined &&
-        distribuicao.qtde_sementes !== "" &&
         Number.isInteger(ano) &&
         ano > 0 &&
-        Number.isFinite(quantidade) &&
-        quantidade >= 0 &&
+        distribuicao.area_algodao !== undefined &&
+        distribuicao.area_algodao !== null &&
+        distribuicao.area_algodao !== "" &&
+        Number.isFinite(areaAlgodao) &&
+        areaAlgodao >= 0 &&
         typeof distribuicao.pedido_atendido === "boolean"
       );
     });
@@ -476,8 +523,11 @@ class AgroControllers {
       const novosRegistros = distribuicoes.map((distribuicao) => ({
         agricultor_id: agricultorId,
         ano_distribuicao: Number(distribuicao.ano_distribuicao),
-        qtde_sementes: Number(distribuicao.qtde_sementes),
+        qtde_sementes: calcularQuantidadeSementes(
+          Number(distribuicao.area_algodao),
+        ),
         pedido_atendido: distribuicao.pedido_atendido,
+        area_algodao: Number(distribuicao.area_algodao),
       }));
       const anoAtual = new Date().getFullYear();
 
@@ -530,7 +580,12 @@ class AgroControllers {
         !Array.isArray(distribuicao) &&
         Number.isInteger(Number(distribuicao.id)) &&
         Number(distribuicao.id) > 0 &&
-        typeof distribuicao.pedido_atendido === "boolean",
+        typeof distribuicao.pedido_atendido === "boolean" &&
+        distribuicao.area_algodao !== undefined &&
+        distribuicao.area_algodao !== null &&
+        distribuicao.area_algodao !== "" &&
+        Number.isFinite(Number(distribuicao.area_algodao)) &&
+        Number(distribuicao.area_algodao) >= 0,
     );
     const ids = distribuicoes.map((distribuicao) => Number(distribuicao?.id));
 
@@ -547,6 +602,7 @@ class AgroControllers {
           agricultor_id: agricultorId,
           id: ids,
         },
+        lock: transaction.LOCK.UPDATE,
         transaction,
       });
 
@@ -557,16 +613,29 @@ class AgroControllers {
         });
       }
 
+      if (registros.some((registro) => registro.pedido_atendido)) {
+        await transaction.rollback();
+        return res.status(409).json({
+          message: "Distribuições atendidas não podem mais ser editadas",
+        });
+      }
+
       const atendimentos = new Map(
         distribuicoes.map((distribuicao) => [
           Number(distribuicao.id),
-          distribuicao.pedido_atendido,
+          distribuicao,
         ]),
       );
 
       for (const registro of registros) {
+        const distribuicao = atendimentos.get(registro.id);
+        const areaAlgodao = Number(distribuicao.area_algodao);
         await registro.update(
-          { pedido_atendido: atendimentos.get(registro.id) },
+          {
+            pedido_atendido: distribuicao.pedido_atendido,
+            area_algodao: areaAlgodao,
+            qtde_sementes: calcularQuantidadeSementes(areaAlgodao),
+          },
           { transaction },
         );
       }

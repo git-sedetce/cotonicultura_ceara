@@ -100,7 +100,6 @@ export class ListFarmersComponent implements OnInit {
       nome_propriedade: [''],
       ponto_referencia: [''],
       area_total: [''],
-      area_algodao: [''],
       pedido_atendido: [''],
       sementes_recebidas: [''],
       regime_cultivo: [''],
@@ -322,6 +321,15 @@ export class ListFarmersComponent implements OnInit {
     this.page = 1;
   }
 
+  areasAlgodao(farmer: any): string {
+    return (farmer.ass_agricultor_distribuicao_sementes ?? [])
+      .map(
+        (distribuicao: any) =>
+          `${distribuicao.ano_distribuicao ?? 'Sem ano'}: ${distribuicao.area_algodao ?? 0}`,
+      )
+      .join('; ');
+  }
+
   exportarPlanilha(tipo: 'todos' | 'filtrados'): void {
     const dados = tipo === 'todos' ? this.lista_farmers : this.lista_filtrada;
 
@@ -343,7 +351,7 @@ export class ListFarmersComponent implements OnInit {
       Nome_Propriedade: farmer.nome_propriedade,
       Ponto_Referência: farmer.ponto_referencia,
       Area_Total: farmer.area_total,
-      Area_Algodão: farmer.area_algodao,
+      Areas_Algodão: this.areasAlgodao(farmer),
       'Pedido Atendido': farmer.pedido_atendido ? 'Sim' : 'Não',
       Sementes_Recebidas: farmer.sementes_recebidas,
       Regime_Cultivo: farmer.regime_cultivo,
@@ -401,19 +409,36 @@ export class ListFarmersComponent implements OnInit {
     this.novosPedidos.clear();
 
     for (const distribuicao of this.distribuicoesExistentes) {
+      const atendida = distribuicao.pedido_atendido === true;
       this.atendimentosExistentes.push(
         this.formBuilder.group({
           id: [distribuicao.id],
-          pedido_atendido: [distribuicao.pedido_atendido === true],
+          pedido_atendido: [{ value: atendida, disabled: atendida }],
+          area_algodao: [
+            { value: distribuicao.area_algodao, disabled: atendida },
+            [Validators.required, Validators.min(0)],
+          ],
         }),
       );
     }
   }
 
+  quantidadeSementes(areaAlgodao: unknown): number {
+    const area = Number(areaAlgodao);
+    return Number.isFinite(area) && area >= 0
+      ? Number((area * 10.2).toFixed(2))
+      : 0;
+  }
+
   atendimentoAlterado(index: number): boolean {
+    const original = this.distribuicoesExistentes[index];
+    if (original.pedido_atendido === true) {
+      return false;
+    }
+    const atual = this.atendimentosExistentes.at(index).getRawValue();
     return (
-      this.atendimentosExistentes.at(index).value.pedido_atendido !==
-      (this.distribuicoesExistentes[index].pedido_atendido === true)
+      atual.pedido_atendido !== (original.pedido_atendido === true) ||
+      Number(atual.area_algodao) !== Number(original.area_algodao)
     );
   }
 
@@ -429,6 +454,10 @@ export class ListFarmersComponent implements OnInit {
       this.savingAtendimento ||
       !this.existeAtendimentoAlterado
     ) {
+      return;
+    }
+    if (this.atendimentosExistentes.invalid) {
+      this.atendimentosExistentes.markAllAsTouched();
       return;
     }
 
@@ -448,20 +477,38 @@ export class ListFarmersComponent implements OnInit {
             'Atualização da situação de atendimento de sementes',
           );
           const atendimentosSalvos = new Map(
-            distribuicoes.map((distribuicao: any) => [
-              distribuicao.id,
-              distribuicao.pedido_atendido,
-            ]),
+            distribuicoes.map((distribuicao: any) => [distribuicao.id, distribuicao]),
           );
           this.distribuicoesExistentes = this.distribuicoesExistentes.map(
             (distribuicao, index) => {
-              const pedidoAtendido = atendimentosSalvos.get(distribuicao.id);
-              if (pedidoAtendido !== undefined) {
+              const atualizado = atendimentosSalvos.get(distribuicao.id);
+              if (atualizado !== undefined) {
                 this.atendimentosExistentes
                   .at(index)
                   .get('pedido_atendido')
-                  ?.setValue(pedidoAtendido);
-                return { ...distribuicao, pedido_atendido: pedidoAtendido };
+                  ?.setValue(atualizado.pedido_atendido);
+                this.atendimentosExistentes
+                  .at(index)
+                  .get('area_algodao')
+                  ?.setValue(atualizado.area_algodao);
+                if (atualizado.pedido_atendido) {
+                  this.atendimentosExistentes
+                    .at(index)
+                    .get('pedido_atendido')
+                    ?.disable({ emitEvent: false });
+                  this.atendimentosExistentes
+                    .at(index)
+                    .get('area_algodao')
+                    ?.disable({ emitEvent: false });
+                }
+                return {
+                  ...distribuicao,
+                  pedido_atendido: atualizado.pedido_atendido,
+                  area_algodao: atualizado.area_algodao,
+                  qtde_sementes: this.quantidadeSementes(
+                    atualizado.area_algodao,
+                  ),
+                };
               }
               return distribuicao;
             },
@@ -485,10 +532,7 @@ export class ListFarmersComponent implements OnInit {
           new Date().getFullYear(),
           [Validators.required, Validators.pattern(/^\d+$/), Validators.min(1)],
         ],
-        qtde_sementes: [
-          null,
-          [Validators.required, Validators.min(0)],
-        ],
+        area_algodao: [null, [Validators.required, Validators.min(0)]],
         pedido_atendido: [false],
       }),
     );
@@ -564,7 +608,6 @@ export class ListFarmersComponent implements OnInit {
       farmer.ponto_referencia,
     );
     this.formFarmer.controls['area_total'].setValue(farmer.area_total);
-    this.formFarmer.controls['area_algodao'].setValue(farmer.area_algodao);
     this.formFarmer.controls['regime_cultivo'].setValue(farmer.regime_cultivo);
     this.formFarmer.controls['cadastro_adagri'].setValue(
       farmer.cadastro_adagri,
@@ -596,7 +639,6 @@ export class ListFarmersComponent implements OnInit {
     this.farmerObj.nome_propriedade = this.formFarmer.value.nome_propriedade;
     this.farmerObj.ponto_referencia = this.formFarmer.value.ponto_referencia;
     this.farmerObj.area_total = this.formFarmer.value.area_total;
-    this.farmerObj.area_algodao = this.formFarmer.value.area_algodao;
     this.farmerObj.regime_cultivo = this.formFarmer.value.regime_cultivo;
     this.farmerObj.cadastro_adagri = this.formFarmer.value.cadastro_adagri;
     this.farmerObj.confirma_informacao =

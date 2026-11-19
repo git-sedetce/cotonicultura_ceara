@@ -76,7 +76,6 @@ export class ListFarmesDropoutsComponent implements OnInit {
       nome_propriedade: [''],
       ponto_referencia: [''],
       area_total: [''],
-      area_algodao: [''],
       pedido_atendido: [''],
       sementes_recebidas: [''],
       regime_cultivo: [''],
@@ -283,6 +282,15 @@ export class ListFarmesDropoutsComponent implements OnInit {
     this.page = 1;
   }
 
+  areasAlgodao(farmer: any): string {
+    return (farmer.ass_agricultor_distribuicao_sementes ?? [])
+      .map(
+        (distribuicao: any) =>
+          `${distribuicao.ano_distribuicao ?? 'Sem ano'}: ${distribuicao.area_algodao ?? 0}`,
+      )
+      .join('; ');
+  }
+
   exportarPlanilha(tipo: 'todos' | 'filtrados'): void {
     const dados = tipo === 'todos' ? this.lista_farmers : this.lista_filtrada;
 
@@ -304,7 +312,7 @@ export class ListFarmesDropoutsComponent implements OnInit {
       Nome_Propriedade: farmer.nome_propriedade,
       Ponto_Referência: farmer.ponto_referencia,
       Area_Total: farmer.area_total,
-      Area_Algodão: farmer.area_algodao,
+      Areas_Algodão: this.areasAlgodao(farmer),
       'Pedido Atendido': farmer.pedido_atendido ? 'Sim' : 'Não',
       Sementes_Recebidas: farmer.sementes_recebidas,
       Regime_Cultivo: farmer.regime_cultivo,

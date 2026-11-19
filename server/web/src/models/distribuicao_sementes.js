@@ -17,7 +17,8 @@ module.exports = (sequelize, DataTypes) => {
     pedido: DataTypes.STRING,
     qtde_sementes: DataTypes.DOUBLE,
     pedido_atendido: DataTypes.BOOLEAN,
-    ano_distribuicao: DataTypes.INTEGER
+    ano_distribuicao: DataTypes.INTEGER,
+    area_algodao: DataTypes.DOUBLE,
   }, {
     sequelize,
     modelName: 'distribuicao_sementes',

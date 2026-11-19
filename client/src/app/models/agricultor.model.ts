@@ -11,7 +11,6 @@ export class Agricultor {
     public cidade?: number,
     public nome_propriedade?: string,
     public area_total: number = 0,
-    public area_algodao: number = 0,
     public pedido_atendido: boolean = false,
     public sementes_recebidas?: number,
     public regime_cultivo?: string,

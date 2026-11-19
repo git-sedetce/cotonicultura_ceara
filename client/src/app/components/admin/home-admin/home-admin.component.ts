@@ -70,6 +70,15 @@ export class HomeAdminComponent implements OnInit {
       });
   }
 
+  areasAlgodao(farmer: any): string {
+    return (farmer.ass_agricultor_distribuicao_sementes ?? [])
+      .map(
+        (distribuicao: any) =>
+          `${distribuicao.ano_distribuicao ?? 'Sem ano'}: ${distribuicao.area_algodao ?? 0}`,
+      )
+      .join('; ');
+  }
+
   statusDocumentos(farmer: any): string {
     const anexos = farmer.ass_agricultor_anexo || [];
 

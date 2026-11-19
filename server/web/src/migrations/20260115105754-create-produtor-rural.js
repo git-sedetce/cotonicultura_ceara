@@ -45,10 +45,6 @@ module.exports = {
         type: Sequelize.DOUBLE,
         allowNull: false,
       },
-      area_algodao: {
-        type: Sequelize.DOUBLE,
-        allowNull: false,
-      },
       regime_cultivo: {
         type: Sequelize.STRING,
         allowNull: false,
