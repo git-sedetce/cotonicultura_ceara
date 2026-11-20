@@ -23,18 +23,8 @@ export class LoginComponent implements OnInit {
     this.loginUsers = new LoginUser()
   }
 
-  verificaEmail(email: any){
-    email = this.loginUsers.user_email?.split("@")
-    //console.log('verificaEmail', email)
-    if(email[1] != 'sde.ce.gov.br'){
-      this.toastr.warning('Somente emaili @SDE!')
-      this.formLogin.reset()
-    }
-  }
-
   login(): void {
     this.loginUsers.user_password = this.serviceUser.CriptografarMD5(this.loginUsers.user_password)
-    // console.log('loginUser', this.loginUsers)
     this.serviceUser.login(this.loginUsers).subscribe({
       next: (res) => res,
       error: (e) => (this.toastr.error(e.error.message), this.formLogin.reset())

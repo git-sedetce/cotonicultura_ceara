@@ -14,21 +14,32 @@ import { ListFarmesDropoutsComponent } from './components/admin/list-farmes-drop
 import { DuvidasComponent } from './components/duvidas/duvidas.component';
 import { AuditoriaComponent } from './components/admin/auditoria/auditoria.component';
 import { authGuard } from './services/auth/auth.guard';
+import { PerfilProdutorComponent } from './components/cadastro-produtor/perfil-produtor/perfil-produtor.component';
+import { FirstLoginComponent } from './components/first-login/first-login.component';
+import { ResetSenhaProdutorComponent } from './components/reset-senha-produtor/reset-senha-produtor.component';
 
 const routes: Routes = [
 
   { path: 'login', component: LoginComponent },
   { path: 'cadastro', component: RegisterComponent },
+  {
+    path: 'perfil',
+    component: PerfilProdutorComponent,
+    canActivate: [authGuard],
+    data: { userTypes: ['producer'] },
+  },
   { path: 'resetSenha', component: ResetSexhaComponent },
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'cadastroagricultor', component: CadastroProdutorComponent },
+  { path: 'firstlogin', component: FirstLoginComponent },
+  { path: 'resetSenhaProdutor', component: ResetSenhaProdutorComponent },
   { path: 'quemsomos', component: WhoAreComponent },
-  { path: 'listusers', component: ListaUsersComponent },
-  { path: 'listfarmers', component: ListFarmersComponent },
-  { path: 'admin', component: HomeAdminComponent },
-  { path: 'anexo', component: AnexoComponent},
-  { path: 'desistentes', component: ListFarmesDropoutsComponent},
+  { path: 'listusers', component: ListaUsersComponent, canActivate: [authGuard], data: { roles: [1] } },
+  { path: 'listfarmers', component: ListFarmersComponent, canActivate: [authGuard], data: { roles: [1, 2, 3, 4, 5] } },
+  { path: 'admin', component: HomeAdminComponent, canActivate: [authGuard], data: { roles: [1, 2, 3, 4, 5] } },
+  { path: 'anexo', component: AnexoComponent, canActivate: [authGuard], data: { roles: [1, 2, 3, 4, 5] } },
+  { path: 'desistentes', component: ListFarmesDropoutsComponent, canActivate: [authGuard], data: { roles: [1, 2, 3, 4, 5] } },
   {
     path: 'auditoria',
     component: AuditoriaComponent,

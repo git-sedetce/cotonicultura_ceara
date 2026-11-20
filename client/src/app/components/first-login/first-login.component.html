@@ -1,0 +1,39 @@
+<main class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7 col-xl-6">
+      <section class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h1 class="h4 mb-0">Primeiro acesso do produtor rural</h1>
+        </div>
+        <div class="card-body">
+          <p>Informe o CPF, o PIN recebido no e-mail cadastrado e o CPF como senha inicial.</p>
+          <form #formPrimeiroAcesso="ngForm" (ngSubmit)="validarPrimeiroAcesso()">
+            <div class="mb-3">
+              <label for="cpfPrimeiroAcesso" class="form-label">CPF</label>
+              <input id="cpfPrimeiroAcesso" name="cpf" class="form-control"
+                [(ngModel)]="cpf" inputmode="numeric" autocomplete="username"
+                appCpfcnpjMask="cpf" required>
+            </div>
+            <div class="mb-3">
+              <label for="pinPrimeiroAcesso" class="form-label">PIN</label>
+              <input id="pinPrimeiroAcesso" name="pin" type="text" class="form-control"
+                [(ngModel)]="pin" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required>
+            </div>
+            <div class="mb-3">
+              <label for="senhaInicial" class="form-label">Senha inicial (CPF)</label>
+              <input id="senhaInicial" name="senha" type="password" class="form-control"
+                [(ngModel)]="senha" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="btn btn-success w-100"
+              [disabled]="formPrimeiroAcesso.invalid || validando">
+              {{ validando ? 'Validando...' : 'Validar e continuar' }}
+            </button>
+          </form>
+        </div>
+        <div class="card-footer text-center">
+          <a routerLink="/login">Voltar ao login</a>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>

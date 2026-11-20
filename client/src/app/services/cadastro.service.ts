@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, map, Observable, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, tap, throwError } from 'rxjs';
 import { Md5 } from 'ts-md5';
 import { environment } from '../../environments/environment';
 import { jwtDecode } from 'jwt-decode';
@@ -64,12 +64,51 @@ export class CadastroService {
     return this.http.post<any>(environment.apiUrl + 'login', data).pipe(
       tap((response) => {
         localStorage.setItem('access_token', response.token);
-        const decoded = jwtDecode(response.token);
+        const decoded: any = jwtDecode(response.token);
         this.userSubject.next(decoded);
 
-        this.router.navigate(['/admin']);
+        this.router.navigate([decoded._user_type === 'producer' ? '/perfil' : '/admin']);
       })
     );
+  }
+
+  primeiroAcessoProdutor(data: any): Observable<any> {
+    return this.http
+      .post<any>(environment.apiUrl + 'primeiroAcessoProdutor', data)
+      .pipe(
+        tap((response) => {
+          if (this.isBrowser()) {
+            localStorage.removeItem('access_token');
+            sessionStorage.setItem('producer_reset_token', response.resetToken);
+            this.userSubject.next(null);
+          }
+        }),
+      );
+  }
+
+  possuiTokenResetProdutor(): boolean {
+    return (
+      typeof sessionStorage !== 'undefined' &&
+      !!sessionStorage.getItem('producer_reset_token')
+    );
+  }
+
+  resetarSenhaProdutor(senha: string): Observable<any> {
+    if (!this.possuiTokenResetProdutor()) {
+      return throwError(() => new Error('A validação do primeiro acesso expirou.'));
+    }
+
+    return this.http
+      .post<any>(environment.apiUrl + 'resetSenhaProdutor', {
+        reset_token: sessionStorage.getItem('producer_reset_token'),
+        user_password: this.CriptografarMD5(senha),
+      })
+      .pipe(
+        tap(() => {
+          sessionStorage.removeItem('producer_reset_token');
+          this.userSubject.next(null);
+        }),
+      );
   }
 
   logout() {

@@ -14,15 +14,15 @@
         <div class="row">
           <form control="" class="form-group" #formLogin="ngForm">
             <div class="row">
-              <input type="email" name="user_email" id="user_email" class="form__input form-control" #user_email="ngModel" [(ngModel)]="loginUsers.user_email"
-                placeholder="Email do usuário" required>
-              <div *ngIf="!user_email.valid && user_email.touched" class="alert alert-danger" role="alert">Informe o
-                email do usuário</div>
+              <input type="text" name="identifier" id="identifier" class="form__input form-control" #identifier="ngModel" [(ngModel)]="loginUsers.identifier"
+                placeholder="E-mail administrativo ou CPF do produtor" autocomplete="username" required>
+              <div *ngIf="!identifier.valid && identifier.touched" class="alert alert-danger" role="alert">Informe o
+                e-mail ou CPF</div>
             </div>
             <div class="row">
               <!-- <span class="fa fa-lock"></span> -->
               <input type="password" name="user_password" id="user_password" class="form__input form-control"
-                #user_password="ngModel" [(ngModel)]="loginUsers.user_password" placeholder="Password" required>
+                #user_password="ngModel" [(ngModel)]="loginUsers.user_password" placeholder="Senha" autocomplete="current-password" required>
               <div *ngIf="!user_password.valid && user_password.touched" class="alert alert-danger" role="alert">Digite
                 a sua senha</div>
             </div>
@@ -37,6 +37,9 @@
         </div>
         <div class="row">
           <p>Não possui conta? <a routerLink="/cadastro">Registre-se aqui</a></p>
+        </div>
+        <div class="row">
+          <p>Produtor rural? <a routerLink="/firstlogin">Acesse pela primeira vez</a></p>
         </div>
         <div class="row">
           <button type="button" class="btn btn-warning fw-bold text-white" data-bs-toggle="modal"

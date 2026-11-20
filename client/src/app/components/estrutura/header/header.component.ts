@@ -13,6 +13,7 @@ export class HeaderComponent implements OnInit {
   user_name: string = '';
   profile: number = 0;
   sexec_id: number = 0;
+  isProducer = false;
 
   private sub!: Subscription;
 
@@ -40,6 +41,7 @@ export class HeaderComponent implements OnInit {
       this.user_name = '';
       this.profile = 0;
       this.sexec_id = 0;
+      this.isProducer = false;
       return;
     }
 
@@ -47,6 +49,7 @@ export class HeaderComponent implements OnInit {
     this.user_name = user._user_name;
     this.profile = Number(user._profile_id);
     this.sexec_id = Number(user._sexec_id);
+    this.isProducer = user._user_type === 'producer';
   }
 
   logout(){

@@ -1,0 +1,174 @@
+<main class="container py-4" *ngIf="!carregando; else carregamento">
+  <div *ngIf="produtor; else semPerfil">
+    <h1 class="h3 mb-4">Meu cadastro de produtor rural</h1>
+
+    <form #formPerfil="ngForm" (ngSubmit)="salvarPerfil()" class="card shadow-sm mb-4">
+      <div class="card-header bg-success text-white">
+        <h2 class="h5 mb-0">Dados do cadastro</h2>
+      </div>
+      <div class="card-body row g-3">
+        <div class="col-md-6">
+          <label for="nome" class="form-label">Nome</label>
+          <input id="nome" name="nome" class="form-control" [(ngModel)]="produtor.nome" required>
+        </div>
+        <div class="col-md-6">
+          <label for="cpf" class="form-label">CPF</label>
+          <input id="cpf" class="form-control" [value]="produtor.cpf_cnpj" readonly>
+        </div>
+        <div class="col-md-6">
+          <label for="telefone" class="form-label">Telefone</label>
+          <input id="telefone" name="telefone" class="form-control" [(ngModel)]="produtor.telefone">
+        </div>
+        <div class="col-md-6">
+          <label for="email" class="form-label">E-mail</label>
+          <input id="email" name="email_trabalhador" type="email" class="form-control" [(ngModel)]="produtor.email_trabalhador">
+        </div>
+        <div class="col-md-6">
+          <label for="rg" class="form-label">RG</label>
+          <input id="rg" name="rg" class="form-control" [(ngModel)]="produtor.rg">
+        </div>
+        <div class="col-md-6">
+          <label for="cidade" class="form-label">Município</label>
+          <select id="cidade" name="cidade" class="form-select" [(ngModel)]="produtor.cidade">
+            <option *ngFor="let cidade of cidades" [ngValue]="cidade.id">{{ cidade.nome_municipio }}</option>
+          </select>
+        </div>
+        <div class="col-md-8">
+          <label for="endereco" class="form-label">Endereço</label>
+          <input id="endereco" name="endereco" class="form-control" [(ngModel)]="produtor.endereco">
+        </div>
+        <div class="col-md-4">
+          <label for="area_total" class="form-label">Área total (ha)</label>
+          <input id="area_total" name="area_total" type="number" min="0" step="0.01" class="form-control"
+            [(ngModel)]="produtor.area_total">
+        </div>
+        <div class="col-md-6">
+          <label for="propriedade" class="form-label">Nome da propriedade</label>
+          <input id="propriedade" name="nome_propriedade" class="form-control" [(ngModel)]="produtor.nome_propriedade">
+        </div>
+        <div class="col-md-6">
+          <label for="referencia" class="form-label">Ponto de referência</label>
+          <input id="referencia" name="ponto_referencia" class="form-control" [(ngModel)]="produtor.ponto_referencia">
+        </div>
+        <div class="col-md-6">
+          <label for="regime" class="form-label">Regime de cultivo</label>
+          <input id="regime" name="regime_cultivo" class="form-control" [(ngModel)]="produtor.regime_cultivo">
+        </div>
+        <div class="col-md-6">
+          <label for="adagri" class="form-label">Cadastro ADAGRI</label>
+          <input id="adagri" name="cadastro_adagri" class="form-control" [(ngModel)]="produtor.cadastro_adagri">
+        </div>
+      </div>
+      <div class="card-footer text-end">
+        <button type="submit" class="btn btn-success" [disabled]="formPerfil.invalid || salvando">
+          {{ salvando ? 'Salvando...' : 'Salvar alterações' }}
+        </button>
+      </div>
+    </form>
+
+    <section class="card shadow-sm mb-4">
+      <div class="card-header bg-success text-white">
+        <h2 class="h5 mb-0">Documentos enviados</h2>
+      </div>
+      <div class="card-body row g-3">
+        <div class="col-md-6" *ngFor="let documento of documentos">
+          <div class="border rounded p-3 h-100">
+            <h3 class="h6">{{ documento.titulo }}</h3>
+            <p class="small text-muted mb-2">
+              Atual: {{ nomeAnexo(documento.tipo) || 'Nenhum arquivo enviado' }}
+            </p>
+            <p class="small text-muted">PDF, JPG ou PNG; limite de 10 MB.</p>
+            <input type="file" class="form-control mb-2"
+              [id]="'anexo-' + documento.tipo"
+              accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+              (change)="selecionarAnexo(documento.tipo, $event)">
+            <button type="button" class="btn btn-outline-success"
+              [disabled]="!anexosSelecionados[documento.tipo] || enviandoAnexo !== null"
+              (click)="trocarAnexo(documento.tipo)">
+              {{ enviandoAnexo === documento.tipo ? 'Enviando...' : 'Substituir documento' }}
+            </button>
+            <button type="button" class="btn btn-outline-primary ms-2"
+              [disabled]="!nomeAnexo(documento.tipo) || carregandoAnexo !== null"
+              (click)="exibirAnexo(documento.tipo, documento.titulo)">
+              {{ carregandoAnexo === documento.tipo ? 'Carregando...' : 'Exibir anexo' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card shadow-sm mb-4" *ngIf="anexoExibido as anexo">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="h5 mb-0">{{ anexo.titulo }}</h2>
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="fecharAnexo()">
+          Fechar visualização
+        </button>
+      </div>
+      <div class="card-body text-center">
+        <img *ngIf="anexo.mimetype.startsWith('image/')" [src]="anexo.url"
+          [alt]="anexo.titulo" class="img-fluid anexo-imagem">
+        <iframe *ngIf="anexo.mimetype === 'application/pdf' && urlAnexoPdf"
+          [src]="urlAnexoPdf" [title]="anexo.titulo" class="anexo-pdf">
+        </iframe>
+      </div>
+    </section>
+
+    <section class="card shadow-sm mb-4">
+      <div class="card-header bg-success text-white">
+        <h2 class="h5 mb-0">Solicitar sementes de algodão</h2>
+      </div>
+      <form #formPedido="ngForm" (ngSubmit)="solicitarPedido()" class="card-body row g-3 align-items-end">
+        <div class="col-md-6">
+          <label for="areaAlgodao" class="form-label">Área de plantio (ha)</label>
+          <input id="areaAlgodao" name="areaAlgodao" type="number" min="0.01" step="0.01"
+            [max]="produtor.area_total" class="form-control" [(ngModel)]="areaAlgodao" required>
+          <small class="text-muted">Máximo: {{ produtor.area_total }} ha; estimativa: {{ quantidadeSementes() }} kg.</small>
+        </div>
+        <div class="col-md-6">
+          <button type="submit" class="btn btn-primary" [disabled]="formPedido.invalid || solicitando">
+            {{ solicitando ? 'Enviando...' : 'Registrar pedido' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card shadow-sm">
+      <div class="card-header">
+        <h2 class="h5 mb-0">Meus pedidos de sementes</h2>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped mb-0">
+          <thead>
+            <tr>
+              <th>Pedido</th>
+              <th>Ano</th>
+              <th>Área (ha)</th>
+              <th>Sementes (kg)</th>
+              <th>Situação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pedido of produtor.ass_agricultor_distribuicao_sementes">
+              <td>{{ pedido.pedido }}</td>
+              <td>{{ pedido.ano_distribuicao }}</td>
+              <td>{{ pedido.area_algodao }}</td>
+              <td>{{ pedido.qtde_sementes }}</td>
+              <td>{{ pedido.pedido_atendido ? 'Atendido' : 'Aguardando atendimento' }}</td>
+            </tr>
+            <tr *ngIf="!produtor.ass_agricultor_distribuicao_sementes?.length">
+              <td colspan="5" class="text-center">Nenhum pedido registrado.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<ng-template #carregamento>
+  <div class="container py-5 text-center" role="status">Carregando seu cadastro...</div>
+</ng-template>
+
+<ng-template #semPerfil>
+  <div class="alert alert-warning">Não foi possível localizar seu cadastro de produtor.</div>
+</ng-template>

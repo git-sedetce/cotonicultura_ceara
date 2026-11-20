@@ -2,6 +2,9 @@ const database = require("../models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const { Op } = require("sequelize");
+const { createHash } = require("node:crypto");
+const { cpfBusca } = require("../utils/cpfBusca");
 
 class UserController {
   static async cadastraUser(req, res) {
@@ -177,40 +180,192 @@ class UserController {
     const user = req.body;
 
     try {
-      const verificaUser = await database.user.findOne({
-        where: { user_email: user.user_email },
-      });
-      if (!verificaUser) {
-        return res.status(404).send({ message: "Usuário não encontrado!" });
+      const identifier = String(
+        user.identifier ?? user.user_email ?? "",
+      ).trim();
+      if (!identifier || !user.user_password) {
+        return res.status(400).send({ message: "Informe o usuário e a senha" });
       }
-      if (!verificaUser.user_active) {
-        return res
-          .status(400)
-          .send({ message: "Consulte o Administrador do sistema" });
-      }
-      if (
-        !(await bcrypt.compare(user.user_password, verificaUser.user_password))
-      ) {
-        return res.status(400).send({ message: "Crendenciais inválidos!" });
-      }
-      const token = jwt.sign(
-        {
+
+      let payload;
+      if (identifier.includes("@")) {
+        const verificaUser = await database.user.findOne({
+          where: { user_email: identifier },
+        });
+        if (!verificaUser) {
+          return res.status(404).send({ message: "Usuário não encontrado!" });
+        }
+        if (!verificaUser.user_active) {
+          return res
+            .status(400)
+            .send({ message: "Consulte o Administrador do sistema" });
+        }
+        if (
+          !(await bcrypt.compare(user.user_password, verificaUser.user_password))
+        ) {
+          return res.status(400).send({ message: "Credenciais inválidas!" });
+        }
+        payload = {
           _id: verificaUser.id,
           _profile_id: verificaUser.profile_id,
           _user_name: verificaUser.user_name,
-        },
-        process.env.ACCESS_TOKEN,
-        {
-          expiresIn: "8h",
-        },
-      );
+          _user_type: "admin",
+        };
+      } else {
+        const cpfs = cpfBusca(identifier);
+        if (!cpfs) {
+          return res.status(400).send({ message: "Informe um CPF válido" });
+        }
+        const cpf = cpfs[0];
+        const produtor = await database.produtor_rural.findOne({
+          where: { cpf_cnpj: { [Op.in]: cpfs } },
+        });
+        if (!produtor) {
+          return res.status(404).send({ message: "Produtor não encontrado!" });
+        }
+        if (produtor.login_ativado !== true) {
+          return res.status(403).send({
+            message: "Conclua o primeiro acesso para ativar seu cadastro",
+          });
+        }
+
+        const senhaInicial = createHash("md5").update(cpf).digest("hex");
+        const senhaValida =
+          (await bcrypt.compare(
+            user.user_password,
+            produtor.password_trabalhador,
+          )) ||
+          (user.user_password === senhaInicial &&
+            (await bcrypt.compare(cpf, produtor.password_trabalhador)));
+        if (!senhaValida) {
+          return res.status(400).send({ message: "Credenciais inválidas!" });
+        }
+        payload = {
+          _id: produtor.id,
+          _produtor_id: produtor.id,
+          _user_name: produtor.nome,
+          _user_type: "producer",
+        };
+      }
+
+      const token = jwt.sign(payload, process.env.ACCESS_TOKEN, {
+        expiresIn: "8h",
+      });
       return res.json({
         auth: true,
-        token: token,
+        token,
         message: "Usuário logado com sucesso!",
       });
     } catch (error) {
       res.send({ message: "Problemas ao realizar login!" });
+    }
+  }
+
+  static async primeiroAcessoProdutor(req, res) {
+    const cpfs = cpfBusca(req.body?.cpf);
+    const pin = String(req.body?.pin ?? "").trim();
+    const senha = req.body?.user_password;
+    if (!cpfs || !pin || !senha) {
+      return res.status(400).json({ message: "Informe CPF, PIN e senha inicial" });
+    }
+
+    try {
+      const cpf = cpfs[0];
+      const produtor = await database.produtor_rural.findOne({
+        where: { cpf_cnpj: { [Op.in]: cpfs } },
+      });
+      if (!produtor) {
+        return res.status(404).json({ message: "Cadastro de produtor não encontrado" });
+      }
+      if (produtor.login_ativado === true) {
+        return res.status(409).json({
+          message: "O primeiro acesso já foi concluído. Entre pela tela de login.",
+        });
+      }
+
+      const senhaInicial = createHash("md5").update(cpf).digest("hex");
+      const [pinValido, senhaValida] = await Promise.all([
+        produtor.pin_trabalhador
+          ? bcrypt.compare(pin, produtor.pin_trabalhador)
+          : false,
+        produtor.password_trabalhador
+          ? bcrypt.compare(cpf, produtor.password_trabalhador)
+          : false,
+      ]);
+      if (!pinValido || !senhaValida || senha !== senhaInicial) {
+        return res.status(400).json({ message: "CPF, PIN ou senha inicial inválidos" });
+      }
+
+      const resetToken = jwt.sign(
+        {
+          _produtor_id: produtor.id,
+          _user_type: "producer-password-reset",
+        },
+        process.env.ACCESS_TOKEN,
+        { expiresIn: "15m" },
+      );
+      return res.status(200).json({
+        resetToken,
+        message: "Identidade confirmada. Cadastre uma nova senha.",
+      });
+    } catch (error) {
+      console.error("Erro ao validar primeiro acesso do produtor:", error);
+      return res.status(500).json({ message: "Erro ao validar o primeiro acesso" });
+    }
+  }
+
+  static async resetSenhaProdutor(req, res) {
+    let dadosToken;
+    try {
+      dadosToken = jwt.verify(req.body?.reset_token, process.env.ACCESS_TOKEN);
+    } catch {
+      return res.status(401).json({
+        message: "Sessão de primeiro acesso inválida ou expirada. Faça a validação novamente.",
+      });
+    }
+
+    if (
+      dadosToken._user_type !== "producer-password-reset" ||
+      !dadosToken._produtor_id
+    ) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    const senha = String(req.body?.user_password ?? "");
+    if (!/^[a-f0-9]{32}$/i.test(senha)) {
+      return res.status(400).json({ message: "Informe uma nova senha válida" });
+    }
+
+    try {
+      const produtor = await database.produtor_rural.findByPk(
+        dadosToken._produtor_id,
+      );
+      if (!produtor || produtor.login_ativado === true) {
+        return res.status(409).json({
+          message: "O primeiro acesso já foi concluído ou o cadastro não existe",
+        });
+      }
+
+      const cpf = String(produtor.cpf_cnpj ?? "").replace(/\D/g, "");
+      const senhaInicial = createHash("md5").update(cpf).digest("hex");
+      if (senha === senhaInicial) {
+        return res.status(400).json({
+          message: "A nova senha deve ser diferente do CPF",
+        });
+      }
+
+      const passwordHash = await bcrypt.hash(senha, 10);
+      await produtor.update({
+        password_trabalhador: passwordHash,
+        pin_trabalhador: null,
+        login_ativado: true,
+      });
+      return res.status(200).json({
+        message: "Senha redefinida e cadastro ativado com sucesso",
+      });
+    } catch (error) {
+      console.error("Erro ao redefinir senha do produtor:", error);
+      return res.status(500).json({ message: "Erro ao redefinir a senha" });
     }
   }
 

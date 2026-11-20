@@ -15,6 +15,13 @@ export const authGuard: CanActivateFn = (route, state) => {
     return false;
   }
 
+  const userTypes: string[] = route.data['userTypes'] ?? [];
+  if (userTypes.length && !userTypes.includes(user._user_type)) {
+    toastr.warning('Acesso não autorizado!');
+    router.navigate([user._user_type === 'producer' ? '/perfil' : '/home']);
+    return false;
+  }
+
   const rolesPermitidos: number[] = route.data['roles'] ?? [];
 
   if (rolesPermitidos.length && !auth.hasRole(rolesPermitidos)) {

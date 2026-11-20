@@ -35,6 +35,7 @@ module.exports = (sequelize, DataTypes) => {
     uso_dados: DataTypes.BOOLEAN,
     etapa: DataTypes.INTEGER,
     status_farmer: DataTypes.BOOLEAN,
+    login_ativado: { type: DataTypes.BOOLEAN, defaultValue: false },
     password_trabalhador: DataTypes.STRING,
     pin_trabalhador: DataTypes.STRING
   }, {

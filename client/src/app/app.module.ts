@@ -29,6 +29,9 @@ import { ListFarmesDropoutsComponent } from './components/admin/list-farmes-drop
 import { DuvidasComponent } from './components/duvidas/duvidas.component';
 import { CpfcnpjMaskDirective } from './directives/cpf_cnpj/cpfcnpj-mask.directive';
 import { AuditoriaComponent } from './components/admin/auditoria/auditoria.component';
+import { PerfilProdutorComponent } from './components/cadastro-produtor/perfil-produtor/perfil-produtor.component';
+import { FirstLoginComponent } from './components/first-login/first-login.component';
+import { ResetSenhaProdutorComponent } from './components/reset-senha-produtor/reset-senha-produtor.component';
 
 @NgModule({
   declarations: [
@@ -49,7 +52,10 @@ import { AuditoriaComponent } from './components/admin/auditoria/auditoria.compo
     ListFarmesDropoutsComponent,
     DuvidasComponent,
     CpfcnpjMaskDirective,
-    AuditoriaComponent
+    AuditoriaComponent,
+    PerfilProdutorComponent,
+    FirstLoginComponent,
+    ResetSenhaProdutorComponent
   ],
   imports: [
     BrowserModule,

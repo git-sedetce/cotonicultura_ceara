@@ -36,13 +36,19 @@
             </a>
           </li>
 
-          <li class="nav-item" *ngIf="authenticated">
+          <li class="nav-item" *ngIf="authenticated && isProducer">
+            <a routerLink="/perfil" class="nav-link">
+              <i class="fa-solid fa-user me-1"></i> Meu perfil
+            </a>
+          </li>
+
+          <li class="nav-item" *ngIf="authenticated && !isProducer">
             <a routerLink="/listfarmers" class="nav-link">
               <i class="fa-solid fa-seedling me-1"></i> Agricultores
             </a>
           </li>
 
-          <li class="nav-item" *ngIf="authenticated">
+          <li class="nav-item" *ngIf="authenticated && !isProducer">
             <a routerLink="/admin" class="nav-link">
               <i class="fa-solid fa-chart-pie me-1"></i> Admin
             </a>

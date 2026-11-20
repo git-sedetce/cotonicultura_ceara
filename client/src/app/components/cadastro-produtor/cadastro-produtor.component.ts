@@ -106,8 +106,12 @@ export class CadastroProdutorComponent implements OnInit {
     this.http
       .post(environment.apiUrl + 'registerCompleto', formData)
       .subscribe({
-        next: () => {
-          this.toastr.success('Cadastro realizado com sucesso!');
+        next: (res: any) => {
+          if (res.pinEnviado === false) {
+            this.toastr.warning(res.message);
+          } else {
+            this.toastr.success(res.message ?? 'Cadastro realizado com sucesso!');
+          }
           this.formAgricultor.reset();
           this.router.navigate(['/home']);
         },

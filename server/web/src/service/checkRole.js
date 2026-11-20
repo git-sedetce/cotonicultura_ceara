@@ -10,4 +10,11 @@ function checkRole(rolesPermitidos){
     }
 }
 
-module.exports = {checkRole : checkRole}
+function checkProducer(req, res, next) {
+    if (res.locals.user._user_type !== 'producer' || !res.locals.user._produtor_id) {
+        return res.status(403).json({message: "Acesso negado!"});
+    }
+    next();
+}
+
+module.exports = {checkRole : checkRole, checkProducer: checkProducer}

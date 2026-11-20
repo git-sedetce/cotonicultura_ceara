@@ -4,9 +4,21 @@ const bcrypt = require("bcryptjs");
 const { randomInt } = require("node:crypto");
 const fs = require("fs");
 const path = require("path");
+const nodemailer = require("nodemailer");
+const { cpfBusca } = require("../utils/cpfBusca");
 
 function calcularQuantidadeSementes(areaAlgodao) {
   return Number((areaAlgodao * 10.2).toFixed(2));
+}
+
+async function removerArquivoTemporario(caminho) {
+  try {
+    await fs.promises.unlink(caminho);
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      console.error("Erro ao remover arquivo enviado:", error);
+    }
+  }
 }
 
 async function criarDistribuicaoInicial(agricultorId, areaAlgodao, transaction) {
@@ -30,6 +42,40 @@ async function criarDistribuicaoInicial(agricultorId, areaAlgodao, transaction) 
   );
 }
 
+function emailProdutorValido(email) {
+  return typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function enviarPinPrimeiroAcesso(email, pin) {
+  const transporter = nodemailer.createTransport({
+    host: "172.26.2.26",
+    port: 25,
+    secure: false,
+    tls: { rejectUnauthorized: false },
+  });
+  await transporter.sendMail({
+    from: "cotec@sde.ce.gov.br",
+    to: email,
+    subject: "PIN para primeiro acesso - Sistema de Cotonicultura da SDE",
+    html: `
+      <h2>Primeiro acesso</h2>
+      <p>Seu PIN de confirmação é: <strong>${pin}</strong></p>
+      <p>Acesse o sistema e selecione “Primeiro acesso do produtor” para cadastrar sua senha.</p>
+      <a href="https://cotonicultura.sde.ce.gov.br/firstlogin">Validar primeiro acesso</a>
+    `,
+  });
+}
+
+async function notificarPinPrimeiroAcesso(email, pin) {
+  try {
+    await enviarPinPrimeiroAcesso(email, pin);
+    return true;
+  } catch (error) {
+    console.error("Erro ao enviar PIN de primeiro acesso:", error);
+    return false;
+  }
+}
+
 class AgroControllers {
   static async registerAgro(req, res) {
     const { area_algodao, ...dadosProdutor } = req.body;
@@ -44,19 +90,53 @@ class AgroControllers {
     ) {
       return res.status(400).json({ message: "Área de algodão inválida" });
     }
+    if (!emailProdutorValido(dadosProdutor.email_trabalhador)) {
+      return res.status(400).json({
+        message: "Informe um e-mail válido para receber o PIN de primeiro acesso",
+      });
+    }
+    const cpfs = cpfBusca(dadosProdutor.cpf_cnpj);
+    if (!cpfs) {
+      return res.status(400).json({ message: "Informe um CPF válido" });
+    }
+    const cpfNumerico = cpfs[0];
+    const pin = String(randomInt(0, 1_000_000)).padStart(6, "0");
+    const [passwordHash, pinHash] = await Promise.all([
+      bcrypt.hash(cpfNumerico, 10),
+      bcrypt.hash(pin, 10),
+    ]);
 
     let transaction;
     try {
       transaction = await database.sequelize.transaction();
       const novoProdutor = await database.produtor_rural.create(
-        { ...dadosProdutor, etapa: 2 },
+        {
+          ...dadosProdutor,
+          password_trabalhador: passwordHash,
+          pin_trabalhador: pinHash,
+          login_ativado: false,
+          etapa: 2,
+        },
         { transaction },
       );
 
       await criarDistribuicaoInicial(novoProdutor.id, areaAlgodao, transaction);
 
       await transaction.commit();
-      return res.status(200).json(novoProdutor);
+      const pinEnviado = await notificarPinPrimeiroAcesso(
+        dadosProdutor.email_trabalhador,
+        pin,
+      );
+      const produtorCriado = novoProdutor.toJSON();
+      delete produtorCriado.password_trabalhador;
+      delete produtorCriado.pin_trabalhador;
+      return res.status(201).json({
+        ...produtorCriado,
+        pinEnviado,
+        message: pinEnviado
+          ? "Cadastro realizado. Consulte o e-mail informado para obter o PIN."
+          : "Cadastro salvo, mas não foi possível enviar o PIN. Procure o suporte.",
+      });
     } catch (error) {
       if (transaction && !transaction.finished) {
         await transaction.rollback();
@@ -87,11 +167,17 @@ class AgroControllers {
         return res.status(400).json({ message: "Área de algodão inválida" });
       }
       const { area_algodao, ...dadosProdutor } = dados;
-      const cpfNumerico = String(dadosProdutor.cpf_cnpj ?? "").replace(/\D/g, "");
-      if (!cpfNumerico) {
-        return res.status(400).json({ message: "CPF/CNPJ inválido" });
+      const cpfs = cpfBusca(dadosProdutor.cpf_cnpj);
+      if (!cpfs) {
+        return res.status(400).json({ message: "Informe um CPF válido" });
+      }
+      if (!emailProdutorValido(dadosProdutor.email_trabalhador)) {
+        return res.status(400).json({
+          message: "Informe um e-mail válido para receber o PIN de primeiro acesso",
+        });
       }
 
+      const cpfNumerico = cpfs[0];
       const pin = String(randomInt(0, 1_000_000)).padStart(6, "0");
       const [passwordHash, pinHash] = await Promise.all([
         bcrypt.hash(cpfNumerico, 10),
@@ -105,6 +191,7 @@ class AgroControllers {
           ...dadosProdutor,
           password_trabalhador: passwordHash,
           pin_trabalhador: pinHash,
+          login_ativado: false,
           etapa: 2,
         },
         { transaction: t },
@@ -150,11 +237,21 @@ class AgroControllers {
       }
 
       await t.commit();
+      const pinEnviado = await notificarPinPrimeiroAcesso(
+        dadosProdutor.email_trabalhador,
+        pin,
+      );
 
       const produtorCriado = novoProdutor.toJSON();
       delete produtorCriado.password_trabalhador;
       delete produtorCriado.pin_trabalhador;
-      return res.status(200).json(produtorCriado);
+      return res.status(201).json({
+        ...produtorCriado,
+        pinEnviado,
+        message: pinEnviado
+          ? "Cadastro realizado. Consulte o e-mail informado para obter o PIN."
+          : "Cadastro salvo, mas não foi possível enviar o PIN. Procure o suporte.",
+      });
     } catch (error) {
       if (t && !t.finished) {
         await t.rollback();
@@ -479,6 +576,306 @@ class AgroControllers {
       return res.status(200).json(updateFarmer);
     } catch (error) {
       return res.status(500).json(error.message);
+    }
+  }
+
+  static async pegaPerfilProdutor(req, res) {
+    try {
+      const produtor = await database.produtor_rural.findByPk(
+        res.locals.user._produtor_id,
+        {
+          attributes: [
+            "id", "nome", "telefone", "cpf_cnpj", "rg", "endereco", "cidade",
+            "nome_propriedade", "ponto_referencia", "area_total", "regime_cultivo",
+            "cadastro_adagri", "confirma_informacao", "email_trabalhador",
+            "apelido_trabalhador", "tem_cadastro_adagri", "uso_dados", "createdAt",
+          ],
+          include: [
+            {
+              association: "ass_produtor_rural_cidade",
+              attributes: ["id", "nome_municipio"],
+            },
+            {
+              association: "ass_agricultor_distribuicao_sementes",
+              separate: true,
+              attributes: [
+                "id", "pedido", "qtde_sementes", "ano_distribuicao",
+                "pedido_atendido", "area_algodao",
+              ],
+              order: [["ano_distribuicao", "DESC"]],
+            },
+            {
+              association: "ass_agricultor_anexo",
+              separate: true,
+              attributes: ["id", "tipo_anexo", "mimetype", "filename"],
+              where: {
+                tipo_anexo: {
+                  [Op.in]: [
+                    "comprovante_cpf_cnpj",
+                    "comprovante_residencia",
+                  ],
+                },
+              },
+              order: [["id", "DESC"]],
+            },
+          ],
+        },
+      );
+      if (!produtor) {
+        return res.status(404).json({ message: "Produtor não encontrado" });
+      }
+      return res.status(200).json(produtor);
+    } catch (error) {
+      console.error("Erro ao buscar perfil do produtor:", error);
+      return res.status(500).json({ message: "Erro ao buscar perfil do produtor" });
+    }
+  }
+
+  static async atualizaAnexoProdutor(req, res) {
+    const tiposPermitidos = [
+      "comprovante_cpf_cnpj",
+      "comprovante_residencia",
+    ];
+    const { tipo } = req.params;
+    const arquivo = req.file;
+
+    if (!tiposPermitidos.includes(tipo)) {
+      if (arquivo) await removerArquivoTemporario(arquivo.path);
+      return res.status(400).json({ message: "Tipo de documento inválido" });
+    }
+    if (!arquivo) {
+      return res.status(400).json({ message: "Selecione um arquivo para enviar" });
+    }
+
+    const tiposMimePermitidos = [
+      "application/pdf",
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+    ];
+    if (!tiposMimePermitidos.includes(arquivo.mimetype)) {
+      await removerArquivoTemporario(arquivo.path);
+      return res.status(400).json({
+        message: "Envie um arquivo PDF, JPG, JPEG ou PNG",
+      });
+    }
+
+    try {
+      const produtorId = res.locals.user._produtor_id;
+      const produtor = await database.produtor_rural.findByPk(produtorId);
+      if (!produtor) {
+        await removerArquivoTemporario(arquivo.path);
+        return res.status(404).json({ message: "Produtor não encontrado" });
+      }
+
+      const anexosExistentes = await database.anexo.findAll({
+        where: { agricultor_id: produtorId, tipo_anexo: tipo },
+        order: [["id", "DESC"]],
+      });
+      const anexoExistente = anexosExistentes[0];
+      const caminhoAnterior = anexoExistente?.path;
+      const caminhoRelativo = path.relative(
+        path.resolve(__dirname, ".."),
+        arquivo.path,
+      );
+      const dadosAnexo = {
+        mimetype: arquivo.mimetype,
+        filename: arquivo.filename,
+        path: caminhoRelativo,
+      };
+
+      let anexo;
+      if (anexoExistente) {
+        await anexoExistente.update(dadosAnexo);
+        anexo = anexoExistente;
+      } else {
+        anexo = await database.anexo.create({
+          ...dadosAnexo,
+          tipo_anexo: tipo,
+          agricultor_id: produtorId,
+        });
+      }
+
+      if (caminhoAnterior) {
+        const raizUploads = path.resolve(__dirname, "../uploads/anexos");
+        const caminhoAntigo = path.resolve(
+          path.resolve(__dirname, ".."),
+          String(caminhoAnterior).replace(/^[\\/]+/, ""),
+        );
+        if (caminhoAntigo.startsWith(`${raizUploads}${path.sep}`)) {
+          await removerArquivoTemporario(caminhoAntigo);
+        }
+      }
+
+      return res.status(anexoExistente ? 200 : 201).json({
+        message: "Documento atualizado com sucesso",
+        anexo: {
+          id: anexo.id,
+          tipo_anexo: anexo.tipo_anexo,
+          mimetype: anexo.mimetype,
+          filename: anexo.filename,
+        },
+      });
+    } catch (error) {
+      await removerArquivoTemporario(arquivo.path);
+      console.error("Erro ao atualizar anexo do produtor:", error);
+      return res.status(500).json({ message: "Erro ao atualizar o documento" });
+    }
+  }
+
+  static async pegaAnexoProdutor(req, res) {
+    const tiposPermitidos = [
+      "comprovante_cpf_cnpj",
+      "comprovante_residencia",
+    ];
+    const { tipo } = req.params;
+    if (!tiposPermitidos.includes(tipo)) {
+      return res.status(400).json({ message: "Tipo de documento inválido" });
+    }
+
+    try {
+      const anexo = await database.anexo.findOne({
+        where: {
+          agricultor_id: res.locals.user._produtor_id,
+          tipo_anexo: tipo,
+        },
+        order: [["id", "DESC"]],
+      });
+      if (!anexo) {
+        return res.status(404).json({ message: "Documento não encontrado" });
+      }
+
+      const tiposMimePermitidos = [
+        "application/pdf",
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+      ];
+      if (!tiposMimePermitidos.includes(anexo.mimetype)) {
+        return res.status(415).json({ message: "Tipo de documento não suportado" });
+      }
+
+      const raizFonte = path.resolve(__dirname, "..");
+      const raizUploads = path.resolve(raizFonte, "uploads", "anexos");
+      const caminhoArquivo = path.resolve(
+        raizFonte,
+        String(anexo.path).replace(/^[\\/]+/, ""),
+      );
+      if (!caminhoArquivo.startsWith(`${raizUploads}${path.sep}`)) {
+        return res.status(404).json({ message: "Documento não encontrado" });
+      }
+
+      const base64 = await fs.promises.readFile(caminhoArquivo, "base64");
+      return res.status(200).json({
+        id_anexo: anexo.id,
+        tipo_anexo: anexo.tipo_anexo,
+        filename: anexo.filename,
+        mimetype: anexo.mimetype,
+        base64,
+      });
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        return res.status(404).json({ message: "Arquivo não existe no servidor" });
+      }
+      console.error("Erro ao recuperar anexo do produtor:", error);
+      return res.status(500).json({ message: "Erro ao recuperar o documento" });
+    }
+  }
+
+  static async atualizaPerfilProdutor(req, res) {
+    const camposPermitidos = [
+      "nome", "telefone", "rg", "endereco", "cidade", "nome_propriedade",
+      "ponto_referencia", "area_total", "regime_cultivo", "cadastro_adagri",
+      "confirma_informacao", "email_trabalhador", "apelido_trabalhador",
+      "tem_cadastro_adagri", "uso_dados",
+    ];
+    const bodyValido =
+      req.body && typeof req.body === "object" && !Array.isArray(req.body);
+    const dados = bodyValido
+      ? Object.fromEntries(
+          Object.entries(req.body).filter(([campo]) =>
+            camposPermitidos.includes(campo),
+          ),
+        )
+      : {};
+    if (Object.keys(dados).length === 0) {
+      return res.status(400).json({ message: "Nenhum dado permitido para atualização" });
+    }
+    if (
+      dados.area_total !== undefined &&
+      (!Number.isFinite(Number(dados.area_total)) || Number(dados.area_total) < 0)
+    ) {
+      return res.status(400).json({ message: "Área total inválida" });
+    }
+    if (
+      dados.cidade !== undefined &&
+      (!Number.isInteger(Number(dados.cidade)) || Number(dados.cidade) <= 0)
+    ) {
+      return res.status(400).json({ message: "Município inválido" });
+    }
+
+    try {
+      const produtor = await database.produtor_rural.findByPk(
+        res.locals.user._produtor_id,
+      );
+      if (!produtor) {
+        return res.status(404).json({ message: "Produtor não encontrado" });
+      }
+      if (dados.area_total !== undefined) dados.area_total = Number(dados.area_total);
+      if (dados.cidade !== undefined) dados.cidade = Number(dados.cidade);
+      await produtor.update(dados);
+      return AgroControllers.pegaPerfilProdutor(req, res);
+    } catch (error) {
+      console.error("Erro ao atualizar perfil do produtor:", error);
+      return res.status(500).json({ message: "Erro ao atualizar perfil do produtor" });
+    }
+  }
+
+  static async criaPedidoProdutor(req, res) {
+    const areaAlgodao = Number(req.body?.area_algodao);
+    if (!Number.isFinite(areaAlgodao) || areaAlgodao <= 0) {
+      return res.status(400).json({ message: "Informe uma área de algodão válida" });
+    }
+
+    let transaction;
+    try {
+      transaction = await database.sequelize.transaction();
+      const produtor = await database.produtor_rural.findByPk(
+        res.locals.user._produtor_id,
+        { transaction, lock: transaction.LOCK.UPDATE },
+      );
+      if (!produtor) {
+        await transaction.rollback();
+        return res.status(404).json({ message: "Produtor não encontrado" });
+      }
+      if (areaAlgodao > Number(produtor.area_total)) {
+        await transaction.rollback();
+        return res.status(400).json({
+          message: "A área do pedido não pode ser maior que a área total da propriedade",
+        });
+      }
+
+      const ano = new Date().getFullYear();
+      const pedido = await database.distribuicao_sementes.create(
+        {
+          agricultor_id: produtor.id,
+          ano_distribuicao: ano,
+          qtde_sementes: calcularQuantidadeSementes(areaAlgodao),
+          pedido_atendido: false,
+          area_algodao: areaAlgodao,
+        },
+        { transaction },
+      );
+      await pedido.update(
+        { pedido: `PED-${String(pedido.id).padStart(6, "0")}-${ano}` },
+        { transaction },
+      );
+      await transaction.commit();
+      return res.status(201).json(pedido);
+    } catch (error) {
+      if (transaction && !transaction.finished) await transaction.rollback();
+      console.error("Erro ao criar pedido do produtor:", error);
+      return res.status(500).json({ message: "Erro ao criar pedido de sementes" });
     }
   }
 

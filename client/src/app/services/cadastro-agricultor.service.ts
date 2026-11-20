@@ -76,6 +76,35 @@ export class CadastroAgricultorService {
     );
   }
 
+  perfilProdutor(): Observable<any> {
+    return this.http.get(environment.apiUrl + 'perfilProdutor');
+  }
+
+  atualizarPerfilProdutor(data: any): Observable<any> {
+    return this.http.put(environment.apiUrl + 'perfilProdutor', data);
+  }
+
+  solicitarSementes(areaAlgodao: number): Observable<any> {
+    return this.http.post(environment.apiUrl + 'perfilProdutor/pedidos', {
+      area_algodao: areaAlgodao,
+    });
+  }
+
+  substituirAnexoProdutor(tipo: string, arquivo: File): Observable<any> {
+    const dados = new FormData();
+    dados.append('file', arquivo);
+    return this.http.put(
+      environment.apiUrl + 'perfilProdutor/anexos/' + tipo,
+      dados,
+    );
+  }
+
+  pegarAnexoProdutor(tipo: string): Observable<any> {
+    return this.http.get(
+      environment.apiUrl + 'perfilProdutor/anexos/' + tipo,
+    );
+  }
+
   deleteAgricultor(id: number) {
     return this.http.delete<any>(environment.apiUrl + 'farmer/' + id).pipe(
       map((res: any) => {
