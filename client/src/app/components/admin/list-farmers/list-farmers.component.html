@@ -126,7 +126,8 @@
           <tr>
             <th class="text-center">Nome Completo</th>
             <th class="text-center">Telefone</th>
-            <!-- <th class="text-center">Foi Atendido?</th> -->
+            <th class="text-center">Ativou login?</th>
+            <th class="text-center">PIN de primeiro acesso</th>
             <th class="text-center">Possui cadastro ADAGRI?</th>
             <th class="text-center">Município</th>
             <th class="text-center">Região</th>
@@ -139,10 +140,15 @@
           <tr *ngFor="let farmer of lista_filtrada | paginate: { itemsPerPage: itemsPerPage, currentPage: page }">
             <td>{{ farmer.nome }}</td>
             <td class="text-center">{{ farmer.telefone }}</td>
-            <!-- <td class="text-center">
-              <i *ngIf="farmer.pedido_atendido" class="bi bi-check-circle-fill text-success fs-5"></i>
-              <i *ngIf="!farmer.pedido_atendido" class="bi bi-x-circle-fill text-danger fs-5"></i>
-            </td> -->
+            <td class="text-center">
+              <i *ngIf="farmer.login_ativado" class="bi bi-check-circle-fill text-success fs-5"></i>
+              <i *ngIf="!farmer.login_ativado" class="bi bi-x-circle-fill text-danger fs-5"></i>
+            </td>
+            <td class="text-center">
+              <span *ngIf="farmer.login_ativado">Utilizado</span>
+              <span *ngIf="!farmer.login_ativado && farmer.pin_trabalhador_configurado">Pendente</span>
+              <span *ngIf="!farmer.login_ativado && !farmer.pin_trabalhador_configurado">Não gerado</span>
+            </td>
             <td class="text-center">
               <i *ngIf="farmer.tem_cadastro_adagri" class="bi bi-check-circle-fill text-success fs-5"></i>
               <i *ngIf="!farmer.tem_cadastro_adagri" class="bi bi-x-circle-fill text-danger fs-5"></i>
@@ -517,17 +523,34 @@
               </div>
             </div>
 
-            <!-- <div class="col-sm-3 col-12 mt-3">
+            <div class="col-sm-3 col-12 mt-3">
               <div class="form-check form-switch">
-                <label class="form-check-label" for="pedido_atendido">O Agricultor foi atendido?</label>
-                <input type="checkbox" class="form-check-input" formControlName="pedido_atendido">
+                <label class="form-check-label" for="login_ativado">O Agricultor ativou o login?</label>
+                <input type="checkbox" class="form-check-input" formControlName="login_ativado">
               </div>
-            </div> -->
+            </div>
+
+            <div class="col-sm-5 col-12 mt-3">
+              <div class="form-check">
+                <input type="checkbox" id="gerar_pin" class="form-check-input" formControlName="gerar_pin"
+                  [disabled]="formFarmer.get('login_ativado')?.value">
+                <label class="form-check-label" for="gerar_pin">Gerar novo PIN de primeiro acesso</label>
+                <div class="form-text">O PIN será enviado ao e-mail do agricultor e exibido uma única vez aqui.</div>
+              </div>
+            </div>
 
             <div class="col-sm-4 col-12 mt-3">
               <div class="form-check form-switch">
                 <label class="form-check-label" for="uso_dados">Uso de dados?</label>
                 <input type="checkbox" class="form-check-input" formControlName="uso_dados">
+              </div>
+            </div>
+
+            <div *ngIf="pinGerado" class="col-12 alert alert-warning mt-3 mb-0" role="alert">
+              <strong>Novo PIN (exibido uma única vez):</strong>
+              <span class="font-monospace fs-5 ms-2">{{ pinGerado }}</span>
+              <div *ngIf="!pinEmailEnviado" class="mt-2">
+                Não foi possível enviar o PIN por e-mail. Informe o código ao agricultor por um canal seguro.
               </div>
             </div>
 

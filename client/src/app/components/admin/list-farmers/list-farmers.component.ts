@@ -35,7 +35,7 @@ export class ListFarmersComponent implements OnInit {
   searchFarmers: string = '';
   searchCidade: string = '';
   searchRegiao: string = '';
-  searchPedidoAtendido: boolean | '' = '';
+  searchloginAtivado: boolean | '' = '';
   searchAdagri: boolean | '' = '';
   numeroPedido: number | '' = '';
 
@@ -54,6 +54,8 @@ export class ListFarmersComponent implements OnInit {
   formFiltro!: FormGroup;
   formFarmer!: FormGroup;
   formDistribuicoes!: FormGroup;
+  pinGerado: string | null = null;
+  pinEmailEnviado = false;
   nomeFarmerDistribuicoes = '';
   farmerDistribuicoesId: number | null = null;
   distribuicoesExistentes: any[] = [];
@@ -109,13 +111,15 @@ export class ListFarmersComponent implements OnInit {
       apelido_trabalhador: [''],
       tem_cadastro_adagri: [''],
       uso_dados: [''],
+      login_ativado: [''],
+      gerar_pin: [false],
     });
 
     this.formFiltro = this.formBuilder.group({
       nome: [''],
       cidade: [''],
       regiao: [''],
-      pedidoAtendido: [''],
+      loginAtivado: [''],
       cadastroADAGRI: [''],
       etapa: [''],
       dataInicio: [''],
@@ -239,7 +243,7 @@ export class ListFarmersComponent implements OnInit {
       nome,
       cidade,
       regiao,
-      pedidoAtendido,
+      loginAtivado,
       cadastroADAGRI,
       etapa,
       dataInicio,
@@ -259,8 +263,8 @@ export class ListFarmersComponent implements OnInit {
         farmer?.ass_produtor_rural_cidade?.ass_municipio_regiao?.nome ===
           regiao;
 
-      const matchPedido =
-        pedidoAtendido === '' || farmer?.pedido_atendido === pedidoAtendido;
+      const matchLogin =
+        loginAtivado === '' || farmer?.login_ativado === loginAtivado;
 
       const matchADAGRI =
         cadastroADAGRI === '' || farmer?.tem_cadastro_adagri === cadastroADAGRI;
@@ -283,7 +287,7 @@ export class ListFarmersComponent implements OnInit {
         matchNome &&
         matchCidade &&
         matchRegiao &&
-        matchPedido &&
+        matchLogin &&
         matchADAGRI &&
         matchEtapa &&
         matchDataInicio &&
@@ -299,7 +303,7 @@ export class ListFarmersComponent implements OnInit {
       nome: '',
       cidade: '',
       regiao: '',
-      pedidoAtendido: '',
+      loginAtivado: '',
       cadastroADAGRI: '',
       etapa: '',
       dataInicio: '',
@@ -314,7 +318,7 @@ export class ListFarmersComponent implements OnInit {
     this.searchFarmers = '';
     this.searchCidade = '';
     this.searchRegiao = '';
-    this.searchPedidoAtendido = '';
+    this.searchloginAtivado = '';
     this.searchAdagri = '';
 
     this.lista_filtrada = [...this.lista_farmers];
@@ -503,7 +507,7 @@ export class ListFarmersComponent implements OnInit {
                 }
                 return {
                   ...distribuicao,
-                  pedido_atendido: atualizado.pedido_atendido,
+                  login_ativado: atualizado.login_ativado,
                   area_algodao: atualizado.area_algodao,
                   qtde_sementes: this.quantidadeSementes(
                     atualizado.area_algodao,
@@ -618,56 +622,65 @@ export class ListFarmersComponent implements OnInit {
     this.formFarmer.controls['sementes_recebidas'].setValue(
       farmer.sementes_recebidas,
     );
-    this.formFarmer.controls['pedido_atendido'].setValue(
-      farmer.pedido_atendido,
-    );
     this.formFarmer.controls['uso_dados'].setValue(farmer.uso_dados);
     this.formFarmer.controls['tem_cadastro_adagri'].setValue(
       farmer.tem_cadastro_adagri,
     );
+    this.formFarmer.controls['gerar_pin'].setValue(false);
+    this.formFarmer.controls['login_ativado'].setValue(farmer.login_ativado);
+    this.pinGerado = null;
+    this.pinEmailEnviado = false;
   }
   updateFarmer() {
-    this.farmerObj.nome = this.formFarmer.value.nome;
-    this.farmerObj.apelido_trabalhador =
-      this.formFarmer.value.apelido_trabalhador;
-    this.farmerObj.email_trabalhador = this.formFarmer.value.email_trabalhador;
-    this.farmerObj.telefone = this.formFarmer.value.telefone;
-    this.farmerObj.cpf_cnpj = this.formFarmer.value.cpf_cnpj;
-    this.farmerObj.rg = this.formFarmer.value.rg;
-    this.farmerObj.endereco = this.formFarmer.value.endereco;
-    this.farmerObj.cidade = this.formFarmer.value.cidade;
-    this.farmerObj.nome_propriedade = this.formFarmer.value.nome_propriedade;
-    this.farmerObj.ponto_referencia = this.formFarmer.value.ponto_referencia;
-    this.farmerObj.area_total = this.formFarmer.value.area_total;
-    this.farmerObj.regime_cultivo = this.formFarmer.value.regime_cultivo;
-    this.farmerObj.cadastro_adagri = this.formFarmer.value.cadastro_adagri;
-    this.farmerObj.confirma_informacao =
-      this.formFarmer.value.confirma_informacao;
-    this.farmerObj.sementes_recebidas =
-      this.formFarmer.value.sementes_recebidas;
-    this.farmerObj.pedido_atendido = this.formFarmer.value.pedido_atendido;
-    this.farmerObj.uso_dados = this.formFarmer.value.uso_dados;
-    this.farmerObj.tem_cadastro_adagri =
-      this.formFarmer.value.tem_cadastro_adagri;
+    const dadosAtualizacao = {
+      nome: this.formFarmer.value.nome,
+      apelido_trabalhador: this.formFarmer.value.apelido_trabalhador,
+      email_trabalhador: this.formFarmer.value.email_trabalhador,
+      telefone: this.formFarmer.value.telefone,
+      cpf_cnpj: this.formFarmer.value.cpf_cnpj,
+      rg: this.formFarmer.value.rg,
+      endereco: this.formFarmer.value.endereco,
+      cidade: this.formFarmer.value.cidade,
+      nome_propriedade: this.formFarmer.value.nome_propriedade,
+      ponto_referencia: this.formFarmer.value.ponto_referencia,
+      area_total: this.formFarmer.value.area_total,
+      regime_cultivo: this.formFarmer.value.regime_cultivo,
+      cadastro_adagri: this.formFarmer.value.cadastro_adagri,
+      confirma_informacao: this.formFarmer.value.confirma_informacao,
+      uso_dados: this.formFarmer.value.uso_dados,
+      tem_cadastro_adagri: this.formFarmer.value.tem_cadastro_adagri,
+      login_ativado: this.formFarmer.value.login_ativado,
+      gerar_pin: this.formFarmer.value.gerar_pin,
+    };
 
     this.cadastroAgricultorService
-      .atualizarAgricultor(this.farmerObj, Number(this.farmerObj.id))
-      .subscribe((res) => {
-        this.toastr.success('Atualiação realizada com sucesso!!!');
-        this.formFarmer.reset();
-        this.getFarmers();
+      .atualizarAgricultor(dadosAtualizacao, Number(this.farmerObj.id))
+      .subscribe({
+        next: (res) => {
+          this.pinGerado = res.pin_trabalhador ?? null;
+          this.pinEmailEnviado = res.pinEnviado ?? false;
+          this.toastr.success('Atualização realizada com sucesso!');
+          this.formFarmer.controls['gerar_pin'].setValue(false);
+          this.getFarmers();
 
-        // 🔥 Fechar modal
-        const modalEl = document.getElementById('modalEdit');
-        if (modalEl) {
-          const modal =
-            bootstrap.Modal.getInstance(modalEl) ||
-            new bootstrap.Modal(modalEl);
-          modal.hide();
-        }
+          if (!this.pinGerado) {
+            this.formFarmer.reset();
+            const modalEl = document.getElementById('modalEdit');
+            if (modalEl) {
+              const modal =
+                bootstrap.Modal.getInstance(modalEl) ||
+                new bootstrap.Modal(modalEl);
+              modal.hide();
+            }
+          }
+          this.saveRegister(dadosAtualizacao.nome, 'Alteração de dados do agricultor');
+        },
+        error: (erro) => {
+          this.toastr.error(
+            erro.error?.message || 'Não foi possível atualizar o agricultor.',
+          );
+        },
       });
-
-    this.saveRegister(this.farmerObj.nome, 'Alteração de dados do agricultor');
   }
 
   resetVisualizacao(tipo: string) {

@@ -46,6 +46,16 @@ function emailProdutorValido(email) {
   return typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function serializarAgricultor(produtor) {
+  const dados = produtor.toJSON();
+  if (Object.hasOwn(dados, "pin_trabalhador")) {
+    dados.pin_trabalhador_configurado = Boolean(dados.pin_trabalhador);
+  }
+  delete dados.pin_trabalhador;
+  delete dados.password_trabalhador;
+  return dados;
+}
+
 async function enviarPinPrimeiroAcesso(email, pin) {
   const transporter = nodemailer.createTransport({
     host: "172.26.2.26",
@@ -379,6 +389,8 @@ class AgroControllers {
           "uso_dados",
           "etapa",
           "status_farmer",
+          "pin_trabalhador",
+          "login_ativado",
           "createdAt",
         ],
         include: [
@@ -403,7 +415,9 @@ class AgroControllers {
         ],
       });
 
-      return res.status(200).json(getFarmer);
+      return res.status(200).json(
+        getFarmer.map((produtor) => serializarAgricultor(produtor)),
+      );
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Erro ao buscar agricultores" });
@@ -430,7 +444,12 @@ class AgroControllers {
           "cadastro_adagri",
           "confirma_informacao",
           "email_trabalhador",
+          "apelido_trabalhador",
+          "tem_cadastro_adagri",
           "uso_dados",
+          "etapa",
+          "status_farmer",
+          "login_ativado",
           "createdAt",
         ],
         include: [
@@ -451,7 +470,9 @@ class AgroControllers {
         ],
       });
 
-      return res.status(200).json(getFarmer);
+      return res.status(200).json(
+        getFarmer ? serializarAgricultor(getFarmer) : null,
+      );
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Erro ao buscar agricultor" });
@@ -567,14 +588,85 @@ class AgroControllers {
   static async atualizaFarmer(req, res) {
     const { id } = req.params;
     try {
-      await database.produtor_rural.update(req.body, {
-        where: { id: Number(id) },
-      });
-      const updateFarmer = await database.produtor_rural.findOne({
-        where: { id: Number(id) },
-      });
-      return res.status(200).json(updateFarmer);
+      const produtor = await database.produtor_rural.findByPk(Number(id));
+      if (!produtor) {
+        return res.status(404).json({ message: "Agricultor não encontrado" });
+      }
+
+      const camposPermitidos = [
+        "nome",
+        "telefone",
+        "cpf_cnpj",
+        "rg",
+        "endereco",
+        "cidade",
+        "nome_propriedade",
+        "ponto_referencia",
+        "area_total",
+        "regime_cultivo",
+        "cadastro_adagri",
+        "confirma_informacao",
+        "email_trabalhador",
+        "apelido_trabalhador",
+        "tem_cadastro_adagri",
+        "uso_dados",
+        "login_ativado",
+      ];
+      const dadosAtualizacao = Object.fromEntries(
+        camposPermitidos
+          .filter((campo) => Object.hasOwn(req.body, campo))
+          .map((campo) => [campo, req.body[campo]]),
+      );
+      if (
+        Object.hasOwn(dadosAtualizacao, "login_ativado") &&
+        typeof dadosAtualizacao.login_ativado !== "boolean"
+      ) {
+        return res.status(400).json({ message: "Estado do login inválido" });
+      }
+
+      const gerarPin = req.body.gerar_pin === true;
+      if (gerarPin) {
+        const loginAtivado = dadosAtualizacao.login_ativado ??
+          produtor.login_ativado;
+        if (loginAtivado) {
+          return res.status(400).json({
+            message: "Desative o login antes de gerar um novo PIN de primeiro acesso",
+          });
+        }
+        const email = dadosAtualizacao.email_trabalhador ??
+          produtor.email_trabalhador;
+        if (!emailProdutorValido(email)) {
+          return res.status(400).json({
+            message: "Informe um e-mail válido para receber o PIN",
+          });
+        }
+        const cpfs = cpfBusca(dadosAtualizacao.cpf_cnpj ?? produtor.cpf_cnpj);
+        if (!cpfs) {
+          return res.status(400).json({ message: "Informe um CPF válido" });
+        }
+
+        const pin = String(randomInt(0, 1_000_000)).padStart(6, "0");
+        const [pinHash, passwordHash] = await Promise.all([
+          bcrypt.hash(pin, 10),
+          bcrypt.hash(cpfs[0], 10),
+        ]);
+        dadosAtualizacao.pin_trabalhador = pinHash;
+        dadosAtualizacao.password_trabalhador = passwordHash;
+        dadosAtualizacao.login_ativado = false;
+        await produtor.update(dadosAtualizacao);
+
+        const pinEnviado = await notificarPinPrimeiroAcesso(email, pin);
+        return res.status(200).json({
+          ...serializarAgricultor(produtor),
+          pin_trabalhador: pin,
+          pinEnviado,
+        });
+      }
+
+      await produtor.update(dadosAtualizacao);
+      return res.status(200).json(serializarAgricultor(produtor));
     } catch (error) {
+      console.error("Erro ao atualizar agricultor:", error);
       return res.status(500).json(error.message);
     }
   }

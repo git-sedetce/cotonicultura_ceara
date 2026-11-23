@@ -20,5 +20,9 @@ export class Agricultor {
     public apelido_trabalhador?: string,
     public uso_dados: boolean = false,
     public tem_cadastro_adagri: boolean = false,
+    public status_farmer: boolean = false,
+    public etapa: number = 0,
+    public pin_trabalhador_configurado: boolean = false,
+    public login_ativado: boolean = false,
   ) {}
 }
