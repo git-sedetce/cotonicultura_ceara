@@ -9,28 +9,32 @@ import { environment } from '../../environments/environment';
 export class StatisticsService {
   constructor(private http: HttpClient) {}
 
-  contarAgricultores(): Observable<any> {
-    return this.http.get(environment.apiUrl + 'totalAgricultores');
+  anosDisponiveis(): Observable<number[]> {
+    return this.http.get<number[]>(environment.apiUrl + 'anosDisponiveis');
   }
 
-  contarMunicipio(data: any): Observable<any> {
-    return this.http.get(environment.apiUrl + 'countPorMunicipio', data);
+  contarAgricultores(ano?: number | null): Observable<any> {
+    return this.http.get(environment.apiUrl + 'totalAgricultores', this.opcoesAno(ano));
   }
 
-  contarRegiao(data: any): Observable<any> {
-    return this.http.get(environment.apiUrl + 'countPorRegiao', data);
+  contarMunicipio(ano?: number | null): Observable<any> {
+    return this.http.get(environment.apiUrl + 'countPorMunicipio', this.opcoesAno(ano));
   }
 
-  contarAtendidos(): Observable<any> {
-    return this.http.get(environment.apiUrl + 'countAtendidos');
+  contarRegiao(ano?: number | null): Observable<any> {
+    return this.http.get(environment.apiUrl + 'countPorRegiao', this.opcoesAno(ano));
   }
 
-  sementesDistribuidas(): Observable<any> {
-    return this.http.get(environment.apiUrl + 'totalSementesDistribuidas');
+  contarAtendidos(ano?: number | null): Observable<any> {
+    return this.http.get(environment.apiUrl + 'countAtendidos', this.opcoesAno(ano));
   }
 
-  sementesDistribuidasPorRegiao(): Observable<any> {
-    return this.http.get(environment.apiUrl + 'sementesPorRegiao');
+  sementesDistribuidas(ano?: number | null): Observable<any> {
+    return this.http.get(environment.apiUrl + 'totalSementesDistribuidas', this.opcoesAno(ano));
+  }
+
+  sementesDistribuidasPorRegiao(ano?: number | null): Observable<any> {
+    return this.http.get(environment.apiUrl + 'sementesPorRegiao', this.opcoesAno(ano));
   }
 
   sementesDistribuidasPorAno(): Observable<any> {
@@ -45,23 +49,27 @@ export class StatisticsService {
     return this.http.get(environment.apiUrl + 'countPorTipoCultivo', data);
   }
 
-  somaAreaCultivoMunicipio(data: any): Observable<any> {
-    return this.http.get(environment.apiUrl + 'hectareMunicipio', data);
+  somaAreaCultivoMunicipio(ano?: number | null): Observable<any> {
+    return this.http.get(environment.apiUrl + 'hectareMunicipio', this.opcoesAno(ano));
   }
 
-  somaAreaCultivoRegiao(data: any): Observable<any> {
-    return this.http.get(environment.apiUrl + 'hectareRegiao', data);
+  somaAreaCultivoRegiao(ano?: number | null): Observable<any> {
+    return this.http.get(environment.apiUrl + 'hectareRegiao', this.opcoesAno(ano));
   }
 
-  areaParaCultivar(): Observable<any> {
-    return this.http.get(environment.apiUrl + 'totalAreaCultivo');
+  areaParaCultivar(ano?: number | null): Observable<any> {
+    return this.http.get(environment.apiUrl + 'totalAreaCultivo', this.opcoesAno(ano));
   }
 
-  areaParaTrabalhar(): Observable<any> {
-    return this.http.get(environment.apiUrl + 'totalAreaCultivoTrabalhado');
+  areaParaTrabalhar(ano?: number | null): Observable<any> {
+    return this.http.get(environment.apiUrl + 'totalAreaCultivoTrabalhado', this.opcoesAno(ano));
   }
 
   dadosMapa(): Observable<any> {
     return this.http.get(environment.apiUrl + 'mapa');
+  }
+
+  private opcoesAno(ano?: number | null): { params: { ano: number } } | {} {
+    return ano == null ? {} : { params: { ano } };
   }
 }

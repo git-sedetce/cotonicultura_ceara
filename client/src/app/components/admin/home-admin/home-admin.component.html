@@ -1,5 +1,15 @@
 <div class="dashboard">
 
+  <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mb-3">
+    <label for="filtroAno" class="form-label mb-0">Filtrar por ano:</label>
+    <select id="filtroAno" class="form-select" style="width: 180px"
+      [value]="anoSelecionado ?? ''" (change)="alterarAno($event)">
+      <option value="">Todos os anos</option>
+      <option *ngFor="let ano of anosDisponiveis" [value]="ano">{{ ano }}</option>
+    </select>
+    <small class="text-muted">Agricultores pelo ano de cadastro; áreas e sementes pelo ano da distribuição.</small>
+  </div>
+
   <!-- CARDS -->
   <div class="cards">
     <div class="card">Total Agricultores<br><strong>{{ totalAgricultores }}</strong></div>

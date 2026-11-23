@@ -2,11 +2,72 @@ const database = require("../models");
 const { Sequelize, QueryTypes, Op, fn, col, literal } = require("sequelize");
 const dbConfig = require("../config/config").development;
 
+function lerAnoQuery(req, res) {
+  const valor = req.query.ano;
+  if (valor === undefined || valor === "") return null;
+
+  const ano = Number(valor);
+  if (!/^\d{4}$/.test(String(valor)) || !Number.isInteger(ano) || ano < 1900) {
+    res.status(400).json({ message: "Ano inválido" });
+    return undefined;
+  }
+  return ano;
+}
+
+function filtroAnoCadastro(ano) {
+  if (ano === null) return {};
+  return {
+    createdAt: {
+      [Op.gte]: new Date(Date.UTC(ano, 0, 1)),
+      [Op.lt]: new Date(Date.UTC(ano + 1, 0, 1)),
+    },
+  };
+}
+
+function condicaoAnoDistribuicao(ano) {
+  return ano === null ? "" : " AND ds.ano_distribuicao = :ano";
+}
+
+function opcoesQueryAno(ano) {
+  return {
+    type: QueryTypes.SELECT,
+    ...(ano === null ? {} : { replacements: { ano } }),
+  };
+}
+
 class StatisticsController {
+  static async anosDisponiveis(req, res) {
+    try {
+      const anos = await database.sequelize.query(
+        `SELECT ano
+         FROM (
+           SELECT EXTRACT(YEAR FROM pr."createdAt")::INTEGER AS ano
+           FROM produtor_rurals AS pr
+           WHERE pr.status_farmer = true
+           UNION
+           SELECT ds.ano_distribuicao::INTEGER AS ano
+           FROM distribuicao_sementes AS ds
+           INNER JOIN produtor_rurals AS pr ON pr.id = ds.agricultor_id
+           WHERE pr.status_farmer = true
+             AND ds.ano_distribuicao IS NOT NULL
+         ) AS anos
+         WHERE ano IS NOT NULL
+         ORDER BY ano DESC`,
+        { type: QueryTypes.SELECT },
+      );
+      return res.status(200).json(anos.map(({ ano }) => Number(ano)));
+    } catch (error) {
+      console.error("Erro ao listar anos disponíveis:", error);
+      return res.status(500).json({ message: "Erro ao listar anos disponíveis" });
+    }
+  }
+
   static async countProdutores(req, res) {
+    const ano = lerAnoQuery(req, res);
+    if (ano === undefined) return;
     try {
       const totalAgricultores = await database.produtor_rural.count({
-        where: { status_farmer: true },
+        where: { status_farmer: true, ...filtroAnoCadastro(ano) },
       });
 
       return res.status(200).json({
@@ -21,9 +82,11 @@ class StatisticsController {
   }
 
   static async countPorMunicipio(req, res) {
+    const ano = lerAnoQuery(req, res);
+    if (ano === undefined) return;
     try {
       const resultado = await database.produtor_rural.findAll({
-        where: { status_farmer: true },
+        where: { status_farmer: true, ...filtroAnoCadastro(ano) },
         attributes: [
           [col("ass_produtor_rural_cidade.nome_municipio"), "nome_municipio"],
           [fn("COUNT", col("produtor_rural.id")), "qtd_agricultores"],
@@ -50,9 +113,11 @@ class StatisticsController {
   }
 
   static async countPorRegiao(req, res) {
+    const ano = lerAnoQuery(req, res);
+    if (ano === undefined) return;
     try {
       const resultado = await database.produtor_rural.findAll({
-        where: { status_farmer: true },
+        where: { status_farmer: true, ...filtroAnoCadastro(ano) },
         attributes: [
           [
             col("ass_produtor_rural_cidade.ass_municipio_regiao.nome"),
@@ -90,6 +155,8 @@ class StatisticsController {
   }
 
   static async countAgricultoresAtendidos(req, res) {
+    const ano = lerAnoQuery(req, res);
+    if (ano === undefined) return;
     try {
       const total = await database.produtor_rural.count({
         where: {
@@ -99,7 +166,10 @@ class StatisticsController {
           {
             association: "ass_agricultor_distribuicao_sementes",
             attributes: [],
-            where: { pedido_atendido: true },
+            where: {
+              pedido_atendido: true,
+              ...(ano === null ? {} : { ano_distribuicao: ano }),
+            },
             required: true,
           },
         ],
@@ -119,12 +189,15 @@ class StatisticsController {
   }
 
   static async totalSementesDistribuidas(req, res) {
+    const ano = lerAnoQuery(req, res);
+    if (ano === undefined) return;
     try {
       const totalSementes = await database.distribuicao_sementes.sum(
         "qtde_sementes",
         {
           where: {
             pedido_atendido: true,
+            ...(ano === null ? {} : { ano_distribuicao: ano }),
           },
           include: [
             {
@@ -197,13 +270,15 @@ class StatisticsController {
   }
 
   static async totalAreaCultivo(req, res) {
+    const ano = lerAnoQuery(req, res);
+    if (ano === undefined) return;
     try {
       const [resultado] = await database.sequelize.query(
         `SELECT COALESCE(SUM(ds.area_algodao), 0) AS area_algodao
          FROM distribuicao_sementes AS ds
          INNER JOIN produtor_rurals AS pr ON pr.id = ds.agricultor_id
-         WHERE pr.status_farmer = true`,
-        { type: QueryTypes.SELECT },
+         WHERE pr.status_farmer = true${condicaoAnoDistribuicao(ano)}`,
+        opcoesQueryAno(ano),
       );
 
       return res.status(200).json({
@@ -217,15 +292,17 @@ class StatisticsController {
     }
   }
 
-  static async totalAreaCultivoTrabalhado(req, res) {    
+  static async totalAreaCultivoTrabalhado(req, res) {
+    const ano = lerAnoQuery(req, res);
+    if (ano === undefined) return;
     try {
       const [resultado] = await database.sequelize.query(
         `SELECT COALESCE(SUM(ds.area_algodao), 0) AS area_algodao
          FROM distribuicao_sementes AS ds
          INNER JOIN produtor_rurals AS pr ON pr.id = ds.agricultor_id
          WHERE pr.status_farmer = true
-           AND ds.pedido_atendido = true`,
-        { type: QueryTypes.SELECT },
+           AND ds.pedido_atendido = true${condicaoAnoDistribuicao(ano)}`,
+        opcoesQueryAno(ano),
       );
 
       return res.status(200).json({
@@ -240,6 +317,8 @@ class StatisticsController {
   }
 
   static async sementesPorRegiao(req, res) {
+    const ano = lerAnoQuery(req, res);
+    if (ano === undefined) return;
     try {
       const resultado = await database.sequelize.query(
         `SELECT r.nome AS nome_regiao,
@@ -249,11 +328,11 @@ class StatisticsController {
          INNER JOIN cidades AS c ON c.id = pr.cidade
          INNER JOIN regiaos AS r ON r.id = c.regiao_id
          WHERE ds.pedido_atendido = true
-           AND pr.status_farmer = true
+           AND pr.status_farmer = true${condicaoAnoDistribuicao(ano)}
          GROUP BY r.nome
          ORDER BY total_sementes DESC
          LIMIT 5`,
-        { type: QueryTypes.SELECT }
+        opcoesQueryAno(ano)
       );
 
       return res.status(200).json(resultado);
@@ -331,6 +410,8 @@ class StatisticsController {
   }
 
   static async sumAreaCultivo(req, res) {
+    const ano = lerAnoQuery(req, res);
+    if (ano === undefined) return;
     try {
       const resultado = await database.sequelize.query(
         `SELECT c.nome_municipio,
@@ -338,11 +419,11 @@ class StatisticsController {
          FROM distribuicao_sementes AS ds
          INNER JOIN produtor_rurals AS pr ON pr.id = ds.agricultor_id
          INNER JOIN cidades AS c ON c.id = pr.cidade
-         WHERE pr.status_farmer = true
+         WHERE pr.status_farmer = true${condicaoAnoDistribuicao(ano)}
          GROUP BY c.nome_municipio
          ORDER BY area_algodao DESC
          LIMIT 10`,
-        { type: QueryTypes.SELECT },
+        opcoesQueryAno(ano),
       );
 
       return res.status(200).json(resultado);
@@ -355,6 +436,8 @@ class StatisticsController {
   }
 
   static async sumAreaCultivoRegiao(req, res) {
+    const ano = lerAnoQuery(req, res);
+    if (ano === undefined) return;
     try {
       const resultado = await database.sequelize.query(
         `SELECT r.nome AS nome_regiao,
@@ -363,11 +446,11 @@ class StatisticsController {
          INNER JOIN produtor_rurals AS pr ON pr.id = ds.agricultor_id
          INNER JOIN cidades AS c ON c.id = pr.cidade
          INNER JOIN regiaos AS r ON r.id = c.regiao_id
-         WHERE pr.status_farmer = true
+         WHERE pr.status_farmer = true${condicaoAnoDistribuicao(ano)}
          GROUP BY r.nome
          ORDER BY total_area_cultivo DESC
          LIMIT 5`,
-        { type: QueryTypes.SELECT },
+        opcoesQueryAno(ano),
       );
 
       return res.status(200).json(resultado);

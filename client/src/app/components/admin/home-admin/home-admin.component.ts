@@ -24,6 +24,8 @@ export class HomeAdminComponent implements OnInit {
   areaMonitorada = '';
   areaMonitoradaFormatada = '';
   listaAgricultoresMunicipio: any[] = [];
+  anosDisponiveis: number[] = [];
+  anoSelecionado: number | null = null;
 
   municipios: any[] = [];
   regioes: any[] = [];
@@ -44,8 +46,16 @@ export class HomeAdminComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.carregarAnosDisponiveis();
     this.carregarIndicadores();
     this.carregarGraficos();
+  }
+
+  alterarAno(event: Event): void {
+    const valor = (event.target as HTMLSelectElement).value;
+    this.anoSelecionado = valor ? Number(valor) : null;
+    this.carregarIndicadores();
+    this.carregarGraficosFiltrados();
   }
 
   carregarAgricultoresMunicipio(nomeMunicipio: string) {
@@ -103,13 +113,15 @@ export class HomeAdminComponent implements OnInit {
 
   // ================= INDICADORES =================
   carregarIndicadores() {
+    const ano = this.anoSelecionado;
     forkJoin({
-      agricultores: this.statisticsService.contarAgricultores(),
-      atendidos: this.statisticsService.contarAtendidos(),
-      sementes: this.statisticsService.sementesDistribuidas(),
-      area: this.statisticsService.areaParaCultivar(),
-      areaTrabalho: this.statisticsService.areaParaTrabalhar(),
+      agricultores: this.statisticsService.contarAgricultores(ano),
+      atendidos: this.statisticsService.contarAtendidos(ano),
+      sementes: this.statisticsService.sementesDistribuidas(ano),
+      area: this.statisticsService.areaParaCultivar(ano),
+      areaTrabalho: this.statisticsService.areaParaTrabalhar(ano),
     }).subscribe((res) => {
+      if (ano !== this.anoSelecionado) return;
       this.totalAgricultores = Number(res.agricultores.total) || 0;
       this.agricultoresAtendidos =
         Number(res.atendidos.agricultores_atendidos) || 0;
@@ -169,6 +181,15 @@ export class HomeAdminComponent implements OnInit {
     return this.municipioColorMap[nome];
   }
 
+  private carregarAnosDisponiveis(): void {
+    this.statisticsService.anosDisponiveis().subscribe({
+      next: (anos) => {
+        this.anosDisponiveis = anos.map(Number);
+      },
+      error: (error) => console.error('Erro ao carregar anos disponíveis:', error),
+    });
+  }
+
   carregarGraficos() {
     this.statisticsService.sementesDistribuidasPorAno().subscribe((res) => {
       this.sementesAnoChart = {
@@ -185,8 +206,21 @@ export class HomeAdminComponent implements OnInit {
       };
     });
 
+    this.carregarGraficosFiltrados();
+
+    // O mapa permanece com os dados agregados de todos os anos.
+    this.statisticsService.dadosMapa().subscribe((res) => {
+      this.municipios = res;
+      this.initMapa();
+    });
+  }
+
+  private carregarGraficosFiltrados(): void {
+    const ano = this.anoSelecionado;
+
     // Agricultores por Município (Donut)
-    this.statisticsService.contarMunicipio({}).subscribe((res) => {
+    this.statisticsService.contarMunicipio(ano).subscribe((res) => {
+      if (ano !== this.anoSelecionado) return;
       const labels = res.map((c: any) => c.nome_municipio);
       const series = res.map((c: any) => Number(c.qtd_agricultores));
       const colors = labels.map((l: any) => this.getColorFromMunicipio(l));
@@ -200,7 +234,8 @@ export class HomeAdminComponent implements OnInit {
     });
 
     // Agricultores por Município (Donut)
-    this.statisticsService.somaAreaCultivoMunicipio({}).subscribe((res) => {
+    this.statisticsService.somaAreaCultivoMunicipio(ano).subscribe((res) => {
+      if (ano !== this.anoSelecionado) return;
       const labels = res.map((c: any) => c.nome_municipio);
       const series = res.map((c: any) => Number(c.area_algodao));
       const colors = labels.map((l: any) => this.getColorFromMunicipio(l));
@@ -214,7 +249,8 @@ export class HomeAdminComponent implements OnInit {
     });
 
     // Agricultores por Município (Donut)
-    this.statisticsService.somaAreaCultivoRegiao({}).subscribe((res) => {
+    this.statisticsService.somaAreaCultivoRegiao(ano).subscribe((res) => {
+      if (ano !== this.anoSelecionado) return;
       const labels = res.map((c: any) => c.nome_regiao);
       const series = res.map((c: any) => Number(c.total_area_cultivo));
       const colors = labels.map((l: any) => this.getColorFromMunicipio(l));
@@ -228,7 +264,8 @@ export class HomeAdminComponent implements OnInit {
     });
 
     // Agricultores por Região
-    this.statisticsService.contarRegiao({}).subscribe((res) => {
+    this.statisticsService.contarRegiao(ano).subscribe((res) => {
+      if (ano !== this.anoSelecionado) return;
       const categorias = res.map((r: any) => r.nome_regiao);
       const dados = res.map((r: any) => Number(r.qtd_agricultores));
 
@@ -247,7 +284,8 @@ export class HomeAdminComponent implements OnInit {
     });
 
     // Sementes por Região
-    this.statisticsService.sementesDistribuidasPorRegiao().subscribe((res) => {
+    this.statisticsService.sementesDistribuidasPorRegiao(ano).subscribe((res) => {
+      if (ano !== this.anoSelecionado) return;
       const categorias = res.map((r: any) => r.nome_regiao);
       const dados = res.map((r: any) =>
         Number(Number(r.total_sementes).toFixed(2)),
@@ -267,11 +305,6 @@ export class HomeAdminComponent implements OnInit {
       };
     });
 
-    // 🔴 IMPORTANTE: sementes por município + mapa
-    this.statisticsService.dadosMapa().subscribe((res) => {
-      this.municipios = res;
-      this.initMapa();
-    });
   }
 
   //PONTOS DE DISTRIBUIÇÃO
