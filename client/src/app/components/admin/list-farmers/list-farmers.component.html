@@ -146,7 +146,9 @@
             </td>
             <td class="text-center">
               <span *ngIf="farmer.login_ativado">Utilizado</span>
-              <span *ngIf="!farmer.login_ativado && farmer.pin_trabalhador_configurado">Pendente</span>
+              <span *ngIf="!farmer.login_ativado && farmer.pin_trabalhador"
+                class="font-monospace fw-bold fs-6">{{ farmer.pin_trabalhador }}</span>
+              <span *ngIf="!farmer.login_ativado && farmer.pin_trabalhador_configurado && !farmer.pin_trabalhador">Pendente</span>
               <span *ngIf="!farmer.login_ativado && !farmer.pin_trabalhador_configurado">Não gerado</span>
             </td>
             <td class="text-center">
@@ -405,9 +407,9 @@
             <div class="form-group col-sm-4 col-12 ">
               <div class="form-floating">
                 <input type="email" id="email_trabalhador" name="email_trabalhador"
-                  placeholder="Digite o email do trabalhador" required formControlName="email_trabalhador"
+                  placeholder="Digite o email do trabalhador (opcional)" formControlName="email_trabalhador"
                   class="form-control" />
-                <label class="form-label pergunta" for="email_trabalhador">Email do trabalhador</label>
+                <label class="form-label pergunta" for="email_trabalhador">Email do trabalhador (opcional)</label>
               </div>
             </div>
 
@@ -535,7 +537,7 @@
                 <input type="checkbox" id="gerar_pin" class="form-check-input" formControlName="gerar_pin"
                   [disabled]="formFarmer.get('login_ativado')?.value">
                 <label class="form-check-label" for="gerar_pin">Gerar novo PIN de primeiro acesso</label>
-                <div class="form-text">O PIN será enviado ao e-mail do agricultor e exibido uma única vez aqui.</div>
+                <div class="form-text">Se houver e-mail válido, o envio será iniciado em segundo plano. O PIN também ficará salvo e visível na lista de agricultores.</div>
               </div>
             </div>
 
@@ -547,10 +549,13 @@
             </div>
 
             <div *ngIf="pinGerado" class="col-12 alert alert-warning mt-3 mb-0" role="alert">
-              <strong>Novo PIN (exibido uma única vez):</strong>
+              <strong>Novo PIN de primeiro acesso:</strong>
               <span class="font-monospace fs-5 ms-2">{{ pinGerado }}</span>
-              <div *ngIf="!pinEmailEnviado" class="mt-2">
-                Não foi possível enviar o PIN por e-mail. Informe o código ao agricultor por um canal seguro.
+              <div *ngIf="!pinEmailInformado" class="mt-2">
+                Agricultor sem e-mail informado. Repasse este PIN por outro canal.
+              </div>
+              <div *ngIf="pinEmailInformado && pinEmailEnvioSolicitado" class="mt-2">
+                O envio do e-mail foi iniciado em segundo plano; o PIN já está salvo e disponível na lista.
               </div>
             </div>
 

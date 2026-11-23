@@ -21,37 +21,29 @@ async function removerArquivoTemporario(caminho) {
   }
 }
 
-async function criarDistribuicaoInicial(agricultorId, areaAlgodao, transaction) {
-  const ano = new Date().getFullYear();
-  const distribuicao = await database.distribuicao_sementes.create(
-    {
-      agricultor_id: agricultorId,
-      ano_distribuicao: ano,
-      qtde_sementes: calcularQuantidadeSementes(areaAlgodao),
-      pedido_atendido: false,
-      area_algodao: areaAlgodao,
-    },
-    { transaction },
-  );
-
-  await distribuicao.update(
-    {
-      pedido: `PED-${String(distribuicao.id).padStart(6, "0")}-${ano}`,
-    },
-    { transaction },
-  );
-}
-
 function emailProdutorValido(email) {
   return typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function serializarAgricultor(produtor) {
+function normalizarEmail(email) {
+  return typeof email === "string" ? email.trim().toLowerCase() || null : email;
+}
+
+function mensagemCadastroProdutor(emailInformado) {
+  if (!emailInformado) {
+    return "Cadastro realizado com sucesso. O PIN foi salvo; informe-o ao agricultor por outro canal.";
+  }
+  return "Cadastro realizado com sucesso. O PIN foi salvo e o envio ao e-mail foi iniciado em segundo plano.";
+}
+
+function serializarAgricultor(produtor, incluirPin = false) {
   const dados = produtor.toJSON();
   if (Object.hasOwn(dados, "pin_trabalhador")) {
     dados.pin_trabalhador_configurado = Boolean(dados.pin_trabalhador);
   }
-  delete dados.pin_trabalhador;
+  if (!incluirPin) {
+    delete dados.pin_trabalhador;
+  }
   delete dados.password_trabalhador;
   return dados;
 }
@@ -86,21 +78,24 @@ async function notificarPinPrimeiroAcesso(email, pin) {
   }
 }
 
+function solicitarEnvioPin(email, pin) {
+  setImmediate(() => {
+    void notificarPinPrimeiroAcesso(email, pin);
+  });
+}
+
 class AgroControllers {
   static async registerAgro(req, res) {
-    const { area_algodao, ...dadosProdutor } = req.body;
-    const areaAlgodao = Number(area_algodao);
+    const dadosProdutor = { ...req.body };
+    delete dadosProdutor.area_algodao;
+    dadosProdutor.email_trabalhador = normalizarEmail(
+      dadosProdutor.email_trabalhador,
+    );
+    const emailInformado = Boolean(dadosProdutor.email_trabalhador);
     if (
-      area_algodao === undefined ||
-      area_algodao === null ||
-      area_algodao === "" ||
-      !Number.isFinite(areaAlgodao) ||
-      areaAlgodao < 0 ||
-      areaAlgodao > Number(dadosProdutor.area_total)
+      emailInformado &&
+      !emailProdutorValido(dadosProdutor.email_trabalhador)
     ) {
-      return res.status(400).json({ message: "Área de algodão inválida" });
-    }
-    if (!emailProdutorValido(dadosProdutor.email_trabalhador)) {
       return res.status(400).json({
         message: "Informe um e-mail válido para receber o PIN de primeiro acesso",
       });
@@ -111,10 +106,7 @@ class AgroControllers {
     }
     const cpfNumerico = cpfs[0];
     const pin = String(randomInt(0, 1_000_000)).padStart(6, "0");
-    const [passwordHash, pinHash] = await Promise.all([
-      bcrypt.hash(cpfNumerico, 10),
-      bcrypt.hash(pin, 10),
-    ]);
+    const passwordHash = await bcrypt.hash(cpfNumerico, 10);
 
     let transaction;
     try {
@@ -123,29 +115,26 @@ class AgroControllers {
         {
           ...dadosProdutor,
           password_trabalhador: passwordHash,
-          pin_trabalhador: pinHash,
+          pin_trabalhador: pin,
+          status_farmer: true,
           login_ativado: false,
           etapa: 2,
         },
         { transaction },
       );
 
-      await criarDistribuicaoInicial(novoProdutor.id, areaAlgodao, transaction);
-
       await transaction.commit();
-      const pinEnviado = await notificarPinPrimeiroAcesso(
-        dadosProdutor.email_trabalhador,
-        pin,
-      );
+      if (emailInformado) {
+        solicitarEnvioPin(dadosProdutor.email_trabalhador, pin);
+      }
       const produtorCriado = novoProdutor.toJSON();
       delete produtorCriado.password_trabalhador;
       delete produtorCriado.pin_trabalhador;
       return res.status(201).json({
         ...produtorCriado,
-        pinEnviado,
-        message: pinEnviado
-          ? "Cadastro realizado. Consulte o e-mail informado para obter o PIN."
-          : "Cadastro salvo, mas não foi possível enviar o PIN. Procure o suporte.",
+        emailInformado,
+        emailEnvioSolicitado: emailInformado,
+        message: mensagemCadastroProdutor(emailInformado),
       });
     } catch (error) {
       if (transaction && !transaction.finished) {
@@ -165,23 +154,18 @@ class AgroControllers {
     let t;
     try {
       const dados = JSON.parse(req.body.dados);
-      const areaAlgodao = Number(dados.area_algodao);
-      if (
-        dados.area_algodao === undefined ||
-        dados.area_algodao === null ||
-        dados.area_algodao === "" ||
-        !Number.isFinite(areaAlgodao) ||
-        areaAlgodao < 0 ||
-        areaAlgodao > Number(dados.area_total)
-      ) {
-        return res.status(400).json({ message: "Área de algodão inválida" });
-      }
-      const { area_algodao, ...dadosProdutor } = dados;
+      dados.email_trabalhador = normalizarEmail(dados.email_trabalhador);
+      delete dados.area_algodao;
+      const dadosProdutor = dados;
       const cpfs = cpfBusca(dadosProdutor.cpf_cnpj);
       if (!cpfs) {
         return res.status(400).json({ message: "Informe um CPF válido" });
       }
-      if (!emailProdutorValido(dadosProdutor.email_trabalhador)) {
+      const emailInformado = Boolean(dadosProdutor.email_trabalhador);
+      if (
+        emailInformado &&
+        !emailProdutorValido(dadosProdutor.email_trabalhador)
+      ) {
         return res.status(400).json({
           message: "Informe um e-mail válido para receber o PIN de primeiro acesso",
         });
@@ -189,10 +173,7 @@ class AgroControllers {
 
       const cpfNumerico = cpfs[0];
       const pin = String(randomInt(0, 1_000_000)).padStart(6, "0");
-      const [passwordHash, pinHash] = await Promise.all([
-        bcrypt.hash(cpfNumerico, 10),
-        bcrypt.hash(pin, 10),
-      ]);
+      const passwordHash = await bcrypt.hash(cpfNumerico, 10);
 
       t = await database.sequelize.transaction();
 
@@ -200,14 +181,13 @@ class AgroControllers {
         {
           ...dadosProdutor,
           password_trabalhador: passwordHash,
-          pin_trabalhador: pinHash,
+          pin_trabalhador: pin,
+          status_farmer: true,
           login_ativado: false,
           etapa: 2,
         },
         { transaction: t },
       );
-
-      await criarDistribuicaoInicial(novoProdutor.id, areaAlgodao, t);
 
       const arquivos = [
         {
@@ -247,20 +227,18 @@ class AgroControllers {
       }
 
       await t.commit();
-      const pinEnviado = await notificarPinPrimeiroAcesso(
-        dadosProdutor.email_trabalhador,
-        pin,
-      );
+      if (emailInformado) {
+        solicitarEnvioPin(dadosProdutor.email_trabalhador, pin);
+      }
 
       const produtorCriado = novoProdutor.toJSON();
       delete produtorCriado.password_trabalhador;
       delete produtorCriado.pin_trabalhador;
       return res.status(201).json({
         ...produtorCriado,
-        pinEnviado,
-        message: pinEnviado
-          ? "Cadastro realizado. Consulte o e-mail informado para obter o PIN."
-          : "Cadastro salvo, mas não foi possível enviar o PIN. Procure o suporte.",
+        emailInformado,
+        emailEnvioSolicitado: emailInformado,
+        message: mensagemCadastroProdutor(emailInformado),
       });
     } catch (error) {
       if (t && !t.finished) {
@@ -366,8 +344,17 @@ class AgroControllers {
   static async pegaFarmers(req, res) {
     const { status } = req.query;
     try {
+      let filtroStatus;
+      if (status === true || status === "true") {
+        filtroStatus = true;
+      } else if (status === false || status === "false") {
+        filtroStatus = false;
+      }
+
       const getFarmer = await database.produtor_rural.findAll({
-        where: { status_farmer: status },
+        ...(filtroStatus !== undefined
+          ? { where: { status_farmer: filtroStatus } }
+          : {}),
         order: [["nome", "ASC"]],
         attributes: [
           "id",
@@ -416,7 +403,7 @@ class AgroControllers {
       });
 
       return res.status(200).json(
-        getFarmer.map((produtor) => serializarAgricultor(produtor)),
+        getFarmer.map((produtor) => serializarAgricultor(produtor, true)),
       );
     } catch (error) {
       console.error(error);
@@ -617,6 +604,17 @@ class AgroControllers {
           .filter((campo) => Object.hasOwn(req.body, campo))
           .map((campo) => [campo, req.body[campo]]),
       );
+      if (Object.hasOwn(dadosAtualizacao, "email_trabalhador")) {
+        dadosAtualizacao.email_trabalhador = normalizarEmail(
+          dadosAtualizacao.email_trabalhador,
+        );
+        if (
+          dadosAtualizacao.email_trabalhador &&
+          !emailProdutorValido(dadosAtualizacao.email_trabalhador)
+        ) {
+          return res.status(400).json({ message: "Informe um e-mail válido" });
+        }
+      }
       if (
         Object.hasOwn(dadosAtualizacao, "login_ativado") &&
         typeof dadosAtualizacao.login_ativado !== "boolean"
@@ -633,9 +631,11 @@ class AgroControllers {
             message: "Desative o login antes de gerar um novo PIN de primeiro acesso",
           });
         }
-        const email = dadosAtualizacao.email_trabalhador ??
-          produtor.email_trabalhador;
-        if (!emailProdutorValido(email)) {
+        const email = normalizarEmail(
+          dadosAtualizacao.email_trabalhador ?? produtor.email_trabalhador,
+        );
+        const emailInformado = Boolean(email);
+        if (emailInformado && !emailProdutorValido(email)) {
           return res.status(400).json({
             message: "Informe um e-mail válido para receber o PIN",
           });
@@ -646,20 +646,20 @@ class AgroControllers {
         }
 
         const pin = String(randomInt(0, 1_000_000)).padStart(6, "0");
-        const [pinHash, passwordHash] = await Promise.all([
-          bcrypt.hash(pin, 10),
-          bcrypt.hash(cpfs[0], 10),
-        ]);
-        dadosAtualizacao.pin_trabalhador = pinHash;
+        const passwordHash = await bcrypt.hash(cpfs[0], 10);
+        dadosAtualizacao.pin_trabalhador = pin;
         dadosAtualizacao.password_trabalhador = passwordHash;
         dadosAtualizacao.login_ativado = false;
         await produtor.update(dadosAtualizacao);
 
-        const pinEnviado = await notificarPinPrimeiroAcesso(email, pin);
+        if (emailInformado) {
+          solicitarEnvioPin(email, pin);
+        }
         return res.status(200).json({
           ...serializarAgricultor(produtor),
           pin_trabalhador: pin,
-          pinEnviado,
+          emailInformado,
+          emailEnvioSolicitado: emailInformado,
         });
       }
 
@@ -892,6 +892,15 @@ class AgroControllers {
       : {};
     if (Object.keys(dados).length === 0) {
       return res.status(400).json({ message: "Nenhum dado permitido para atualização" });
+    }
+    if (Object.hasOwn(dados, "email_trabalhador")) {
+      dados.email_trabalhador = normalizarEmail(dados.email_trabalhador);
+      if (
+        dados.email_trabalhador &&
+        !emailProdutorValido(dados.email_trabalhador)
+      ) {
+        return res.status(400).json({ message: "Informe um e-mail válido" });
+      }
     }
     if (
       dados.area_total !== undefined &&

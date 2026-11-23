@@ -286,7 +286,9 @@ class UserController {
       const senhaInicial = createHash("md5").update(cpf).digest("hex");
       const [pinValido, senhaValida] = await Promise.all([
         produtor.pin_trabalhador
-          ? bcrypt.compare(pin, produtor.pin_trabalhador)
+          ? produtor.pin_trabalhador.startsWith("$2")
+            ? bcrypt.compare(pin, produtor.pin_trabalhador)
+            : Promise.resolve(produtor.pin_trabalhador === pin)
           : false,
         produtor.password_trabalhador
           ? bcrypt.compare(cpf, produtor.password_trabalhador)

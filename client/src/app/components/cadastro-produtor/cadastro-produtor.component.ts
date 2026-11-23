@@ -19,7 +19,6 @@ export class CadastroProdutorComponent implements OnInit {
   @ViewChild('anexoCPFCNPJ') anexoCPFCNPJ!: ElementRef;
   @ViewChild('anexoResidencia') anexoResidencia!: ElementRef;
   agricultor!: Agricultor;
-  area_algodao = 0;
   comprovanteSelected: boolean = false;
   cpf_cnpjSelected: boolean = false;
   arquivoResidenciaInvalido = false;
@@ -35,7 +34,6 @@ export class CadastroProdutorComponent implements OnInit {
 
   ngOnInit(): void {
     this.agricultor = new Agricultor();
-    this.area_algodao = 0;
     this.getCity();
   }
 
@@ -80,6 +78,10 @@ export class CadastroProdutorComponent implements OnInit {
   cadastrarAgricultor() {
     const cpfFile = this.anexoCPFCNPJ.nativeElement.files[0];
     const resFile = this.anexoResidencia.nativeElement.files[0];
+    if (this.agricultor.email_trabalhador) {
+      this.agricultor.email_trabalhador =
+        this.agricultor.email_trabalhador.trim().toLowerCase();
+    }
 
     if (!cpfFile) {
       this.arquivoDocumentoInvalido = true;
@@ -95,10 +97,7 @@ export class CadastroProdutorComponent implements OnInit {
 
     formData.append(
       'dados',
-      JSON.stringify({
-        ...this.agricultor,
-        area_algodao: this.area_algodao,
-      }),
+      JSON.stringify(this.agricultor),
     );
     formData.append('cpf', cpfFile);
     formData.append('residencia', resFile);
@@ -107,11 +106,9 @@ export class CadastroProdutorComponent implements OnInit {
       .post(environment.apiUrl + 'registerCompleto', formData)
       .subscribe({
         next: (res: any) => {
-          if (res.pinEnviado === false) {
-            this.toastr.warning(res.message);
-          } else {
-            this.toastr.success(res.message ?? 'Cadastro realizado com sucesso!');
-          }
+          this.toastr.success(
+            res.message ?? 'Cadastro realizado com sucesso!',
+          );
           this.formAgricultor.reset();
           this.router.navigate(['/home']);
         },

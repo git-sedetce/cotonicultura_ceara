@@ -42,17 +42,15 @@
         </div>
 
         <div class="form-group">
-          <label for="email_trabalhador">E-mail para receber o PIN</label>
+          <label for="email_trabalhador">E-mail para receber o PIN (opcional)</label>
 
           <input type="email" id="email_trabalhador" name="email_trabalhador" [(ngModel)]="agricultor.email_trabalhador"
-            #email_trabalhador="ngModel" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" required
+            #email_trabalhador="ngModel" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+            (blur)="agricultor.email_trabalhador = agricultor.email_trabalhador ? agricultor.email_trabalhador.trim().toLowerCase() : agricultor.email_trabalhador"
             placeholder="Digite o email do produtor" />
+          <small class="form-text">Se não informar um e-mail, o PIN ficará salvo para ser repassado pelo administrador.</small>
 
           <div *ngIf="email_trabalhador.touched && email_trabalhador.invalid" class="alert alert-danger">
-            <!-- <span *ngIf="email_trabalhador.errors?.['required']">
-              Email é obrigatório
-            </span> -->
-
             <span *ngIf="email_trabalhador.errors?.['pattern']">
               Formato de email inválido
             </span>

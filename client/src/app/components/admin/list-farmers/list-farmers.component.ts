@@ -55,7 +55,8 @@ export class ListFarmersComponent implements OnInit {
   formFarmer!: FormGroup;
   formDistribuicoes!: FormGroup;
   pinGerado: string | null = null;
-  pinEmailEnviado = false;
+  pinEmailEnvioSolicitado = false;
+  pinEmailInformado = false;
   nomeFarmerDistribuicoes = '';
   farmerDistribuicoesId: number | null = null;
   distribuicoesExistentes: any[] = [];
@@ -185,7 +186,7 @@ export class ListFarmersComponent implements OnInit {
     this.cadastroAgricultorService.agricultorRural(true).subscribe(
       (usr: any[]) => {
         this.lista_farmers = usr;
-        // console.log('lista_farmers', this.lista_farmers);
+        console.log('lista_farmers', this.lista_farmers);
         this.lista_filtrada = usr; // inicia filtrada
       },
       (erro: any) => console.error(erro),
@@ -350,8 +351,7 @@ export class ListFarmersComponent implements OnInit {
       RG: farmer.rg,
       Endereço: farmer.endereco,
       Município: farmer.ass_produtor_rural_cidade?.nome_municipio ?? '',
-      Região:
-        farmer.ass_produtor_rural_cidade?.ass_municipio_regiao?.nome ?? '',
+      Região: farmer.ass_produtor_rural_cidade?.ass_municipio_regiao?.nome ?? '',
       Nome_Propriedade: farmer.nome_propriedade,
       Ponto_Referência: farmer.ponto_referencia,
       Area_Total: farmer.area_total,
@@ -629,13 +629,14 @@ export class ListFarmersComponent implements OnInit {
     this.formFarmer.controls['gerar_pin'].setValue(false);
     this.formFarmer.controls['login_ativado'].setValue(farmer.login_ativado);
     this.pinGerado = null;
-    this.pinEmailEnviado = false;
+    this.pinEmailEnvioSolicitado = false;
+    this.pinEmailInformado = false;
   }
   updateFarmer() {
     const dadosAtualizacao = {
       nome: this.formFarmer.value.nome,
       apelido_trabalhador: this.formFarmer.value.apelido_trabalhador,
-      email_trabalhador: this.formFarmer.value.email_trabalhador,
+      email_trabalhador: this.formFarmer.value.email_trabalhador?.trim().toLowerCase(),
       telefone: this.formFarmer.value.telefone,
       cpf_cnpj: this.formFarmer.value.cpf_cnpj,
       rg: this.formFarmer.value.rg,
@@ -658,7 +659,8 @@ export class ListFarmersComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.pinGerado = res.pin_trabalhador ?? null;
-          this.pinEmailEnviado = res.pinEnviado ?? false;
+          this.pinEmailEnvioSolicitado = res.emailEnvioSolicitado ?? false;
+          this.pinEmailInformado = res.emailInformado ?? false;
           this.toastr.success('Atualização realizada com sucesso!');
           this.formFarmer.controls['gerar_pin'].setValue(false);
           this.getFarmers();

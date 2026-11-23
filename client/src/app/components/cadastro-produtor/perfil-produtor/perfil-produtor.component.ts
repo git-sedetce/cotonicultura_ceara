@@ -69,6 +69,9 @@ export class PerfilProdutorComponent implements OnInit, OnDestroy {
     const dados = Object.fromEntries(
       camposEditaveis.map((campo) => [campo, this.produtor[campo]]),
     );
+    if (typeof dados['email_trabalhador'] === 'string') {
+      dados['email_trabalhador'] = dados['email_trabalhador'].trim().toLowerCase();
+    }
 
     this.salvando = true;
     this.agricultores.atualizarPerfilProdutor(dados).subscribe({

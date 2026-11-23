@@ -63,6 +63,14 @@ const CAMPOS_EXCLUIDOS = [
 function formatarCamposString(instance) {
   Object.keys(instance.dataValues).forEach((campo) => {
 
+    if (campo === 'email_trabalhador') {
+      const email = instance.dataValues[campo];
+      if (typeof email === 'string') {
+        instance.dataValues[campo] = email.trim().toLowerCase();
+      }
+      return;
+    }
+
     // ⛔ pula campos excluídos
     if (CAMPOS_EXCLUIDOS.includes(campo)) return;
 
