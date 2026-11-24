@@ -252,7 +252,14 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
       <div class="modal-body">
-        <h2 class="h6">Pedidos já registrados</h2>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h2 class="h6 mb-0">Pedidos já registrados</h2>
+          <button type="button" class="btn btn-outline-success btn-sm"
+            (click)="exportarPedidos()"
+            [disabled]="distribuicoesExistentes.length === 0">
+            <i class="fa-solid fa-file-excel me-1"></i>Exportar planilha
+          </button>
+        </div>
         <div *ngIf="distribuicoesExistentes.length === 0" class="alert alert-info">
           Não há distribuições de sementes registradas para este trabalhador.
         </div>

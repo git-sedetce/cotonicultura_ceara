@@ -326,13 +326,23 @@ export class ListFarmersComponent implements OnInit {
     this.page = 1;
   }
 
-  areasAlgodao(farmer: any): string {
-    return (farmer.ass_agricultor_distribuicao_sementes ?? [])
-      .map(
-        (distribuicao: any) =>
-          `${distribuicao.ano_distribuicao ?? 'Sem ano'}: ${distribuicao.area_algodao ?? 0}`,
-      )
-      .join('; ');
+  totalDistribuicoes(
+    farmer: any,
+    campo: 'area_algodao' | 'qtde_sementes',
+  ): number {
+    return (farmer.ass_agricultor_distribuicao_sementes ?? []).reduce(
+      (total: number, distribuicao: any) => {
+        const valor = Number(distribuicao[campo]);
+        return total + (Number.isFinite(valor) ? valor : 0);
+      },
+      0,
+    );
+  }
+
+  contarPedidos(farmer: any, atendido: boolean): number {
+    return (farmer.ass_agricultor_distribuicao_sementes ?? []).filter(
+      (distribuicao: any) => distribuicao.pedido_atendido === atendido,
+    ).length;
   }
 
   exportarPlanilha(tipo: 'todos' | 'filtrados'): void {
@@ -355,9 +365,10 @@ export class ListFarmersComponent implements OnInit {
       Nome_Propriedade: farmer.nome_propriedade,
       Ponto_Referência: farmer.ponto_referencia,
       Area_Total: farmer.area_total,
-      Areas_Algodão: this.areasAlgodao(farmer),
-      'Pedido Atendido': farmer.pedido_atendido ? 'Sim' : 'Não',
-      Sementes_Recebidas: farmer.sementes_recebidas,
+      Areas_Algodão: this.totalDistribuicoes(farmer, 'area_algodao'),
+      Pedidos_Atendidos: this.contarPedidos(farmer, true),
+      Pedidos_Não_Atendidos: this.contarPedidos(farmer, false),
+      Sementes_Recebidas: this.totalDistribuicoes(farmer, 'qtde_sementes'),
       Regime_Cultivo: farmer.regime_cultivo,
       Cadastro_adagri: farmer.cadastro_adagri,
       Email: farmer.email_trabalhador,
@@ -432,6 +443,47 @@ export class ListFarmersComponent implements OnInit {
     return Number.isFinite(area) && area >= 0
       ? Number((area * 10.2).toFixed(2))
       : 0;
+  }
+
+  exportarPedidos(): void {
+    if (this.distribuicoesExistentes.length === 0) {
+      this.toastr.warning('Nenhum pedido para exportar');
+      return;
+    }
+
+    const planilha = this.distribuicoesExistentes.map(
+      (distribuicao: any, index: number) => {
+        const atual = this.atendimentosExistentes.at(index).getRawValue();
+        const areaAlgodao = atual.area_algodao ?? distribuicao.area_algodao;
+        const pedidoAtendido = atual.pedido_atendido === true;
+
+        return {
+          'Nome do agricultor': this.nomeFarmerDistribuicoes,
+          'Número do pedido': distribuicao.pedido ?? '',
+          Ano: distribuicao.ano_distribuicao ?? '',
+          'Quantidade de sementes (kg)': pedidoAtendido
+            ? Number(distribuicao.qtde_sementes) || 0
+            : this.quantidadeSementes(areaAlgodao),
+          'Área de algodão (ha)': Number(areaAlgodao) || 0,
+          'Pedido atendido': pedidoAtendido ? 'Sim' : 'Não',
+        };
+      },
+    );
+
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(planilha);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { Pedidos: worksheet },
+      SheetNames: ['Pedidos'],
+    };
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+
+    saveAs(blob, `pedidos_sementes_${this.farmerDistribuicoesId}.xlsx`);
   }
 
   atendimentoAlterado(index: number): boolean {
